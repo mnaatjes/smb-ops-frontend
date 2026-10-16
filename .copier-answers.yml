@@ -1,0 +1,11 @@
+---
+# Changes here will be overwritten by Copier
+_commit: v0.1.0
+_src_path: /home/michael/src/github.com/mnaatjes/template-vue-spa
+api_base_url_default: /api
+app_description: Vue 3 Single Page Application for SMB Operations
+app_name: smb-ops-ui
+default_dev_port: 5173
+include_architecture_scaffold: true
+include_diataxis_docs: true
+include_pinia_store: true
