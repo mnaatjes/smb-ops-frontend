@@ -135,4 +135,39 @@ describe('useLeadStore', () => {
     expect(leadApi.fetchRankedLeads).toHaveBeenCalled()
     expect(store.statusMessage).toContain('Audited 1 leads')
   })
+
+  it('qualifies a lead and removes it from active list', async () => {
+    vi.mocked(leadApi.fetchRankedLeads).mockResolvedValue(mockLeads)
+    vi.mocked(leadApi.qualifyLead).mockResolvedValue({
+      ...mockLeads[0].prospect,
+      status: 'QUALIFIED'
+    })
+    const store = useLeadStore()
+    await store.loadRankedLeads()
+    expect(store.totalLeadsCount).toBe(3)
+
+    await store.qualifyLead('1')
+
+    expect(store.totalLeadsCount).toBe(2)
+    expect(store.leads.find((l) => l.prospect.id === '1')).toBeUndefined()
+    expect(store.statusMessage).toContain('QUALIFIED')
+  })
+
+  it('disqualifies a lead with reason and removes it from active list', async () => {
+    vi.mocked(leadApi.fetchRankedLeads).mockResolvedValue(mockLeads)
+    vi.mocked(leadApi.disqualifyLead).mockResolvedValue({
+      ...mockLeads[1].prospect,
+      status: 'DISQUALIFIED',
+      disqualification_reason: 'Out of Business'
+    })
+    const store = useLeadStore()
+    await store.loadRankedLeads()
+    expect(store.totalLeadsCount).toBe(3)
+
+    await store.disqualifyLead('2', { reason: 'Out of Business', notes: 'Permanently closed' })
+
+    expect(store.totalLeadsCount).toBe(2)
+    expect(store.leads.find((l) => l.prospect.id === '2')).toBeUndefined()
+    expect(store.statusMessage).toContain('Out of Business')
+  })
 })

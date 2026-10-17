@@ -5,7 +5,8 @@ import type {
   CreateProspectPayload,
   DiscoverPayload,
   BatchAuditPayload,
-  BatchAuditResponse
+  BatchAuditResponse,
+  DisqualifyPayload
 } from '@/shared/types/lead'
 
 export async function fetchRankedLeads(minScore = 0): Promise<RankedLead[]> {
@@ -33,5 +34,18 @@ export async function createProspect(payload: CreateProspectPayload): Promise<Pr
   if (Array.isArray(response.data)) {
     return response.data[0]
   }
+  return response.data
+}
+
+export async function qualifyLead(prospectId: string): Promise<Prospect> {
+  const response = await apiClient.post<Prospect>(`/leads/${prospectId}/qualify`)
+  return response.data
+}
+
+export async function disqualifyLead(
+  prospectId: string,
+  payload: DisqualifyPayload
+): Promise<Prospect> {
+  const response = await apiClient.post<Prospect>(`/leads/${prospectId}/disqualify`, payload)
   return response.data
 }

@@ -63,4 +63,38 @@ describe('LeadTriageTable', () => {
 
     expect(wrapper.text()).toContain('No leads available')
   })
+
+  it('emits qualify event when Qualify button is clicked', async () => {
+    const wrapper = mount(LeadTriageTable, {
+      props: {
+        leads: dummyLeads,
+        loading: false
+      }
+    })
+
+    const buttons = wrapper.findAllComponents({ name: 'BaseButton' })
+    const qualifyBtn = buttons.find((btn) => btn.props('label') === 'Qualify')
+    expect(qualifyBtn).toBeDefined()
+    await qualifyBtn?.trigger('click')
+
+    expect(wrapper.emitted('qualify')).toBeTruthy()
+    expect(wrapper.emitted('qualify')?.[0]).toEqual([dummyLeads[0]])
+  })
+
+  it('emits disqualify event when Disqualify button is clicked', async () => {
+    const wrapper = mount(LeadTriageTable, {
+      props: {
+        leads: dummyLeads,
+        loading: false
+      }
+    })
+
+    const buttons = wrapper.findAllComponents({ name: 'BaseButton' })
+    const disqualifyBtn = buttons.find((btn) => btn.props('label') === 'Disqualify')
+    expect(disqualifyBtn).toBeDefined()
+    await disqualifyBtn?.trigger('click')
+
+    expect(wrapper.emitted('disqualify')).toBeTruthy()
+    expect(wrapper.emitted('disqualify')?.[0]).toEqual([dummyLeads[0]])
+  })
 })
