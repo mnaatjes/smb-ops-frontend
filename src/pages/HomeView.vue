@@ -6,6 +6,7 @@ import BatchAuditTrigger from '@/features/lead-audit/BatchAuditTrigger.vue'
 import CreateLeadModal from '@/features/manual-lead/CreateLeadModal.vue'
 import LeadTriageTable from '@/features/lead-triage/LeadTriageTable.vue'
 import BaseButton from '@/shared/ui/BaseButton.vue'
+import ThemeToggle from '@/shared/ui/ThemeToggle.vue'
 
 const leadStore = useLeadStore()
 const showCreateModal = ref(false)
@@ -23,6 +24,7 @@ onMounted(async () => {
         <p class="subtitle">Discovery, Technical Audit & High-Opportunity Lead Prioritization</p>
       </div>
       <div class="header-actions">
+        <ThemeToggle />
         <BaseButton label="+ Add Lead" @click="showCreateModal = true" />
       </div>
     </header>
@@ -99,20 +101,26 @@ onMounted(async () => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-color);
   padding-bottom: 1rem;
 }
 
 .header-titles h1 {
   margin: 0;
   font-size: 1.75rem;
-  color: #111827;
+  color: var(--text-primary);
 }
 
 .subtitle {
   margin: 0.25rem 0 0;
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 0.95rem;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .metrics-ribbon {
@@ -123,22 +131,23 @@ onMounted(async () => {
 }
 
 .metric-card {
-  background: #ffffff;
+  background: var(--bg-surface);
   padding: 1rem;
   border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .metric-alert {
-  border-color: #fecaca;
-  background-color: #fffaf0;
+  border-color: var(--metric-alert-border);
+  background-color: var(--metric-alert-bg);
 }
 
 .metric-label {
   font-size: 0.8rem;
-  color: #6b7280;
+  color: var(--text-secondary);
   font-weight: 500;
   text-transform: uppercase;
 }
@@ -146,12 +155,12 @@ onMounted(async () => {
 .metric-value {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #111827;
+  color: var(--text-primary);
   margin-top: 0.25rem;
 }
 
 .metric-alert .metric-value {
-  color: #b91c1c;
+  color: var(--metric-alert-text);
 }
 
 .actions-section {
@@ -174,9 +183,9 @@ onMounted(async () => {
 
 .status-banner {
   padding: 0.75rem 1rem;
-  background-color: #eff6ff;
-  border: 1px solid #bfdbfe;
-  color: #1d4ed8;
+  background-color: var(--banner-info-bg);
+  border: 1px solid var(--banner-info-border);
+  color: var(--banner-info-text);
   border-radius: 6px;
   margin-bottom: 1rem;
   font-size: 0.9rem;
@@ -184,9 +193,9 @@ onMounted(async () => {
 
 .error-banner {
   padding: 0.75rem 1rem;
-  background-color: #fef2f2;
-  border: 1px solid #fecaca;
-  color: #b91c1c;
+  background-color: var(--banner-error-bg);
+  border: 1px solid var(--banner-error-border);
+  color: var(--banner-error-text);
   border-radius: 6px;
   margin-bottom: 1rem;
   font-size: 0.9rem;
@@ -203,15 +212,17 @@ onMounted(async () => {
   align-items: center;
   gap: 0.5rem;
   font-size: 0.85rem;
-  color: #4b5563;
+  color: var(--text-secondary);
 }
 
 .score-select {
   padding: 0.35rem 0.6rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
-  background-color: #ffffff;
-  color: #111827;
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
 }
 
 .table-section {

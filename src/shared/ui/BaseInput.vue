@@ -47,28 +47,28 @@ defineEmits<{
 .input-label {
   font-size: 0.85rem;
   font-weight: 500;
-  color: #374151;
+  color: var(--text-secondary);
 }
 
 .base-input {
   padding: 0.5rem 0.75rem;
   font-size: 0.9rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
-  background-color: #ffffff;
-  color: #111827;
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
   outline: none;
-  transition: border-color 0.15s ease-in-out;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, background-color 0.15s ease-in-out;
 }
 
 .base-input:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 2px var(--focus-ring);
 }
 
 .base-input:disabled {
-  background-color: #f3f4f6;
-  color: #9ca3af;
+  background-color: var(--bg-surface-subtle);
+  color: var(--text-muted);
   cursor: not-allowed;
 }
 </style>
