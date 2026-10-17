@@ -11,6 +11,7 @@ This directory contains the Unified Process (UP) architecture plane for smb-ops-
 * `state-transitions/`: Entity State Transition Specifications (entity lifecycles, statecharts)
 * `information-architecture/`: View Information Architecture Matrices (read models, contextual decision fields)
 * `action-tables/`: Deterministic Action Tables (interaction flows, mutations, redirects)
+* [`GLOSSARY.md`](./GLOSSARY.md): Authoritative glossary of business, UX, and system mechanics terminology
 
 ## Frontend Design Workflow Pipeline
 
