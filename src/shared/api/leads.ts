@@ -9,10 +9,13 @@ import type {
 } from '@/shared/types/lead'
 
 export async function fetchRankedLeads(minScore = 0): Promise<RankedLead[]> {
-  const response = await apiClient.get<RankedLead[]>('/leads/ranked', {
+  const response = await apiClient.get<RankedLead[] | { items: RankedLead[] }>('/leads/ranked', {
     params: { min_score: minScore }
   })
-  return response.data
+  if ('items' in response.data && Array.isArray(response.data.items)) {
+    return response.data.items
+  }
+  return response.data as RankedLead[]
 }
 
 export async function triggerLeadDiscovery(payload: DiscoverPayload): Promise<Prospect[]> {
@@ -26,6 +29,9 @@ export async function triggerBatchAudit(payload: BatchAuditPayload = {}): Promis
 }
 
 export async function createProspect(payload: CreateProspectPayload): Promise<Prospect> {
-  const response = await apiClient.post<Prospect[]>('/leads', [payload])
-  return response.data[0]
+  const response = await apiClient.post<Prospect | Prospect[]>('/leads', payload)
+  if (Array.isArray(response.data)) {
+    return response.data[0]
+  }
+  return response.data
 }
