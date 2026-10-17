@@ -33,7 +33,7 @@ defineEmits<{
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(17, 24, 39, 0.5);
+  background-color: rgba(0, 0, 0, 0.65);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -41,11 +41,12 @@ defineEmits<{
 }
 
 .modal-card {
-  background: #ffffff;
+  background: var(--bg-surface);
   border-radius: 8px;
   width: 100%;
   max-width: 500px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
   overflow: hidden;
 }
 
@@ -54,13 +55,13 @@ defineEmits<{
   justify-content: space-between;
   align-items: center;
   padding: 1rem 1.25rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .modal-title {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #111827;
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -69,22 +70,23 @@ defineEmits<{
   border: none;
   font-size: 1.5rem;
   line-height: 1;
-  color: #9ca3af;
+  color: var(--text-muted);
   cursor: pointer;
 }
 
 .close-btn:hover {
-  color: #374151;
+  color: var(--text-primary);
 }
 
 .modal-body {
   padding: 1.25rem;
+  color: var(--text-primary);
 }
 
 .modal-footer {
   padding: 0.75rem 1.25rem;
-  background-color: #f9fafb;
-  border-top: 1px solid #e5e7eb;
+  background-color: var(--bg-surface-hover);
+  border-top: 1px solid var(--border-color);
   display: flex;
   justify-content: flex-end;
   gap: 0.5rem;

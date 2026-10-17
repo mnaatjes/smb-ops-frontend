@@ -105,23 +105,25 @@ async function handleSubmit() {
 
 .error-banner {
   padding: 0.5rem;
-  background-color: #fee2e2;
-  color: #991b1b;
+  background-color: var(--banner-error-bg);
+  color: var(--banner-error-text);
+  border: 1px solid var(--banner-error-border);
   border-radius: 4px;
   font-size: 0.85rem;
 }
 
 .cancel-btn {
   padding: 0.5rem 1rem;
-  background: none;
-  border: 1px solid #d1d5db;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   cursor: pointer;
   font-weight: 500;
-  color: #374151;
+  color: var(--text-primary);
+  transition: background-color 0.15s ease;
 }
 
 .cancel-btn:hover {
-  background-color: #f3f4f6;
+  background-color: var(--bg-surface-hover);
 }
 </style>

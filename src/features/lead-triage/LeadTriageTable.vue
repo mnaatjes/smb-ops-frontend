@@ -66,10 +66,11 @@ defineProps<{
 <style scoped>
 .triage-table-wrapper {
   position: relative;
-  background: #ffffff;
+  background: var(--bg-surface);
   border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
   overflow-x: auto;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .table-overlay {
@@ -78,12 +79,12 @@ defineProps<{
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(255, 255, 255, 0.75);
+  background: rgba(15, 23, 42, 0.7);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 500;
-  color: #2563eb;
+  color: var(--accent-hover);
   z-index: 10;
 }
 
@@ -95,31 +96,32 @@ defineProps<{
 }
 
 .triage-table th {
-  background-color: #f9fafb;
-  color: #4b5563;
+  background-color: var(--bg-surface-hover);
+  color: var(--text-secondary);
   font-weight: 600;
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .triage-table td {
   padding: 0.85rem 1rem;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--border-subtle);
   vertical-align: top;
+  color: var(--text-primary);
 }
 
 .lead-row:hover {
-  background-color: #f8fafc;
+  background-color: var(--bg-surface-hover);
 }
 
 .business-name {
   font-weight: 600;
-  color: #111827;
+  color: var(--text-primary);
   font-size: 0.95rem;
 }
 
 .website-link a {
-  color: #2563eb;
+  color: var(--accent-hover);
   text-decoration: none;
   font-size: 0.8rem;
   word-break: break-all;
@@ -131,7 +133,7 @@ defineProps<{
 
 .sub-detail {
   font-size: 0.75rem;
-  color: #6b7280;
+  color: var(--text-muted);
   margin-top: 0.15rem;
 }
 
@@ -140,18 +142,18 @@ defineProps<{
   flex-direction: column;
   gap: 0.2rem;
   font-size: 0.75rem;
-  color: #6b7280;
+  color: var(--text-muted);
 }
 
 .source-tag {
   font-weight: 500;
-  color: #374151;
+  color: var(--text-secondary);
 }
 
 .empty-state {
   text-align: center;
   padding: 2.5rem 1rem;
-  color: #9ca3af;
+  color: var(--text-muted);
   font-style: italic;
 }
 </style>

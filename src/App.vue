@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
+import '@/shared/styles/theme.css'
 </script>
 
 <template>
@@ -14,7 +15,9 @@ import { RouterView } from 'vue-router'
 }
 
 body {
-  background-color: #f9fafb;
-  color: #111827;
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  min-height: 100vh;
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
 }
 </style>

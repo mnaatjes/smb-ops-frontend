@@ -27,32 +27,32 @@ withDefaults(
 }
 
 .badge-neutral {
-  background-color: #f3f4f6;
-  color: #374151;
-  border: 1px solid #e5e7eb;
+  background-color: var(--badge-neutral-bg);
+  color: var(--badge-neutral-text);
+  border: 1px solid var(--badge-neutral-border);
 }
 
 .badge-primary {
-  background-color: #dbeafe;
-  color: #1e40af;
-  border: 1px solid #bfdbfe;
+  background-color: var(--badge-primary-bg);
+  color: var(--badge-primary-text);
+  border: 1px solid var(--badge-primary-border);
 }
 
 .badge-success {
-  background-color: #dcfce7;
-  color: #166534;
-  border: 1px solid #bbf7d0;
+  background-color: var(--badge-success-bg);
+  color: var(--badge-success-text);
+  border: 1px solid var(--badge-success-border);
 }
 
 .badge-warning {
-  background-color: #fef9c3;
-  color: #854d0e;
-  border: 1px solid #fef08a;
+  background-color: var(--badge-warning-bg);
+  color: var(--badge-warning-text);
+  border: 1px solid var(--badge-warning-border);
 }
 
 .badge-danger {
-  background-color: #fee2e2;
-  color: #991b1b;
-  border: 1px solid #fecaca;
+  background-color: var(--badge-danger-bg);
+  color: var(--badge-danger-text);
+  border: 1px solid var(--badge-danger-border);
 }
 </style>
