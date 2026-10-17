@@ -7,16 +7,26 @@ import BatchAuditTrigger from '@/features/lead-audit/BatchAuditTrigger.vue'
 import CreateLeadModal from '@/features/manual-lead/CreateLeadModal.vue'
 import LeadTriageTable from '@/features/lead-triage/LeadTriageTable.vue'
 import DisqualifyModal from '@/features/lead-triage/DisqualifyModal.vue'
+import ScoreRubricModal from '@/features/lead-triage/ScoreRubricModal.vue'
+import ServicePills from '@/features/service-catalog/ServicePills.vue'
 import BaseButton from '@/shared/ui/BaseButton.vue'
+import BaseBadge from '@/shared/ui/BaseBadge.vue'
 import ThemeToggle from '@/shared/ui/ThemeToggle.vue'
 
 const leadStore = useLeadStore()
+const activeTab = ref<'pool' | 'pipeline' | 'clients'>('pool')
 const showCreateModal = ref(false)
 const showDisqualifyModal = ref(false)
+const showRubricModal = ref(false)
 const selectedLead = ref<RankedLead | null>(null)
+const inspectingLead = ref<RankedLead | null>(null)
 
 onMounted(async () => {
-  await leadStore.loadRankedLeads()
+  await Promise.all([
+    leadStore.loadRankedLeads(),
+    leadStore.loadServices(),
+    leadStore.loadClients()
+  ])
 })
 
 async function handleQualify(lead: RankedLead): Promise<void> {
@@ -34,14 +44,31 @@ async function handleConfirmDisqualify(payload: { reason: string; notes?: string
     selectedLead.value = null
   }
 }
+
+async function handlePursue(lead: RankedLead): Promise<void> {
+  await leadStore.pursueLead(lead.prospect.id)
+}
+
+async function handleSuppress(lead: RankedLead): Promise<void> {
+  await leadStore.suppressLead(lead.prospect.id)
+}
+
+async function handleConvertToClient(prospectId: string): Promise<void> {
+  await leadStore.convertToClient(prospectId)
+}
+
+function handleInspectScore(lead: RankedLead): void {
+  inspectingLead.value = lead
+  showRubricModal.value = true
+}
 </script>
 
 <template>
   <main class="page-container">
     <header class="header">
       <div class="header-titles">
-        <h1>SMB Lead Operations & Triage</h1>
-        <p class="subtitle">Discovery, Technical Audit & High-Opportunity Lead Prioritization</p>
+        <h1>SMB Consulting Operations</h1>
+        <p class="subtitle">Service-Driven Lead Discovery, Enrichment & Client Operations</p>
       </div>
       <div class="header-actions">
         <ThemeToggle />
@@ -49,27 +76,48 @@ async function handleConfirmDisqualify(payload: { reason: string; notes?: string
       </div>
     </header>
 
+    <!-- Navigation Tabs -->
+    <nav class="workspace-tabs">
+      <button
+        type="button"
+        :class="['tab-btn', { active: activeTab === 'pool' }]"
+        @click="activeTab = 'pool'"
+      >
+        Discovery Pool ({{ leadStore.totalLeadsCount }})
+      </button>
+      <button
+        type="button"
+        :class="['tab-btn', { active: activeTab === 'pipeline' }]"
+        @click="activeTab = 'pipeline'"
+      >
+        Pursued Pipeline ({{ leadStore.pursuedCount }})
+      </button>
+      <button
+        type="button"
+        :class="['tab-btn', { active: activeTab === 'clients' }]"
+        @click="activeTab = 'clients'"
+      >
+        Client Accounts ({{ leadStore.clientsCount }})
+      </button>
+    </nav>
+
     <!-- Metrics Ribbon -->
     <section class="metrics-ribbon">
       <div class="metric-card">
-        <span class="metric-label">Total Leads</span>
+        <span class="metric-label">Discovery Pool</span>
         <span class="metric-value">{{ leadStore.totalLeadsCount }}</span>
       </div>
       <div class="metric-card">
-        <span class="metric-label">Audited Leads</span>
-        <span class="metric-value">{{ leadStore.auditedCount }}</span>
+        <span class="metric-label">Pursued Pipeline</span>
+        <span class="metric-value">{{ leadStore.pursuedCount }}</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">Client Accounts</span>
+        <span class="metric-value">{{ leadStore.clientsCount }}</span>
       </div>
       <div class="metric-card metric-alert">
         <span class="metric-label">High Priority (Score &ge; 70)</span>
         <span class="metric-value">{{ leadStore.highPriorityCount }}</span>
-      </div>
-    </section>
-
-    <!-- Operational Action Row -->
-    <section class="actions-section">
-      <DiscoveryBar class="discovery-flex" />
-      <div class="batch-flex">
-        <BatchAuditTrigger :limit="15" />
       </div>
     </section>
 
@@ -81,42 +129,167 @@ async function handleConfirmDisqualify(payload: { reason: string; notes?: string
       {{ leadStore.error }}
     </div>
 
-    <!-- Triage Filter Controls -->
-    <section class="triage-controls">
-      <div class="score-filter">
-        <label for="score-threshold">Filter Min Opportunity Score:</label>
-        <select
-          id="score-threshold"
-          :value="leadStore.minScore"
-          class="score-select"
-          @change="leadStore.setMinScore(Number(($event.target as HTMLSelectElement).value))"
+    <!-- Workspace 1: Discovery Pool -->
+    <section v-if="activeTab === 'pool'" class="workspace-view">
+      <!-- Operational Action Row -->
+      <section class="actions-section">
+        <DiscoveryBar class="discovery-flex" />
+        <div class="batch-flex">
+          <BatchAuditTrigger :limit="15" />
+        </div>
+      </section>
+
+      <!-- Service Catalog Filter Pills -->
+      <ServicePills
+        :services="leadStore.services"
+        :active-code="leadStore.activeServiceFilter"
+        @select="(code) => { leadStore.activeServiceFilter = code }"
+      />
+
+      <!-- Triage Filter Controls -->
+      <section class="triage-controls">
+        <div class="score-filter">
+          <label for="score-threshold">Filter Min Opportunity Score:</label>
+          <select
+            id="score-threshold"
+            :value="leadStore.minScore"
+            class="score-select"
+            @change="leadStore.setMinScore(Number(($event.target as HTMLSelectElement).value))"
+          >
+            <option :value="0">All Leads (0+)</option>
+            <option :value="40">Moderate & High (&ge; 40)</option>
+            <option :value="70">High Priority Only (&ge; 70)</option>
+          </select>
+        </div>
+      </section>
+
+      <!-- Ranked Lead Triage Table -->
+      <section class="table-section">
+        <LeadTriageTable
+          :leads="leadStore.filteredLeads"
+          :loading="leadStore.loading"
+          @qualify="handleQualify"
+          @disqualify="handleOpenDisqualify"
+          @pursue="handlePursue"
+          @suppress="handleSuppress"
+          @inspect-score="handleInspectScore"
+        />
+      </section>
+    </section>
+
+    <!-- Workspace 2: Pursued Pipeline -->
+    <section v-if="activeTab === 'pipeline'" class="workspace-view">
+      <div class="pipeline-header">
+        <h3>Active Consulting Opportunities</h3>
+        <p class="pipeline-subtitle">Claimed leads undergoing Stage 2 contact discovery and active outreach.</p>
+      </div>
+
+      <div v-if="leadStore.pursuedLeads.length === 0" class="empty-pipeline">
+        No leads currently claimed. Browse the <strong>Discovery Pool</strong> and click "Add to List" to begin outreach.
+      </div>
+
+      <div v-else class="pipeline-grid">
+        <div
+          v-for="lead in leadStore.pursuedLeads"
+          :key="lead.prospect.id"
+          class="pipeline-card"
         >
-          <option :value="0">All Leads (0+)</option>
-          <option :value="40">Moderate & High (&ge; 40)</option>
-          <option :value="70">High Priority Only (&ge; 70)</option>
-        </select>
+          <div class="card-head">
+            <div>
+              <span class="tracking-uid">UID: {{ lead.prospect.id.slice(0, 8) }}</span>
+              <h4 class="business-title">{{ lead.prospect.business_name }}</h4>
+            </div>
+            <BaseBadge variant="primary">{{ lead.prospect.status }}</BaseBadge>
+          </div>
+
+          <div class="card-body">
+            <p v-if="lead.prospect.website_url" class="card-link">
+              <a :href="lead.prospect.website_url" target="_blank" rel="noopener noreferrer">
+                {{ lead.prospect.website_url }}
+              </a>
+            </p>
+            <p v-if="lead.prospect.phone" class="card-meta">📞 {{ lead.prospect.phone }}</p>
+            <p v-if="lead.prospect.address" class="card-meta">📍 {{ lead.prospect.address }}</p>
+
+            <div class="score-line" @click="handleInspectScore(lead)">
+              <span>Opportunity Score:</span>
+              <strong class="highlight-score">{{ lead.audit?.opportunity_score ?? 'N/A' }} / 100</strong>
+            </div>
+          </div>
+
+          <div class="card-actions">
+            <BaseButton
+              label="Convert to Client"
+              variant="primary"
+              @click="handleConvertToClient(lead.prospect.id)"
+            />
+            <BaseButton
+              label="Disqualify"
+              variant="danger"
+              @click="handleOpenDisqualify(lead)"
+            />
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- Ranked Lead Triage Table -->
-    <section class="table-section">
-      <LeadTriageTable
-        :leads="leadStore.filteredLeads"
-        :loading="leadStore.loading"
-        @qualify="handleQualify"
-        @disqualify="handleOpenDisqualify"
-      />
+    <!-- Workspace 3: Client Accounts -->
+    <section v-if="activeTab === 'clients'" class="workspace-view">
+      <div class="clients-header">
+        <h3>Contracted SMB Clients</h3>
+        <p class="clients-subtitle">Paying accounts, active consulting service jobs, and engagement delivery.</p>
+      </div>
+
+      <div v-if="leadStore.clients.length === 0" class="empty-pipeline">
+        No active clients yet. Convert claimed prospects from the <strong>Pursued Pipeline</strong> once signed.
+      </div>
+
+      <div v-else class="clients-grid">
+        <div
+          v-for="client in leadStore.clients"
+          :key="client.id"
+          class="client-card"
+        >
+          <div class="card-head">
+            <div>
+              <span class="tracking-uid">CLIENT-ID: {{ client.id.slice(0, 8) }}</span>
+              <h4 class="business-title">{{ client.business_name }}</h4>
+            </div>
+            <BaseBadge variant="primary">{{ client.state }}</BaseBadge>
+          </div>
+
+          <div class="card-body">
+            <p v-if="client.website_url" class="card-link">
+              <a :href="client.website_url" target="_blank" rel="noopener noreferrer">
+                {{ client.website_url }}
+              </a>
+            </p>
+            <p class="card-meta">Origin Lead: <code>{{ client.source_lead_id.slice(0, 8) }}</code></p>
+            <p class="card-meta">Onboarded: {{ new Date(client.created_at).toLocaleDateString() }}</p>
+
+            <div class="engagements-box">
+              <span class="engagements-title">Engagement Status:</span>
+              <div class="no-engagements">
+                Account lifecycle in <strong>{{ client.state }}</strong>. Consulting review active.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
 
-    <!-- Manual Create Lead Modal -->
+    <!-- Modals -->
     <CreateLeadModal :show="showCreateModal" @close="showCreateModal = false" />
-
-    <!-- Disqualify Lead Modal -->
     <DisqualifyModal
       :show="showDisqualifyModal"
       :lead="selectedLead"
       @close="showDisqualifyModal = false"
       @confirm="handleConfirmDisqualify"
+    />
+    <ScoreRubricModal
+      :show="showRubricModal"
+      :lead="inspectingLead"
+      @close="showRubricModal = false"
     />
   </main>
 </template>
@@ -260,5 +433,187 @@ async function handleConfirmDisqualify(payload: { reason: string; notes?: string
 
 .table-section {
   margin-bottom: 3rem;
+}
+
+.workspace-tabs {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 2px solid var(--border-color);
+  margin-bottom: 1.5rem;
+}
+
+.tab-btn {
+  background: none;
+  border: none;
+  padding: 0.65rem 1.25rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.15s ease;
+}
+
+.tab-btn:hover {
+  color: var(--text-primary);
+}
+
+.tab-btn.active {
+  color: var(--accent-primary);
+  border-bottom-color: var(--accent-primary);
+}
+
+.pipeline-header,
+.clients-header {
+  margin-bottom: 1.5rem;
+}
+
+.pipeline-header h3,
+.clients-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--text-primary);
+}
+
+.pipeline-subtitle,
+.clients-subtitle {
+  margin: 0.25rem 0 0;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.empty-pipeline {
+  padding: 3rem 1.5rem;
+  text-align: center;
+  background: var(--bg-surface);
+  border: 1px dashed var(--border-color);
+  border-radius: 8px;
+  color: var(--text-muted);
+}
+
+.pipeline-grid,
+.clients-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 3rem;
+}
+
+.pipeline-card,
+.client-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pipeline-card:hover,
+.client-card:hover {
+  border-color: var(--accent-primary);
+}
+
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+.tracking-uid {
+  font-size: 0.7rem;
+  font-family: monospace;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.business-title {
+  margin: 0.2rem 0 0;
+  font-size: 1.1rem;
+  color: var(--text-primary);
+}
+
+.card-body {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.card-link a {
+  color: var(--accent-hover);
+  text-decoration: none;
+  font-size: 0.8rem;
+  word-break: break-all;
+}
+
+.card-link a:hover {
+  text-decoration: underline;
+}
+
+.card-meta {
+  margin: 0;
+}
+
+.score-line {
+  margin-top: 0.5rem;
+  padding: 0.4rem 0.6rem;
+  background: var(--bg-surface-hover);
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+
+.highlight-score {
+  color: var(--accent-primary);
+  font-size: 0.95rem;
+}
+
+.card-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.engagements-box {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: var(--bg-surface-hover);
+  border-radius: 6px;
+  font-size: 0.8rem;
+}
+
+.engagements-title {
+  font-weight: 600;
+  color: var(--text-primary);
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.no-engagements {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.engagements-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.engagements-list li {
+  padding: 0.2rem 0;
+  color: var(--text-secondary);
 }
 </style>

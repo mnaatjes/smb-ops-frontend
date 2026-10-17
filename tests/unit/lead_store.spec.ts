@@ -170,4 +170,81 @@ describe('useLeadStore', () => {
     expect(store.leads.find((l) => l.prospect.id === '2')).toBeUndefined()
     expect(store.statusMessage).toContain('Out of Business')
   })
+
+  it('pursues a lead into the pipeline and filters from pool', async () => {
+    vi.mocked(leadApi.fetchRankedLeads).mockResolvedValue(mockLeads)
+    vi.mocked(leadApi.pursueLead).mockResolvedValue({
+      ...mockLeads[0].prospect,
+      status: 'PURSUED'
+    })
+    const store = useLeadStore()
+    await store.loadRankedLeads()
+
+    expect(store.poolLeads.length).toBe(3)
+    expect(store.pursuedLeads.length).toBe(0)
+
+    await store.pursueLead('1')
+
+    expect(store.poolLeads.length).toBe(2)
+    expect(store.pursuedLeads.length).toBe(1)
+    expect(store.pursuedLeads[0].prospect.id).toBe('1')
+    expect(store.statusMessage).toContain('added to Pursued Pipeline')
+  })
+
+  it('suppresses a lead from future discovery and pool', async () => {
+    vi.mocked(leadApi.fetchRankedLeads).mockResolvedValue(mockLeads)
+    vi.mocked(leadApi.suppressLead).mockResolvedValue({
+      ...mockLeads[0].prospect,
+      status: 'SUPPRESSED'
+    })
+    const store = useLeadStore()
+    await store.loadRankedLeads()
+
+    await store.suppressLead('1')
+
+    expect(store.totalLeadsCount).toBe(2)
+    expect(store.leads.find((l) => l.prospect.id === '1')).toBeUndefined()
+    expect(store.statusMessage).toContain('suppressed from future searches')
+  })
+
+  it('converts a lead into a client account', async () => {
+    vi.mocked(leadApi.fetchRankedLeads).mockResolvedValue(mockLeads)
+    vi.mocked(leadApi.convertLeadToClient).mockResolvedValue({
+      id: 'client-101',
+      business_name: 'Alpha Pizza',
+      source_lead_id: '1',
+      state: 'active',
+      website_url: 'http://alpha.com',
+      created_at: '2026-10-17T00:00:00Z'
+    })
+    const store = useLeadStore()
+    await store.loadRankedLeads()
+
+    await store.convertToClient('1')
+
+    expect(store.clientsCount).toBe(1)
+    expect(store.clients[0].business_name).toBe('Alpha Pizza')
+    expect(store.leads.find((l) => l.prospect.id === '1')).toBeUndefined()
+  })
+
+  it('loads service catalog items', async () => {
+    vi.mocked(leadApi.fetchServices).mockResolvedValue([
+      {
+        id: 'svc-1',
+        code: 'SVC-SEO',
+        name: 'SEO Optimization',
+        description: 'Metadata and speed audit',
+        audit_parameters: ['meta_tags', 'ttfb'],
+        minimum_opportunity_score: 50,
+        created_at: '2026-10-17T00:00:00Z'
+      }
+    ])
+    const store = useLeadStore()
+
+    await store.loadServices()
+
+    expect(store.services.length).toBe(1)
+    expect(store.services[0].code).toBe('SVC-SEO')
+  })
 })
+

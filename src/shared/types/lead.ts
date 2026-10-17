@@ -1,4 +1,11 @@
-export type ProspectStatus = 'PENDING' | 'AUDITED' | 'QUALIFIED' | 'DISQUALIFIED'
+export type ProspectStatus =
+  | 'PENDING'
+  | 'AUDITED'
+  | 'PURSUED'
+  | 'ENRICHED'
+  | 'QUALIFIED'
+  | 'DISQUALIFIED'
+  | 'SUPPRESSED'
 
 export interface Prospect {
   id: string
@@ -62,4 +69,23 @@ export interface BatchAuditResponse {
 export interface DisqualifyPayload {
   reason: string
   notes?: string
+}
+
+export interface ServiceCatalogItem {
+  id: string
+  code: string
+  name: string
+  description: string
+  audit_parameters: string[]
+  minimum_opportunity_score: number
+  created_at: string
+}
+
+export interface ClientAccount {
+  id: string
+  source_lead_id: string
+  business_name: string
+  website_url: string | null
+  state: 'onboarding' | 'active' | 'dormant'
+  created_at: string
 }
