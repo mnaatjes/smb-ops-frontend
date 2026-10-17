@@ -1,19 +1,39 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useLeadStore } from '@/entities/lead/store'
+import type { RankedLead } from '@/entities/lead/model'
 import DiscoveryBar from '@/features/lead-discovery/DiscoveryBar.vue'
 import BatchAuditTrigger from '@/features/lead-audit/BatchAuditTrigger.vue'
 import CreateLeadModal from '@/features/manual-lead/CreateLeadModal.vue'
 import LeadTriageTable from '@/features/lead-triage/LeadTriageTable.vue'
+import DisqualifyModal from '@/features/lead-triage/DisqualifyModal.vue'
 import BaseButton from '@/shared/ui/BaseButton.vue'
 import ThemeToggle from '@/shared/ui/ThemeToggle.vue'
 
 const leadStore = useLeadStore()
 const showCreateModal = ref(false)
+const showDisqualifyModal = ref(false)
+const selectedLead = ref<RankedLead | null>(null)
 
 onMounted(async () => {
   await leadStore.loadRankedLeads()
 })
+
+async function handleQualify(lead: RankedLead): Promise<void> {
+  await leadStore.qualifyLead(lead.prospect.id)
+}
+
+function handleOpenDisqualify(lead: RankedLead): void {
+  selectedLead.value = lead
+  showDisqualifyModal.value = true
+}
+
+async function handleConfirmDisqualify(payload: { reason: string; notes?: string }): Promise<void> {
+  if (selectedLead.value) {
+    await leadStore.disqualifyLead(selectedLead.value.prospect.id, payload)
+    selectedLead.value = null
+  }
+}
 </script>
 
 <template>
@@ -80,11 +100,24 @@ onMounted(async () => {
 
     <!-- Ranked Lead Triage Table -->
     <section class="table-section">
-      <LeadTriageTable :leads="leadStore.filteredLeads" :loading="leadStore.loading" />
+      <LeadTriageTable
+        :leads="leadStore.filteredLeads"
+        :loading="leadStore.loading"
+        @qualify="handleQualify"
+        @disqualify="handleOpenDisqualify"
+      />
     </section>
 
     <!-- Manual Create Lead Modal -->
     <CreateLeadModal :show="showCreateModal" @close="showCreateModal = false" />
+
+    <!-- Disqualify Lead Modal -->
+    <DisqualifyModal
+      :show="showDisqualifyModal"
+      :lead="selectedLead"
+      @close="showDisqualifyModal = false"
+      @confirm="handleConfirmDisqualify"
+    />
   </main>
 </template>
 

@@ -58,3 +58,8 @@ export interface BatchAuditResponse {
   failed_count: number
   results: AuditResult[]
 }
+
+export interface DisqualifyPayload {
+  reason: string
+  notes?: string
+}

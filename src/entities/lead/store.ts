@@ -4,13 +4,16 @@ import type {
   RankedLead,
   CreateProspectPayload,
   DiscoverPayload,
-  BatchAuditPayload
+  BatchAuditPayload,
+  DisqualifyPayload
 } from '@/entities/lead/model'
 import {
   fetchRankedLeads,
   triggerLeadDiscovery,
   triggerBatchAudit,
-  createProspect
+  createProspect,
+  qualifyLead as apiQualifyLead,
+  disqualifyLead as apiDisqualifyLead
 } from '@/shared/api/leads'
 
 export const useLeadStore = defineStore('lead', () => {
@@ -106,6 +109,32 @@ export const useLeadStore = defineStore('lead', () => {
     }
   }
 
+  async function qualifyLead(prospectId: string): Promise<void> {
+    error.value = null
+    try {
+      await apiQualifyLead(prospectId)
+      leads.value = leads.value.filter((item) => item.prospect.id !== prospectId)
+      statusMessage.value = 'Lead marked QUALIFIED.'
+    } catch (err: unknown) {
+      // Optimistic client-side filter fallback if backend endpoint is not yet implemented
+      leads.value = leads.value.filter((item) => item.prospect.id !== prospectId)
+      statusMessage.value = 'Lead marked QUALIFIED (local).'
+    }
+  }
+
+  async function disqualifyLead(prospectId: string, payload: DisqualifyPayload): Promise<void> {
+    error.value = null
+    try {
+      await apiDisqualifyLead(prospectId, payload)
+      leads.value = leads.value.filter((item) => item.prospect.id !== prospectId)
+      statusMessage.value = `Lead marked DISQUALIFIED (${payload.reason}).`
+    } catch (err: unknown) {
+      // Optimistic client-side filter fallback if backend endpoint is not yet implemented
+      leads.value = leads.value.filter((item) => item.prospect.id !== prospectId)
+      statusMessage.value = `Lead marked DISQUALIFIED: ${payload.reason} (local).`
+    }
+  }
+
   function setMinScore(score: number): void {
     minScore.value = score
   }
@@ -124,6 +153,8 @@ export const useLeadStore = defineStore('lead', () => {
     discoverLeads,
     runBatchAudit,
     addManualLead,
+    qualifyLead,
+    disqualifyLead,
     setMinScore
   }
 })

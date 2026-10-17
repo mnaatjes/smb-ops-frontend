@@ -1,13 +1,31 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import ScoreBadge from './ScoreBadge.vue'
 import IssueChips from './IssueChips.vue'
 import BaseBadge from '@/shared/ui/BaseBadge.vue'
+import BaseButton from '@/shared/ui/BaseButton.vue'
 import type { RankedLead } from '@/entities/lead/model'
 
 defineProps<{
   leads: RankedLead[]
   loading?: boolean
 }>()
+
+const emit = defineEmits<{
+  (e: 'qualify', lead: RankedLead): void
+  (e: 'disqualify', lead: RankedLead): void
+}>()
+
+const pendingActionId = ref<string | null>(null)
+
+function onQualify(lead: RankedLead): void {
+  pendingActionId.value = lead.prospect.id
+  emit('qualify', lead)
+}
+
+function onDisqualify(lead: RankedLead): void {
+  emit('disqualify', lead)
+}
 </script>
 
 <template>
@@ -21,11 +39,12 @@ defineProps<{
           <th>Opportunity Score</th>
           <th>Audited Findings & Tech</th>
           <th>Discovered / Source</th>
+          <th class="actions-header">Triage Actions</th>
         </tr>
       </thead>
       <tbody>
         <tr v-if="leads.length === 0">
-          <td colspan="5" class="empty-state">No leads available. Run discovery or add a lead manually.</td>
+          <td colspan="6" class="empty-state">No leads available. Run discovery or add a lead manually.</td>
         </tr>
         <tr v-for="lead in leads" :key="lead.prospect.id" class="lead-row">
           <td class="cell-primary">
@@ -56,6 +75,23 @@ defineProps<{
           <td class="cell-meta">
             <span class="source-tag">{{ lead.prospect.source }}</span>
             <span class="timestamp">{{ new Date(lead.prospect.created_at).toLocaleDateString() }}</span>
+          </td>
+          <td class="cell-actions">
+            <div class="action-buttons">
+              <BaseButton
+                label="Qualify"
+                variant="primary"
+                :disabled="pendingActionId === lead.prospect.id"
+                :loading="pendingActionId === lead.prospect.id"
+                @click="onQualify(lead)"
+              />
+              <BaseButton
+                label="Disqualify"
+                variant="danger"
+                :disabled="pendingActionId === lead.prospect.id"
+                @click="onDisqualify(lead)"
+              />
+            </div>
           </td>
         </tr>
       </tbody>
@@ -155,5 +191,21 @@ defineProps<{
   padding: 2.5rem 1rem;
   color: var(--text-muted);
   font-style: italic;
+}
+
+.actions-header {
+  text-align: right;
+  min-width: 170px;
+}
+
+.cell-actions {
+  text-align: right;
+  vertical-align: middle;
+}
+
+.action-buttons {
+  display: inline-flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
 }
 </style>
