@@ -4,7 +4,7 @@ import BaseModal from '@/shared/ui/BaseModal.vue'
 import BaseButton from '@/shared/ui/BaseButton.vue'
 import type { RankedLead } from '@/entities/lead/model'
 
-const props = defineProps<{
+defineProps<{
   show: boolean
   lead: RankedLead | null
 }>()
