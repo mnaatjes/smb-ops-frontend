@@ -1,49 +1,220 @@
 <script setup lang="ts">
-import AuthForm from '@/features/auth/AuthForm.vue'
+import { ref, onMounted } from 'vue'
+import { useLeadStore } from '@/entities/lead/store'
+import DiscoveryBar from '@/features/lead-discovery/DiscoveryBar.vue'
+import BatchAuditTrigger from '@/features/lead-audit/BatchAuditTrigger.vue'
+import CreateLeadModal from '@/features/manual-lead/CreateLeadModal.vue'
+import LeadTriageTable from '@/features/lead-triage/LeadTriageTable.vue'
+import BaseButton from '@/shared/ui/BaseButton.vue'
 
-import { useUserStore } from '@/entities/user/store'
-const userStore = useUserStore()
+const leadStore = useLeadStore()
+const showCreateModal = ref(false)
 
+onMounted(async () => {
+  await leadStore.loadRankedLeads()
+})
 </script>
 
 <template>
   <main class="page-container">
     <header class="header">
-      <h1>smb-ops-ui</h1>
-      <p class="subtitle">Vue 3 Single Page Application for SMB Operations</p>
+      <div class="header-titles">
+        <h1>SMB Lead Operations & Triage</h1>
+        <p class="subtitle">Discovery, Technical Audit & High-Opportunity Lead Prioritization</p>
+      </div>
+      <div class="header-actions">
+        <BaseButton label="+ Add Lead" @click="showCreateModal = true" />
+      </div>
     </header>
 
-    <section class="content">
-      
-      <div v-if="userStore.isAuthenticated" class="user-greeting">
-        <p>Welcome back, <strong>{{ userStore.currentUser?.name }}</strong> ({{ userStore.currentUser?.role }})</p>
-        <button type="button" @click="userStore.clearUser">Sign Out</button>
+    <!-- Metrics Ribbon -->
+    <section class="metrics-ribbon">
+      <div class="metric-card">
+        <span class="metric-label">Total Leads</span>
+        <span class="metric-value">{{ leadStore.totalLeadsCount }}</span>
       </div>
-      <AuthForm v-else />
-      
+      <div class="metric-card">
+        <span class="metric-label">Audited Leads</span>
+        <span class="metric-value">{{ leadStore.auditedCount }}</span>
+      </div>
+      <div class="metric-card metric-alert">
+        <span class="metric-label">High Priority (Score &ge; 70)</span>
+        <span class="metric-value">{{ leadStore.highPriorityCount }}</span>
+      </div>
     </section>
+
+    <!-- Operational Action Row -->
+    <section class="actions-section">
+      <DiscoveryBar class="discovery-flex" />
+      <div class="batch-flex">
+        <BatchAuditTrigger :limit="15" />
+      </div>
+    </section>
+
+    <!-- Status / Notification Feedback -->
+    <div v-if="leadStore.statusMessage" class="status-banner">
+      {{ leadStore.statusMessage }}
+    </div>
+    <div v-if="leadStore.error" class="error-banner">
+      {{ leadStore.error }}
+    </div>
+
+    <!-- Triage Filter Controls -->
+    <section class="triage-controls">
+      <div class="score-filter">
+        <label for="score-threshold">Filter Min Opportunity Score:</label>
+        <select
+          id="score-threshold"
+          :value="leadStore.minScore"
+          class="score-select"
+          @change="leadStore.setMinScore(Number(($event.target as HTMLSelectElement).value))"
+        >
+          <option :value="0">All Leads (0+)</option>
+          <option :value="40">Moderate & High (&ge; 40)</option>
+          <option :value="70">High Priority Only (&ge; 70)</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- Ranked Lead Triage Table -->
+    <section class="table-section">
+      <LeadTriageTable :leads="leadStore.filteredLeads" :loading="leadStore.loading" />
+    </section>
+
+    <!-- Manual Create Lead Modal -->
+    <CreateLeadModal :show="showCreateModal" @close="showCreateModal = false" />
   </main>
 </template>
 
 <style scoped>
 .page-container {
-  max-width: 800px;
-  margin: 2rem auto;
-  padding: 0 1rem;
+  max-width: 1200px;
+  margin: 1.5rem auto;
+  padding: 0 1.5rem;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
+
 .header {
-  margin-bottom: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
   border-bottom: 1px solid #e5e7eb;
   padding-bottom: 1rem;
 }
-.subtitle {
-  color: #6b7280;
+
+.header-titles h1 {
+  margin: 0;
+  font-size: 1.75rem;
+  color: #111827;
 }
-.user-greeting {
-  padding: 1.5rem;
-  background-color: #f0fdf4;
-  border: 1px solid #bbf7d0;
+
+.subtitle {
+  margin: 0.25rem 0 0;
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+.metrics-ribbon {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.metric-card {
+  background: #ffffff;
+  padding: 1rem;
   border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+}
+
+.metric-alert {
+  border-color: #fecaca;
+  background-color: #fffaf0;
+}
+
+.metric-label {
+  font-size: 0.8rem;
+  color: #6b7280;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.metric-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #111827;
+  margin-top: 0.25rem;
+}
+
+.metric-alert .metric-value {
+  color: #b91c1c;
+}
+
+.actions-section {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.discovery-flex {
+  flex: 1;
+  min-width: 320px;
+}
+
+.batch-flex {
+  display: flex;
+  align-items: center;
+}
+
+.status-banner {
+  padding: 0.75rem 1rem;
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.error-banner {
+  padding: 0.75rem 1rem;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.triage-controls {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.75rem;
+}
+
+.score-filter {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #4b5563;
+}
+
+.score-select {
+  padding: 0.35rem 0.6rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background-color: #ffffff;
+  color: #111827;
+}
+
+.table-section {
+  margin-bottom: 3rem;
 }
 </style>
