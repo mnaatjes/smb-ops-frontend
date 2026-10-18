@@ -4,7 +4,12 @@ import { mount } from '@vue/test-utils'
 import { useLeadStore } from '@/entities/lead/store'
 import MaintenanceGauge from '@/shared/ui/MaintenanceGauge.vue'
 import ClientOnboardingModal from '@/features/client-onboarding/ClientOnboardingModal.vue'
-import type { RankedLead, ServiceCatalogItem, ClientAccount } from '@/shared/types/lead'
+import type {
+  RankedLead,
+  ServiceCatalogItem,
+  ClientAccount,
+  OnboardClientPayload
+} from '@/shared/types/lead'
 import * as api from '@/shared/api/leads'
 
 describe('Client Accounts Workspace & Onboarding Pipeline', () => {
@@ -119,7 +124,7 @@ describe('Client Accounts Workspace & Onboarding Pipeline', () => {
     await dispatchBtn?.trigger('click')
 
     expect(wrapper.emitted('onboard')).toHaveLength(1)
-    const emittedPayload = wrapper.emitted('onboard')?.[0]?.[0] as any
+    const emittedPayload = wrapper.emitted('onboard')?.[0]?.[0] as OnboardClientPayload
     expect(emittedPayload.lead_id).toBe('lead-test-123')
     expect(emittedPayload.contact_email).toBe('owner@harborbakery.com')
   })

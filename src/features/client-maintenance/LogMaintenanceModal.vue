@@ -5,7 +5,7 @@ import BaseButton from '@/shared/ui/BaseButton.vue'
 import BaseInput from '@/shared/ui/BaseInput.vue'
 import type { LogTimecardPayload } from '@/shared/types/lead'
 
-const props = defineProps<{
+defineProps<{
   show: boolean
   clientId: string
   clientName: string

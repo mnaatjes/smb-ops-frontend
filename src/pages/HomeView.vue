@@ -13,7 +13,6 @@ import ServiceDetailsModal from '@/features/service-catalog/ServiceDetailsModal.
 import ClientOnboardingModal from '@/features/client-onboarding/ClientOnboardingModal.vue'
 import ClientDossierDrawer from '@/features/client-dossier/ClientDossierDrawer.vue'
 import LogMaintenanceModal from '@/features/client-maintenance/LogMaintenanceModal.vue'
-import MaintenanceGauge from '@/shared/ui/MaintenanceGauge.vue'
 import AsideNavRail from '@/features/navigation/AsideNavRail.vue'
 import DoctrineWorkspace from '@/features/business-doctrine/DoctrineWorkspace.vue'
 import BaseButton from '@/shared/ui/BaseButton.vue'
