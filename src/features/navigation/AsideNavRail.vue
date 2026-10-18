@@ -2,7 +2,7 @@
 import ThemeToggle from '@/shared/ui/ThemeToggle.vue'
 
 defineProps<{
-  activeTab: 'pool' | 'pipeline' | 'clients' | 'services'
+  activeTab: 'pool' | 'pipeline' | 'clients' | 'services' | 'doctrine'
   poolCount: number
   pursuedCount: number
   clientsCount: number
@@ -10,7 +10,7 @@ defineProps<{
 }>()
 
 defineEmits<{
-  (e: 'selectTab', tab: 'pool' | 'pipeline' | 'clients' | 'services'): void
+  (e: 'selectTab', tab: 'pool' | 'pipeline' | 'clients' | 'services' | 'doctrine'): void
   (e: 'openAddLead'): void
 }>()
 </script>
@@ -70,6 +70,15 @@ defineEmits<{
           <span class="nav-icon">📋</span>
           <span class="nav-label">Service Catalog</span>
           <span class="nav-badge">{{ servicesCount }}</span>
+        </button>
+
+        <button
+          type="button"
+          :class="['nav-item', { active: activeTab === 'doctrine' }]"
+          @click="$emit('selectTab', 'doctrine')"
+        >
+          <span class="nav-icon">📖</span>
+          <span class="nav-label">Business Doctrine</span>
         </button>
 
         <button

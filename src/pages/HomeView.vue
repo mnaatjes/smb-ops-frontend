@@ -11,12 +11,13 @@ import ServiceFilterDropdown from '@/features/service-catalog/ServiceFilterDropd
 import CreateServiceModal from '@/features/service-catalog/CreateServiceModal.vue'
 import ServiceDetailsModal from '@/features/service-catalog/ServiceDetailsModal.vue'
 import AsideNavRail from '@/features/navigation/AsideNavRail.vue'
+import DoctrineWorkspace from '@/features/business-doctrine/DoctrineWorkspace.vue'
 import BaseButton from '@/shared/ui/BaseButton.vue'
 import BaseBadge from '@/shared/ui/BaseBadge.vue'
 import type { CreateServicePayload, ServiceCatalogItem } from '@/entities/lead/model'
 
 const leadStore = useLeadStore()
-const activeTab = ref<'pool' | 'pipeline' | 'clients' | 'services'>('pool')
+const activeTab = ref<'pool' | 'pipeline' | 'clients' | 'services' | 'doctrine'>('pool')
 const showCreateModal = ref(false)
 const showCreateServiceModal = ref(false)
 const showDisqualifyModal = ref(false)
@@ -325,6 +326,11 @@ async function handleCreateService(payload: CreateServicePayload): Promise<void>
           </div>
         </div>
       </div>
+    </section>
+
+    <!-- Workspace 5: Business Doctrine -->
+    <section v-if="activeTab === 'doctrine'" class="workspace-view">
+      <DoctrineWorkspace />
     </section>
 
     <!-- Modals -->
