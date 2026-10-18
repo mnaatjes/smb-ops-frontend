@@ -228,33 +228,55 @@ function handleSubmit(): void {
         />
       </div>
 
-      <!-- Scope & Deliverables -->
-      <div class="form-row">
-        <div class="form-group flex-1">
-          <label class="form-label" for="svc-scope">
-            Scope Items (1 per line)
-          </label>
-          <textarea
-            id="svc-scope"
-            v-model="scopeInput"
-            rows="2"
-            class="form-textarea"
-            placeholder="Extract copy and imagery&#10;Refactor to clean HTML5&#10;Deploy to Cloudflare Pages"
-          ></textarea>
-        </div>
+      <!-- Technical Scope of Work -->
+      <div class="form-group">
+        <label class="form-label" for="svc-scope">
+          Technical Scope of Work (1 task per line)
+        </label>
+        <span class="field-hint">
+          Operational engineering tasks performed during service delivery (e.g., updates, backups, caching, edge deployment).
+        </span>
+        <textarea
+          id="svc-scope"
+          v-model="scopeInput"
+          rows="4"
+          class="form-textarea"
+          placeholder="Snapshot backup taken to offsite storage&#10;Core CMS and plugin security updates&#10;SSL verification and HTTPS enforcement"
+        ></textarea>
+      </div>
 
-        <div class="form-group flex-1">
-          <label class="form-label" for="svc-deliverables">
-            Deliverables (1 per line)
-          </label>
-          <textarea
-            id="svc-deliverables"
-            v-model="deliverablesInput"
-            rows="2"
-            class="form-textarea"
-            placeholder="1-page health report&#10;Private Git repository&#10;Zero hosting cost deployment"
-          ></textarea>
-        </div>
+      <!-- Client Deliverables -->
+      <div class="form-group">
+        <label class="form-label" for="svc-deliverables">
+          Client Deliverables (1 tangible artifact per line)
+        </label>
+        <span class="field-hint">
+          Tangible artifacts, reports, and accounts handed to the client upon project completion.
+        </span>
+        <textarea
+          id="svc-deliverables"
+          v-model="deliverablesInput"
+          rows="3"
+          class="form-textarea"
+          placeholder="1-page before-and-after health report&#10;Live production site deployed to edge CDN"
+        ></textarea>
+      </div>
+
+      <!-- Out of Scope / Contractual Boundaries -->
+      <div class="form-group">
+        <label class="form-label" for="svc-exclusions">
+          Out of Scope / Contractual Boundaries (1 item per line)
+        </label>
+        <span class="field-hint">
+          Explicit non-goals protecting against scope creep during engagement delivery.
+        </span>
+        <textarea
+          id="svc-exclusions"
+          v-model="exclusionsInput"
+          rows="3"
+          class="form-textarea"
+          placeholder="Zero graphic design or visual logo redesign&#10;Zero complex CMS database installations"
+        ></textarea>
       </div>
 
       <!-- Verified Audit Parameter Multi-Select Checklist -->
