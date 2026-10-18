@@ -196,46 +196,47 @@ async function handleCreateService(payload: CreateServicePayload): Promise<void>
           v-for="lead in leadStore.pursuedLeads"
           :key="lead.prospect.id"
           class="pipeline-card"
-          @click="handleInspectScore(lead)"
         >
-          <div class="card-head">
-            <div>
-              <span class="tracking-uid">UID: {{ lead.prospect.id.slice(0, 8) }}</span>
-              <h4 class="business-title">{{ lead.prospect.business_name }}</h4>
+          <div class="card-content" @click="handleInspectScore(lead)">
+            <div class="card-head">
+              <div>
+                <span class="tracking-uid">UID: {{ lead.prospect.id.slice(0, 8) }}</span>
+                <h4 class="business-title">{{ lead.prospect.business_name }}</h4>
+              </div>
+              <BaseBadge variant="primary">{{ lead.prospect.status }}</BaseBadge>
             </div>
-            <BaseBadge variant="primary">{{ lead.prospect.status }}</BaseBadge>
+
+            <div class="card-body">
+              <p v-if="lead.prospect.website_url" class="card-link">
+                <a
+                  :href="lead.prospect.website_url"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  @click.stop
+                >
+                  {{ lead.prospect.website_url }}
+                </a>
+              </p>
+              <p v-if="lead.prospect.phone" class="card-meta">📞 {{ lead.prospect.phone }}</p>
+              <p v-if="lead.prospect.address" class="card-meta">📍 {{ lead.prospect.address }}</p>
+
+              <div class="score-line">
+                <span>Opportunity Score:</span>
+                <strong class="highlight-score">{{ lead.audit?.opportunity_score ?? 'N/A' }} / 100</strong>
+              </div>
+            </div>
           </div>
 
-          <div class="card-body">
-            <p v-if="lead.prospect.website_url" class="card-link">
-              <a
-                :href="lead.prospect.website_url"
-                target="_blank"
-                rel="noopener noreferrer"
-                @click.stop
-              >
-                {{ lead.prospect.website_url }}
-              </a>
-            </p>
-            <p v-if="lead.prospect.phone" class="card-meta">📞 {{ lead.prospect.phone }}</p>
-            <p v-if="lead.prospect.address" class="card-meta">📍 {{ lead.prospect.address }}</p>
-
-            <div class="score-line">
-              <span>Opportunity Score:</span>
-              <strong class="highlight-score">{{ lead.audit?.opportunity_score ?? 'N/A' }} / 100</strong>
-            </div>
-          </div>
-
-          <div class="card-actions" @click.stop>
+          <div class="card-actions">
             <BaseButton
               label="Convert to Client"
               variant="primary"
-              @click.stop="handleConvertToClient(lead.prospect.id)"
+              @click="handleConvertToClient(lead.prospect.id)"
             />
             <BaseButton
               label="Disqualify"
               variant="danger"
-              @click.stop="handleOpenDisqualify(lead)"
+              @click="handleOpenDisqualify(lead)"
             />
           </div>
         </div>
@@ -575,8 +576,11 @@ async function handleCreateService(payload: CreateServicePayload): Promise<void>
   margin-bottom: 3rem;
 }
 
-.pipeline-card {
+.card-content {
   cursor: pointer;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .pipeline-card,
