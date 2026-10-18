@@ -361,5 +361,42 @@ describe('useLeadStore', () => {
     expect(store.statusMessage).toContain('Successfully cleared 5')
     expect(store.leads.length).toBe(0)
   })
+
+  it('manages credential secrets through store methods', async () => {
+    const mockSecret = {
+      id: 'sec-1',
+      client_id: 'client-1',
+      secret_type: 'wordpress_admin',
+      label: 'WP Admin',
+      username: 'admin',
+      key_version: 'v1',
+      created_at: '2026-10-18T00:00:00Z',
+      updated_at: '2026-10-18T00:00:00Z'
+    }
+    vi.mocked(leadApi.fetchClientSecrets).mockResolvedValue([mockSecret])
+    vi.mocked(leadApi.storeClientSecret).mockResolvedValue(mockSecret)
+    vi.mocked(leadApi.revealClientSecret).mockResolvedValue({ plaintext: 'dynamic_mock_revealed_pw' })
+    vi.mocked(leadApi.deleteClientSecret).mockResolvedValue()
+
+    const store = useLeadStore()
+
+    const secrets = await store.getClientSecrets('client-1')
+    expect(secrets.length).toBe(1)
+    expect(secrets[0].id).toBe('sec-1')
+
+    const created = await store.storeSecret('client-1', {
+      secret_type: 'wordpress_admin',
+      label: 'WP Admin',
+      username: 'admin',
+      password: 'dynamic_mock_input_pw'
+    })
+    expect(created.label).toBe('WP Admin')
+
+    const plaintext = await store.revealSecret('client-1', 'sec-1')
+    expect(plaintext).toBe('dynamic_mock_revealed_pw')
+
+    await store.deleteSecret('client-1', 'sec-1')
+    expect(leadApi.deleteClientSecret).toHaveBeenCalledWith('client-1', 'sec-1')
+  })
 })
 

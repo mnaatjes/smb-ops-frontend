@@ -13,7 +13,9 @@ import type {
   TimecardEntry,
   ContinuityHealth,
   OnboardClientPayload,
-  LogTimecardPayload
+  LogTimecardPayload,
+  ClientSecretMetadata,
+  ClientSecretPayload
 } from '@/entities/lead/model'
 import {
   fetchRankedLeads,
@@ -32,7 +34,11 @@ import {
   logClientTimecardWork as apiLogClientTimecardWork,
   fetchClientContinuity as apiFetchClientContinuity,
   pingClientContinuity as apiPingClientContinuity,
-  clearLeadsApi
+  clearLeadsApi,
+  fetchClientSecrets as apiFetchClientSecrets,
+  storeClientSecret as apiStoreClientSecret,
+  revealClientSecret as apiRevealClientSecret,
+  deleteClientSecret as apiDeleteClientSecret
 } from '@/shared/api/leads'
 
 export const useLeadStore = defineStore('lead', () => {
@@ -282,6 +288,15 @@ export const useLeadStore = defineStore('lead', () => {
         clients.value.push(client)
       }
       leads.value = leads.value.filter((item) => item.prospect.id !== payload.lead_id)
+      if (payload.secrets && payload.secrets.length > 0) {
+        for (const sec of payload.secrets) {
+          try {
+            await apiStoreClientSecret(client.id, sec)
+          } catch (secErr: unknown) {
+            console.error('Failed to store secret during onboarding:', secErr)
+          }
+        }
+      }
       statusMessage.value = `Onboarding completed for: ${client.business_name}`
       return client
     } catch (err: unknown) {
@@ -363,6 +378,29 @@ export const useLeadStore = defineStore('lead', () => {
     minScore.value = score
   }
 
+  async function getClientSecrets(clientId: string): Promise<ClientSecretMetadata[]> {
+    return await apiFetchClientSecrets(clientId)
+  }
+
+  async function storeSecret(
+    clientId: string,
+    payload: ClientSecretPayload
+  ): Promise<ClientSecretMetadata> {
+    const meta = await apiStoreClientSecret(clientId, payload)
+    statusMessage.value = `Securely encrypted credential: ${meta.label}`
+    return meta
+  }
+
+  async function revealSecret(clientId: string, secretId: string): Promise<string> {
+    const res = await apiRevealClientSecret(clientId, secretId)
+    return res.plaintext
+  }
+
+  async function deleteSecret(clientId: string, secretId: string): Promise<void> {
+    await apiDeleteClientSecret(clientId, secretId)
+    statusMessage.value = 'Secret record purged from vault.'
+  }
+
   return {
     leads,
     services,
@@ -399,7 +437,11 @@ export const useLeadStore = defineStore('lead', () => {
     pingContinuity,
     createServiceOffering,
     clearLeads,
-    setMinScore
+    setMinScore,
+    getClientSecrets,
+    storeSecret,
+    revealSecret,
+    deleteSecret
   }
 })
 
