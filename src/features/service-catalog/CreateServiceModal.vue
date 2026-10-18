@@ -356,28 +356,35 @@ function handleSubmit(): void {
 .form-label {
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--color-text, #1e293b);
+  color: var(--text-primary);
 }
 
 .required {
-  color: var(--color-danger, #ef4444);
+  color: var(--banner-error-text, #ef4444);
 }
 
 .form-select,
 .form-textarea {
   width: 100%;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid var(--color-border, #cbd5e1);
-  border-radius: var(--radius-md, 6px);
-  background-color: var(--color-bg, #ffffff);
-  color: var(--color-text, #1e293b);
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
   font-size: 0.9rem;
   box-sizing: border-box;
 }
 
+.form-select:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
 .field-hint {
   font-size: 0.75rem;
-  color: var(--color-text-muted, #64748b);
+  color: var(--text-secondary);
 }
 
 .parameter-grid {
@@ -392,21 +399,21 @@ function handleSubmit(): void {
   align-items: flex-start;
   gap: 0.5rem;
   padding: 0.5rem 0.65rem;
-  background-color: var(--color-bg-secondary, #f8fafc);
-  border: 1px solid var(--color-border, #cbd5e1);
+  background-color: var(--bg-surface-subtle);
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.15s ease-in-out;
 }
 
 .parameter-chip:hover {
-  border-color: #94a3b8;
-  background-color: #f1f5f9;
+  border-color: var(--accent-primary);
+  background-color: var(--bg-surface-hover);
 }
 
 .parameter-chip.active {
-  border-color: #3b82f6;
-  background-color: #eff6ff;
+  border-color: var(--accent-primary);
+  background-color: var(--badge-primary-bg, #eff6ff);
 }
 
 .param-check {
@@ -422,11 +429,11 @@ function handleSubmit(): void {
 .param-title {
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--color-text, #1e293b);
+  color: var(--text-primary);
 }
 
 .param-probe {
   font-size: 0.75rem;
-  color: var(--color-text-muted, #64748b);
+  color: var(--text-secondary);
 }
 </style>
