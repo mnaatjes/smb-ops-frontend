@@ -360,6 +360,7 @@ async function handleCreateService(payload: CreateServicePayload): Promise<void>
     <ScoreRubricModal
       :show="showRubricModal"
       :lead="inspectingLead"
+      :services="leadStore.services"
       @close="showRubricModal = false; inspectingLead = null"
     />
     </main>
