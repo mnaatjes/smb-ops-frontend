@@ -7,6 +7,7 @@ import type {
   BatchAuditPayload,
   BatchAuditResponse,
   DisqualifyPayload,
+  CreateServicePayload,
   ServiceCatalogItem,
   ClientAccount
 } from '@/shared/types/lead'
@@ -67,6 +68,11 @@ export async function fetchServices(): Promise<ServiceCatalogItem[]> {
   return response.data
 }
 
+export async function createService(payload: CreateServicePayload): Promise<ServiceCatalogItem> {
+  const response = await apiClient.post<ServiceCatalogItem>('/services', payload)
+  return response.data
+}
+
 export async function convertLeadToClient(prospectId: string): Promise<ClientAccount> {
   const response = await apiClient.post<ClientAccount>(`/clients/convert/${prospectId}`)
   return response.data
@@ -76,3 +82,4 @@ export async function fetchClients(): Promise<ClientAccount[]> {
   const response = await apiClient.get<ClientAccount[]>('/clients')
   return response.data
 }
+

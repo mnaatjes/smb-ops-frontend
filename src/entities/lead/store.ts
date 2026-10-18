@@ -6,6 +6,7 @@ import type {
   DiscoverPayload,
   BatchAuditPayload,
   DisqualifyPayload,
+  CreateServicePayload,
   ServiceCatalogItem,
   ClientAccount
 } from '@/entities/lead/model'
@@ -18,6 +19,7 @@ import {
   pursueLead as apiPursueLead,
   suppressLead as apiSuppressLead,
   fetchServices as apiFetchServices,
+  createService as apiCreateService,
   fetchClients as apiFetchClients,
   convertLeadToClient as apiConvertLeadToClient
 } from '@/shared/api/leads'
@@ -226,6 +228,21 @@ export const useLeadStore = defineStore('lead', () => {
     }
   }
 
+  async function createServiceOffering(payload: CreateServicePayload): Promise<void> {
+    loading.value = true
+    error.value = null
+    try {
+      const created = await apiCreateService(payload)
+      services.value.push(created)
+      statusMessage.value = `Registered service offering: ${created.name} (${created.code})`
+    } catch (err: unknown) {
+      error.value = err instanceof Error ? err.message : 'Failed to register service offering'
+    } finally {
+      loading.value = false
+    }
+  }
+
+
   function setMinScore(score: number): void {
     minScore.value = score
   }
@@ -258,6 +275,8 @@ export const useLeadStore = defineStore('lead', () => {
     pursueLead,
     suppressLead,
     convertToClient,
+    createServiceOffering,
     setMinScore
   }
 })
+
