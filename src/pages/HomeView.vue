@@ -10,11 +10,20 @@ import ScoreRubricModal from '@/features/lead-triage/ScoreRubricModal.vue'
 import ServiceFilterDropdown from '@/features/service-catalog/ServiceFilterDropdown.vue'
 import CreateServiceModal from '@/features/service-catalog/CreateServiceModal.vue'
 import ServiceDetailsModal from '@/features/service-catalog/ServiceDetailsModal.vue'
+import ClientOnboardingModal from '@/features/client-onboarding/ClientOnboardingModal.vue'
+import ClientDossierDrawer from '@/features/client-dossier/ClientDossierDrawer.vue'
+import LogMaintenanceModal from '@/features/client-maintenance/LogMaintenanceModal.vue'
 import AsideNavRail from '@/features/navigation/AsideNavRail.vue'
 import DoctrineWorkspace from '@/features/business-doctrine/DoctrineWorkspace.vue'
 import BaseButton from '@/shared/ui/BaseButton.vue'
 import BaseBadge from '@/shared/ui/BaseBadge.vue'
-import type { CreateServicePayload, ServiceCatalogItem } from '@/entities/lead/model'
+import type {
+  CreateServicePayload,
+  ServiceCatalogItem,
+  ClientAccount,
+  OnboardClientPayload,
+  LogTimecardPayload
+} from '@/entities/lead/model'
 
 const leadStore = useLeadStore()
 const activeTab = ref<'pool' | 'pipeline' | 'clients' | 'services' | 'doctrine'>('pool')
@@ -23,9 +32,14 @@ const showCreateServiceModal = ref(false)
 const showDisqualifyModal = ref(false)
 const showRubricModal = ref(false)
 const showServiceDetailsModal = ref(false)
+const showOnboardingModal = ref(false)
+const showDossierDrawer = ref(false)
+const showLogMaintenanceModal = ref(false)
 const selectedLead = ref<RankedLead | null>(null)
 const inspectingLead = ref<RankedLead | null>(null)
 const inspectingService = ref<ServiceCatalogItem | null>(null)
+const activeDossierClient = ref<ClientAccount | null>(null)
+const activeLogClient = ref<ClientAccount | null>(null)
 
 onMounted(async () => {
   await Promise.all([
@@ -51,8 +65,37 @@ async function handleConfirmDisqualify(payload: { reason: string; notes?: string
   }
 }
 
-async function handleConvertToClient(prospectId: string): Promise<void> {
-  await leadStore.convertToClient(prospectId)
+function handleOpenOnboard(lead: RankedLead): void {
+  selectedLead.value = lead
+  showOnboardingModal.value = true
+}
+
+async function handleCompleteOnboard(payload: OnboardClientPayload): Promise<void> {
+  await leadStore.onboardClient(payload)
+  showOnboardingModal.value = false
+  selectedLead.value = null
+  activeTab.value = 'clients'
+}
+
+function handleInspectClient(client: ClientAccount): void {
+  activeDossierClient.value = client
+  showDossierDrawer.value = true
+}
+
+function handleOpenLogWork(client: ClientAccount): void {
+  activeLogClient.value = client
+  showLogMaintenanceModal.value = true
+}
+
+async function handleConfirmLogWork(payload: LogTimecardPayload): Promise<void> {
+  if (activeLogClient.value) {
+    await leadStore.logWork(activeLogClient.value.id, payload)
+    showLogMaintenanceModal.value = false
+    // Refresh client in dossier if drawer is open
+    if (activeDossierClient.value && activeDossierClient.value.id === activeLogClient.value.id) {
+      activeDossierClient.value = { ...activeDossierClient.value }
+    }
+  }
 }
 
 function handleInspectScore(lead: RankedLead): void {
@@ -231,7 +274,7 @@ async function handleCreateService(payload: CreateServicePayload): Promise<void>
             <BaseButton
               label="Convert to Client"
               variant="primary"
-              @click="handleConvertToClient(lead.prospect.id)"
+              @click="handleOpenOnboard(lead)"
             />
             <BaseButton
               label="Disqualify"
@@ -260,29 +303,51 @@ async function handleCreateService(payload: CreateServicePayload): Promise<void>
           :key="client.id"
           class="client-card"
         >
-          <div class="card-head">
+          <div class="card-head" @click="handleInspectClient(client)">
             <div>
               <span class="tracking-uid">CLIENT-ID: {{ client.id.slice(0, 8) }}</span>
               <h4 class="business-title">{{ client.business_name }}</h4>
             </div>
-            <BaseBadge variant="primary">{{ client.state }}</BaseBadge>
+            <BaseBadge :variant="client.state === 'active' ? 'success' : 'primary'">{{ client.state }}</BaseBadge>
           </div>
 
-          <div class="card-body">
+          <div class="card-body" @click="handleInspectClient(client)">
             <p v-if="client.website_url" class="card-link">
-              <a :href="client.website_url" target="_blank" rel="noopener noreferrer">
+              <a :href="client.website_url" target="_blank" rel="noopener noreferrer" @click.stop>
                 {{ client.website_url }}
               </a>
+            </p>
+            <p class="card-meta">
+              👤 Contact: {{ client.primary_contact_name || 'Unassigned' }}
+              <span v-if="client.primary_contact_email">({{ client.primary_contact_email }})</span>
             </p>
             <p class="card-meta">Origin Lead: <code>{{ client.source_lead_id.slice(0, 8) }}</code></p>
             <p class="card-meta">Onboarded: {{ new Date(client.created_at).toLocaleDateString() }}</p>
 
             <div class="engagements-box">
-              <span class="engagements-title">Engagement Status:</span>
-              <div class="no-engagements">
+              <span class="engagements-title">Contracts ({{ client.contracts?.length ?? 0 }}):</span>
+              <div v-if="client.contracts && client.contracts.length > 0" class="client-contract-badges">
+                <BaseBadge v-for="c in client.contracts" :key="c.id" variant="neutral">
+                  {{ c.service_code }}
+                </BaseBadge>
+              </div>
+              <div v-else class="no-engagements">
                 Account lifecycle in <strong>{{ client.state }}</strong>. Consulting review active.
               </div>
             </div>
+          </div>
+
+          <div class="card-actions">
+            <BaseButton
+              label="View Dossier"
+              variant="secondary"
+              @click="handleInspectClient(client)"
+            />
+            <BaseButton
+              label="+ Log Work"
+              variant="primary"
+              @click="handleOpenLogWork(client)"
+            />
           </div>
         </div>
       </div>
@@ -363,6 +428,26 @@ async function handleCreateService(payload: CreateServicePayload): Promise<void>
       :lead="inspectingLead"
       :services="leadStore.services"
       @close="showRubricModal = false; inspectingLead = null"
+    />
+    <ClientOnboardingModal
+      :show="showOnboardingModal"
+      :lead="selectedLead"
+      :services="leadStore.services"
+      @close="showOnboardingModal = false; selectedLead = null"
+      @onboard="handleCompleteOnboard"
+    />
+    <ClientDossierDrawer
+      :show="showDossierDrawer"
+      :client="activeDossierClient"
+      @close="showDossierDrawer = false; activeDossierClient = null"
+      @log-work="handleOpenLogWork"
+    />
+    <LogMaintenanceModal
+      :show="showLogMaintenanceModal"
+      :client-id="activeLogClient?.id ?? ''"
+      :client-name="activeLogClient?.business_name ?? ''"
+      @close="showLogMaintenanceModal = false; activeLogClient = null"
+      @submit="handleConfirmLogWork"
     />
     </main>
   </div>
@@ -682,6 +767,13 @@ async function handleCreateService(payload: CreateServicePayload): Promise<void>
   color: var(--text-primary);
   display: block;
   margin-bottom: 0.25rem;
+}
+
+.client-contract-badges {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  margin-top: 0.25rem;
 }
 
 .no-engagements {

@@ -114,11 +114,77 @@ export interface ServiceCatalogItem {
   created_at: string
 }
 
+export interface ContractAgreement {
+  id: string
+  client_id: string
+  service_code: string
+  contract_type: 'retainer' | 'fixed_fee' | string
+  billing_rate: number
+  billing_frequency: string
+  signature_document_url: string | null
+  status: 'draft' | 'active' | 'cancelled' | 'completed' | string
+  start_date: string
+  renewal_date: string | null
+  created_at: string
+}
+
+export interface TimecardEntry {
+  id: string
+  timecard_id: string
+  description: string
+  minutes_spent: number
+  performed_at: string
+  author: string
+}
+
+export interface Timecard {
+  id: string
+  client_id: string
+  contract_id: string | null
+  billing_month: number
+  billing_year: number
+  total_minutes_logged: number
+  monthly_retainer_cap_minutes: number
+  out_of_scope_flag: boolean
+  entries: TimecardEntry[]
+}
+
+export interface ContinuityHealth {
+  id: string
+  client_id: string
+  ssl_monitored: boolean
+  uptime_healthy: boolean
+  last_backup_at: string | null
+  backup_bucket: string
+  last_ping_at: string
+}
+
 export interface ClientAccount {
   id: string
   source_lead_id: string
   business_name: string
   website_url: string | null
-  state: 'onboarding' | 'active' | 'dormant'
+  primary_contact_name?: string | null
+  primary_contact_email?: string | null
+  phone?: string | null
+  state: 'onboarding' | 'active' | 'dormant' | string
+  contracts?: ContractAgreement[]
   created_at: string
+  updated_at?: string
 }
+
+export interface OnboardClientPayload {
+  lead_id: string
+  contact_name: string
+  contact_email: string
+  contact_phone?: string | null
+  service_codes?: string[]
+  custom_scope_notes?: string | null
+}
+
+export interface LogTimecardPayload {
+  description: string
+  minutes_spent: number
+  author?: string
+}
+
