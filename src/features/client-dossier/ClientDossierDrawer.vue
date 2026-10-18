@@ -441,4 +441,32 @@ async function handlePing(): Promise<void> {
   color: var(--color-text-muted, #94a3b8);
   font-style: italic;
 }
+
+@media (max-width: 768px) {
+  .dossier-drawer {
+    width: 100vw;
+    max-width: 100vw;
+    border-left: none;
+    box-shadow: none;
+  }
+
+  .drawer-header {
+    padding: 1rem 1.25rem;
+  }
+
+  .drawer-body {
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .profile-grid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .contract-body {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+}
 </style>

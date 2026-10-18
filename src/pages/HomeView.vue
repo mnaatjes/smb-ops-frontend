@@ -27,6 +27,8 @@ import type {
 
 const leadStore = useLeadStore()
 const activeTab = ref<'pool' | 'pipeline' | 'clients' | 'services' | 'doctrine'>('pool')
+const isRailCollapsed = ref(false)
+const isMobileNavOpen = ref(false)
 const showCreateModal = ref(false)
 const showCreateServiceModal = ref(false)
 const showDisqualifyModal = ref(false)
@@ -131,6 +133,33 @@ async function handleCreateService(payload: CreateServicePayload): Promise<void>
 
 <template>
   <div class="app-layout">
+    <!-- Top Mobile App Bar (< 768px) -->
+    <header class="mobile-top-bar">
+      <button
+        type="button"
+        class="mobile-hamburger-btn"
+        aria-label="Open navigation menu"
+        @click="isMobileNavOpen = true"
+      >
+        <span class="hamburger-icon">☰</span>
+      </button>
+      <div class="mobile-brand">
+        <span class="brand-icon">⚡</span>
+        <span class="brand-text">SMB Ops</span>
+      </div>
+      <div class="mobile-actions">
+        <button
+          type="button"
+          class="mobile-add-btn"
+          title="Add Lead"
+          aria-label="Add Lead"
+          @click="showCreateModal = true"
+        >
+          ➕
+        </button>
+      </div>
+    </header>
+
     <!-- Vertical Aside Navigation Rail -->
     <AsideNavRail
       :active-tab="activeTab"
@@ -138,8 +167,12 @@ async function handleCreateService(payload: CreateServicePayload): Promise<void>
       :pursued-count="leadStore.pursuedCount"
       :clients-count="leadStore.clientsCount"
       :services-count="leadStore.services.length"
+      :collapsed="isRailCollapsed"
+      :mobile-open="isMobileNavOpen"
       @select-tab="(tab) => { activeTab = tab }"
       @open-add-lead="showCreateModal = true"
+      @toggle-collapse="isRailCollapsed = !isRailCollapsed"
+      @close-mobile="isMobileNavOpen = false"
     />
 
     <main class="page-container">
@@ -923,5 +956,116 @@ async function handleCreateService(payload: CreateServicePayload): Promise<void>
   font-weight: 500;
   display: flex;
   align-items: center;
+}
+
+/* Mobile App Bar Styling */
+.mobile-top-bar {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .app-layout {
+    flex-direction: column;
+  }
+
+  .mobile-top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    background-color: var(--bg-surface);
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 30;
+  }
+
+  .mobile-hamburger-btn {
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    color: var(--text-primary);
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mobile-hamburger-btn:hover {
+    background-color: var(--bg-surface-hover);
+  }
+
+  .mobile-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .mobile-brand .brand-text {
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--text-primary);
+  }
+
+  .mobile-add-btn {
+    background: var(--bg-surface-hover);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 0.35rem 0.65rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+
+  .page-container {
+    margin: 1rem auto;
+    padding: 0 1rem;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .header-actions {
+    width: 100%;
+  }
+
+  .header-actions button {
+    width: 100%;
+  }
+
+  .metrics-ribbon {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+  .metric-card {
+    padding: 0.75rem;
+  }
+
+  .metric-value {
+    font-size: 1.35rem;
+  }
+
+  .actions-section {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .discovery-flex {
+    min-width: 100%;
+  }
+
+  .pipeline-grid,
+  .clients-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .services-mgmt-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
