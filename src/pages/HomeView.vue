@@ -9,17 +9,18 @@ import LeadTriageTable from '@/features/lead-triage/LeadTriageTable.vue'
 import DisqualifyModal from '@/features/lead-triage/DisqualifyModal.vue'
 import ScoreRubricModal from '@/features/lead-triage/ScoreRubricModal.vue'
 import ServicePills from '@/features/service-catalog/ServicePills.vue'
-import ServiceCatalogDrawer from '@/features/service-catalog/ServiceCatalogDrawer.vue'
+import CreateServiceModal from '@/features/service-catalog/CreateServiceModal.vue'
 import AsideNavRail from '@/features/navigation/AsideNavRail.vue'
 import BaseButton from '@/shared/ui/BaseButton.vue'
 import BaseBadge from '@/shared/ui/BaseBadge.vue'
+import type { CreateServicePayload } from '@/entities/lead/model'
 
 const leadStore = useLeadStore()
-const activeTab = ref<'pool' | 'pipeline' | 'clients'>('pool')
+const activeTab = ref<'pool' | 'pipeline' | 'clients' | 'services'>('pool')
 const showCreateModal = ref(false)
+const showCreateServiceModal = ref(false)
 const showDisqualifyModal = ref(false)
 const showRubricModal = ref(false)
-const showCatalogModal = ref(false)
 const selectedLead = ref<RankedLead | null>(null)
 const inspectingLead = ref<RankedLead | null>(null)
 
@@ -55,6 +56,10 @@ function handleInspectScore(lead: RankedLead): void {
   inspectingLead.value = lead
   showRubricModal.value = true
 }
+
+async function handleCreateService(payload: CreateServicePayload): Promise<void> {
+  await leadStore.createServiceOffering(payload)
+}
 </script>
 
 <template>
@@ -65,8 +70,8 @@ function handleInspectScore(lead: RankedLead): void {
       :pool-count="leadStore.totalLeadsCount"
       :pursued-count="leadStore.pursuedCount"
       :clients-count="leadStore.clientsCount"
+      :services-count="leadStore.services.length"
       @select-tab="(tab) => { activeTab = tab }"
-      @open-service-catalog="showCatalogModal = true"
       @open-add-lead="showCreateModal = true"
     />
 
@@ -256,8 +261,54 @@ function handleInspectScore(lead: RankedLead): void {
       </div>
     </section>
 
+    <!-- Workspace 4: Service Catalog Management -->
+    <section v-if="activeTab === 'services'" class="workspace-view">
+      <div class="services-mgmt-header">
+        <div>
+          <h3>Service Catalog & Audit Criteria</h3>
+          <p class="services-mgmt-subtitle">
+            Consulting service offerings governing automated audit parameters and opportunity score weighting.
+          </p>
+        </div>
+        <BaseButton label="+ Add Service Offering" @click="showCreateServiceModal = true" />
+      </div>
+
+      <div class="services-grid">
+        <div
+          v-for="svc in leadStore.services"
+          :key="svc.code"
+          class="service-mgmt-card"
+        >
+          <div class="service-mgmt-head">
+            <span class="service-mgmt-code">{{ svc.code }}</span>
+            <span class="service-mgmt-score">Min Score: &ge; {{ svc.minimum_opportunity_score }}</span>
+          </div>
+          <h4 class="service-mgmt-title">{{ svc.name }}</h4>
+          <p class="service-mgmt-desc">{{ svc.description }}</p>
+
+          <div class="service-mgmt-params">
+            <span class="params-label">Audit Parameters:</span>
+            <div class="params-chips">
+              <span
+                v-for="p in svc.audit_parameters"
+                :key="p"
+                class="param-chip"
+              >
+                {{ p }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Modals -->
     <CreateLeadModal :show="showCreateModal" @close="showCreateModal = false" />
+    <CreateServiceModal
+      :show="showCreateServiceModal"
+      @close="showCreateServiceModal = false"
+      @create="handleCreateService"
+    />
     <DisqualifyModal
       :show="showDisqualifyModal"
       :lead="selectedLead"
@@ -268,11 +319,6 @@ function handleInspectScore(lead: RankedLead): void {
       :show="showRubricModal"
       :lead="inspectingLead"
       @close="showRubricModal = false"
-    />
-    <ServiceCatalogDrawer
-      :show="showCatalogModal"
-      :services="leadStore.services"
-      @close="showCatalogModal = false"
     />
     </main>
   </div>
@@ -606,5 +652,116 @@ function handleInspectScore(lead: RankedLead): void {
 .engagements-list li {
   padding: 0.2rem 0;
   color: var(--text-secondary);
+}
+
+.services-mgmt-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.services-mgmt-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--text-primary);
+}
+
+.services-mgmt-subtitle {
+  margin: 0.25rem 0 0;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 3rem;
+}
+
+.service-mgmt-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.service-mgmt-card:hover {
+  border-color: var(--accent-primary);
+}
+
+.service-mgmt-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.service-mgmt-code {
+  font-size: 0.75rem;
+  font-family: monospace;
+  font-weight: 700;
+  color: var(--accent-primary);
+  background: var(--bg-surface-hover);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+}
+
+.service-mgmt-score {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.service-mgmt-title {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--text-primary);
+}
+
+.service-mgmt-desc {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.service-mgmt-params {
+  margin-top: auto;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.params-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.params-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.param-chip {
+  font-size: 0.7rem;
+  background: var(--bg-surface-hover);
+  color: var(--text-secondary);
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  font-family: monospace;
 }
 </style>

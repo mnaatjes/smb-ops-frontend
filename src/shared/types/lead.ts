@@ -72,6 +72,14 @@ export interface DisqualifyPayload {
   suppress?: boolean
 }
 
+export interface CreateServicePayload {
+  code: string
+  name: string
+  description: string
+  audit_parameters: string[]
+  minimum_opportunity_score: number
+}
+
 export interface ServiceCatalogItem {
   id: string
   code: string

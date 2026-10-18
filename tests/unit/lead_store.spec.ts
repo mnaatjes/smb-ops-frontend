@@ -274,5 +274,31 @@ describe('useLeadStore', () => {
     expect(store.services.length).toBe(1)
     expect(store.services[0].code).toBe('SVC-SEO')
   })
+
+  it('creates and registers a new service offering', async () => {
+    vi.mocked(leadApi.createService).mockResolvedValue({
+      id: 'svc-new',
+      code: 'SVC-ADA',
+      name: 'Accessibility Audit',
+      description: 'WCAG 2.1 compliance check',
+      audit_parameters: ['aria_labels', 'contrast'],
+      minimum_opportunity_score: 60,
+      created_at: '2026-10-18T00:00:00Z'
+    })
+    const store = useLeadStore()
+
+    await store.createServiceOffering({
+      code: 'SVC-ADA',
+      name: 'Accessibility Audit',
+      description: 'WCAG 2.1 compliance check',
+      audit_parameters: ['aria_labels', 'contrast'],
+      minimum_opportunity_score: 60
+    })
+
+    expect(leadApi.createService).toHaveBeenCalled()
+    expect(store.services.length).toBe(1)
+    expect(store.services[0].code).toBe('SVC-ADA')
+    expect(store.statusMessage).toContain('Accessibility Audit')
+  })
 })
 
