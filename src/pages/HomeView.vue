@@ -10,10 +10,11 @@ import DisqualifyModal from '@/features/lead-triage/DisqualifyModal.vue'
 import ScoreRubricModal from '@/features/lead-triage/ScoreRubricModal.vue'
 import ServicePills from '@/features/service-catalog/ServicePills.vue'
 import CreateServiceModal from '@/features/service-catalog/CreateServiceModal.vue'
+import ServiceDetailsModal from '@/features/service-catalog/ServiceDetailsModal.vue'
 import AsideNavRail from '@/features/navigation/AsideNavRail.vue'
 import BaseButton from '@/shared/ui/BaseButton.vue'
 import BaseBadge from '@/shared/ui/BaseBadge.vue'
-import type { CreateServicePayload } from '@/entities/lead/model'
+import type { CreateServicePayload, ServiceCatalogItem } from '@/entities/lead/model'
 
 const leadStore = useLeadStore()
 const activeTab = ref<'pool' | 'pipeline' | 'clients' | 'services'>('pool')
@@ -21,8 +22,10 @@ const showCreateModal = ref(false)
 const showCreateServiceModal = ref(false)
 const showDisqualifyModal = ref(false)
 const showRubricModal = ref(false)
+const showServiceDetailsModal = ref(false)
 const selectedLead = ref<RankedLead | null>(null)
 const inspectingLead = ref<RankedLead | null>(null)
+const inspectingService = ref<ServiceCatalogItem | null>(null)
 
 onMounted(async () => {
   await Promise.all([
@@ -55,6 +58,27 @@ async function handleConvertToClient(prospectId: string): Promise<void> {
 function handleInspectScore(lead: RankedLead): void {
   inspectingLead.value = lead
   showRubricModal.value = true
+}
+
+function handleInspectService(svc: ServiceCatalogItem): void {
+  inspectingService.value = svc
+  showServiceDetailsModal.value = true
+}
+
+function formatServicePrice(svc: ServiceCatalogItem): string {
+  const min = svc.price_min ?? 0
+  const max = svc.price_max ?? min
+  if (svc.pricing_model === 'MONTHLY_RETAINER') {
+    return min === max
+      ? `$${min.toFixed(0)} / mo`
+      : `$${min.toFixed(0)}–$${max.toFixed(0)} / mo`
+  }
+  if (svc.pricing_model === 'HYBRID') {
+    return `$${min.toFixed(0)}–$${max.toFixed(0)} Flat`
+  }
+  return min === max
+    ? `$${min.toFixed(0)} Flat`
+    : `$${min.toFixed(0)}–$${max.toFixed(0)} Flat`
 }
 
 async function handleCreateService(payload: CreateServicePayload): Promise<void> {
@@ -278,11 +302,13 @@ async function handleCreateService(payload: CreateServicePayload): Promise<void>
           v-for="svc in leadStore.services"
           :key="svc.code"
           class="service-mgmt-card"
+          @click="handleInspectService(svc)"
         >
           <div class="service-mgmt-head">
-            <span class="service-mgmt-code">{{ svc.code }}</span>
-            <span class="service-mgmt-score">Min Score: &ge; {{ svc.minimum_opportunity_score }}</span>
+            <span class="service-mgmt-rank">{{ svc.rank || 'Rank 1A' }}</span>
+            <span class="service-mgmt-price">{{ formatServicePrice(svc) }}</span>
           </div>
+          <span class="service-mgmt-code">{{ svc.code }}</span>
           <h4 class="service-mgmt-title">{{ svc.name }}</h4>
           <p class="service-mgmt-desc">{{ svc.description }}</p>
 
@@ -298,6 +324,10 @@ async function handleCreateService(payload: CreateServicePayload): Promise<void>
               </span>
             </div>
           </div>
+
+          <div class="card-footer-prompt">
+            <span>Click to inspect scope & deliverables &rarr;</span>
+          </div>
         </div>
       </div>
     </section>
@@ -308,6 +338,11 @@ async function handleCreateService(payload: CreateServicePayload): Promise<void>
       :show="showCreateServiceModal"
       @close="showCreateServiceModal = false"
       @create="handleCreateService"
+    />
+    <ServiceDetailsModal
+      :show="showServiceDetailsModal"
+      :service="inspectingService"
+      @close="showServiceDetailsModal = false"
     />
     <DisqualifyModal
       :show="showDisqualifyModal"
@@ -691,11 +726,14 @@ async function handleCreateService(payload: CreateServicePayload): Promise<void>
   flex-direction: column;
   gap: 0.6rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
 }
 
 .service-mgmt-card:hover {
   border-color: var(--accent-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .service-mgmt-head {
@@ -704,25 +742,35 @@ async function handleCreateService(payload: CreateServicePayload): Promise<void>
   align-items: center;
 }
 
+.service-mgmt-rank {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: #e0e7ff;
+  color: #3730a3;
+  padding: 0.2rem 0.55rem;
+  border-radius: 4px;
+  letter-spacing: 0.04em;
+}
+
+.service-mgmt-price {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--accent-success, #16a34a);
+}
+
 .service-mgmt-code {
   font-size: 0.75rem;
   font-family: monospace;
-  font-weight: 700;
-  color: var(--accent-primary);
-  background: var(--bg-surface-hover);
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
-  border: 1px solid var(--border-color);
-}
-
-.service-mgmt-score {
-  font-size: 0.75rem;
+  font-weight: 600;
   color: var(--text-muted);
+  width: fit-content;
 }
 
 .service-mgmt-title {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
+  font-weight: 700;
   color: var(--text-primary);
 }
 
@@ -763,5 +811,14 @@ async function handleCreateService(payload: CreateServicePayload): Promise<void>
   border-radius: 4px;
   border: 1px solid var(--border-color);
   font-family: monospace;
+}
+
+.card-footer-prompt {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--accent-primary);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
 }
 </style>
