@@ -254,9 +254,9 @@ function formatPrice(svc: ServiceCatalogItem): string {
 
 /* Exclusions / Contractual Boundaries */
 .exclusions-box {
-  padding: 0.85rem 1rem;
-  background-color: var(--banner-error-bg, #fef2f2);
-  border: 1px solid var(--banner-error-border, #fecaca);
+  padding: 0.9rem 1.15rem;
+  background-color: var(--bg-surface-subtle, #f8fafc);
+  border: 1px solid var(--border-color, #cbd5e1);
   border-radius: 8px;
   gap: 0.65rem;
 }
@@ -264,17 +264,18 @@ function formatPrice(svc: ServiceCatalogItem): string {
 .exclusions-header {
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: 0.25rem;
 }
 
 .exclusion-title {
-  color: var(--banner-error-text, #991b1b);
+  color: var(--text-primary, #0f172a);
 }
 
 .exclusion-subtitle {
-  font-size: 0.75rem;
-  color: #7f1d1d;
-  line-height: 1.3;
+  font-size: 0.82rem;
+  color: var(--text-secondary, #475569);
+  line-height: 1.4;
+  font-weight: 500;
 }
 
 /* Parameter Chips - High Contrast */
