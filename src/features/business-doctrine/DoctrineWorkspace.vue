@@ -1,9 +1,78 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, watch, nextTick, ref } from 'vue'
+import { marked } from 'marked'
+import mermaid from 'mermaid'
 import { useDoctrineStore } from '@/entities/doctrine/store'
 import BaseBadge from '@/shared/ui/BaseBadge.vue'
 
 const doctrineStore = useDoctrineStore()
+const renderedHtml = ref('')
+const docContainer = ref<HTMLElement | null>(null)
+
+mermaid.initialize({
+  startOnLoad: false,
+  securityLevel: 'loose',
+  theme: 'default',
+})
+
+const renderMarkdown = async (content: string) => {
+  if (!content) {
+    renderedHtml.value = ''
+    return
+  }
+
+  const renderer = new marked.Renderer()
+  let diagramIndex = 0
+
+  renderer.code = function ({ text, lang }: { text: string; lang?: string }) {
+    if (lang === 'mermaid') {
+      const id = `mermaid-svg-${Date.now()}-${diagramIndex++}`
+      // Escape HTML entities in raw mermaid code to preserve syntax in data attribute
+      const escaped = text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+      return `<div class="mermaid-diagram" id="${id}" data-mermaid="${escaped}"></div>`
+    }
+    return `<pre><code class="language-${lang || 'text'}">${text}</code></pre>`
+  }
+
+  renderedHtml.value = await marked.parse(content, { renderer, async: true })
+
+  await nextTick()
+
+  if (docContainer.value) {
+    const diagrams = docContainer.value.querySelectorAll<HTMLElement>('.mermaid-diagram')
+    for (let i = 0; i < diagrams.length; i++) {
+      const el = diagrams[i]
+      const rawCode = el.getAttribute('data-mermaid')
+      if (rawCode) {
+        try {
+          const unescaped = rawCode
+            .replace(/&quot;/g, '"')
+            .replace(/&gt;/g, '>')
+            .replace(/&lt;/g, '<')
+            .replace(/&amp;/g, '&')
+          const uniqueId = `mermaid-${Date.now()}-${i}`
+          const { svg } = await mermaid.render(uniqueId, unescaped)
+          el.innerHTML = svg
+        } catch (err) {
+          console.error('Mermaid render error:', err)
+          el.innerHTML = `<pre class="mermaid-error">${rawCode}</pre>`
+        }
+      }
+    }
+  }
+}
+
+watch(
+  () => doctrineStore.activeDocument?.content,
+  async (newContent) => {
+    await renderMarkdown(newContent || '')
+  },
+  { immediate: true }
+)
 
 onMounted(async () => {
   await doctrineStore.loadCatalog()
@@ -67,9 +136,7 @@ onMounted(async () => {
           </div>
         </header>
 
-        <article class="doc-body">
-          <pre class="markdown-content">{{ doctrineStore.activeDocument.content }}</pre>
-        </article>
+        <article ref="docContainer" class="doc-body markdown-body" v-html="renderedHtml" />
       </div>
 
       <div v-else class="empty-state">
@@ -223,15 +290,125 @@ onMounted(async () => {
   line-height: 1.65;
 }
 
-.markdown-content {
-  white-space: pre-wrap;
-  font-family: inherit;
-  font-size: 0.95rem;
-  line-height: 1.6;
+.markdown-body :deep(h1),
+.markdown-body :deep(h2),
+.markdown-body :deep(h3),
+.markdown-body :deep(h4) {
   color: var(--text-primary);
+  font-weight: 700;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  line-height: 1.3;
+}
+
+.markdown-body :deep(h1) {
+  font-size: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.5rem;
+}
+
+.markdown-body :deep(h2) {
+  font-size: 1.25rem;
+  border-bottom: 1px solid var(--border-color-subtle, var(--border-color));
+  padding-bottom: 0.35rem;
+}
+
+.markdown-body :deep(h3) {
+  font-size: 1.1rem;
+}
+
+.markdown-body :deep(p) {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.markdown-body :deep(ul),
+.markdown-body :deep(ol) {
+  padding-left: 1.5rem;
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.markdown-body :deep(li) {
+  margin-bottom: 0.35rem;
+}
+
+.markdown-body :deep(hr) {
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin: 1.75rem 0;
+}
+
+.markdown-body :deep(blockquote) {
+  margin: 1rem 0;
+  padding: 0.5rem 1rem;
+  border-left: 4px solid var(--accent-primary);
+  background: var(--bg-surface-subtle);
+  color: var(--text-secondary);
+}
+
+.markdown-body :deep(code) {
+  font-family: monospace;
+  font-size: 0.85em;
+  background: var(--bg-surface-subtle);
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+}
+
+.markdown-body :deep(pre) {
+  background: var(--bg-surface-subtle);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 1rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
+.markdown-body :deep(pre code) {
   background: none;
   padding: 0;
   border: none;
+}
+
+.markdown-body :deep(table) {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.25rem 0;
+}
+
+.markdown-body :deep(th),
+.markdown-body :deep(td) {
+  border: 1px solid var(--border-color);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+
+.markdown-body :deep(th) {
+  background: var(--bg-surface-subtle);
+  font-weight: 600;
+}
+
+.markdown-body :deep(.mermaid-diagram) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--bg-surface-subtle);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  overflow-x: auto;
+}
+
+.markdown-body :deep(.mermaid-diagram svg) {
+  max-width: 100%;
+  height: auto;
+}
+
+.markdown-body :deep(.mermaid-error) {
+  color: var(--status-error, #ef4444);
+  font-size: 0.8rem;
 }
 
 .empty-state {
