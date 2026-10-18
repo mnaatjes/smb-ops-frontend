@@ -31,14 +31,14 @@ async function handleDiscover() {
         class="limit-field"
       />
     </div>
-    <div class="discover-btn-wrapper" title="Queries geographic providers (OSM/Overpass) for business candidates">
+    <div class="discover-btn-wrapper" title="Discovers candidates and immediately runs technical inspection audits">
       <BaseButton
-        label="Discover Leads"
+        label="Discover & Audit Leads"
         :disabled="leadStore.loading || !location.trim()"
         @click="handleDiscover"
       />
       <div class="hover-tooltip">
-        Queries geographic providers (OSM/Overpass) for local business candidates
+        Discovers local prospects from web directories and immediately inspects their sites to calculate Opportunity Scores
       </div>
     </div>
   </div>

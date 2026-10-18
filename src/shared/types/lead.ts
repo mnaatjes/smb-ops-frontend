@@ -54,6 +54,7 @@ export interface CreateProspectPayload {
 export interface DiscoverPayload {
   location: string
   limit?: number
+  auto_audit?: boolean
 }
 
 export interface BatchAuditPayload {
