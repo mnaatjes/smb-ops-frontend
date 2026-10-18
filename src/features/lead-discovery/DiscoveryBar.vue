@@ -31,11 +31,16 @@ async function handleDiscover() {
         class="limit-field"
       />
     </div>
-    <BaseButton
-      label="Discover Leads"
-      :disabled="leadStore.loading || !location.trim()"
-      @click="handleDiscover"
-    />
+    <div class="discover-btn-wrapper" title="Queries geographic providers (OSM/Overpass) for business candidates">
+      <BaseButton
+        label="Discover Leads"
+        :disabled="leadStore.loading || !location.trim()"
+        @click="handleDiscover"
+      />
+      <div class="hover-tooltip">
+        Queries geographic providers (OSM/Overpass) for local business candidates
+      </div>
+    </div>
   </div>
 </template>
 
@@ -63,5 +68,34 @@ async function handleDiscover() {
 
 .limit-field {
   width: 90px;
+}
+
+.discover-btn-wrapper {
+  position: relative;
+  display: inline-flex;
+}
+
+.hover-tooltip {
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  top: 115%;
+  right: 0;
+  background-color: var(--bg-surface-hover);
+  color: var(--text-primary);
+  font-size: 0.75rem;
+  padding: 0.4rem 0.65rem;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 50;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.discover-btn-wrapper:hover .hover-tooltip {
+  visibility: visible;
+  opacity: 1;
 }
 </style>

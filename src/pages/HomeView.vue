@@ -9,15 +9,17 @@ import LeadTriageTable from '@/features/lead-triage/LeadTriageTable.vue'
 import DisqualifyModal from '@/features/lead-triage/DisqualifyModal.vue'
 import ScoreRubricModal from '@/features/lead-triage/ScoreRubricModal.vue'
 import ServicePills from '@/features/service-catalog/ServicePills.vue'
+import ServiceCatalogDrawer from '@/features/service-catalog/ServiceCatalogDrawer.vue'
+import AsideNavRail from '@/features/navigation/AsideNavRail.vue'
 import BaseButton from '@/shared/ui/BaseButton.vue'
 import BaseBadge from '@/shared/ui/BaseBadge.vue'
-import ThemeToggle from '@/shared/ui/ThemeToggle.vue'
 
 const leadStore = useLeadStore()
 const activeTab = ref<'pool' | 'pipeline' | 'clients'>('pool')
 const showCreateModal = ref(false)
 const showDisqualifyModal = ref(false)
 const showRubricModal = ref(false)
+const showCatalogModal = ref(false)
 const selectedLead = ref<RankedLead | null>(null)
 const inspectingLead = ref<RankedLead | null>(null)
 
@@ -38,19 +40,11 @@ function handleOpenDisqualify(lead: RankedLead): void {
   showDisqualifyModal.value = true
 }
 
-async function handleConfirmDisqualify(payload: { reason: string; notes?: string }): Promise<void> {
+async function handleConfirmDisqualify(payload: { reason: string; notes?: string; suppress?: boolean }): Promise<void> {
   if (selectedLead.value) {
     await leadStore.disqualifyLead(selectedLead.value.prospect.id, payload)
     selectedLead.value = null
   }
-}
-
-async function handlePursue(lead: RankedLead): Promise<void> {
-  await leadStore.pursueLead(lead.prospect.id)
-}
-
-async function handleSuppress(lead: RankedLead): Promise<void> {
-  await leadStore.suppressLead(lead.prospect.id)
 }
 
 async function handleConvertToClient(prospectId: string): Promise<void> {
@@ -64,118 +58,102 @@ function handleInspectScore(lead: RankedLead): void {
 </script>
 
 <template>
-  <main class="page-container">
-    <header class="header">
-      <div class="header-titles">
-        <h1>SMB Consulting Operations</h1>
-        <p class="subtitle">Service-Driven Lead Discovery, Enrichment & Client Operations</p>
-      </div>
-      <div class="header-actions">
-        <ThemeToggle />
-        <BaseButton label="+ Add Lead" @click="showCreateModal = true" />
-      </div>
-    </header>
+  <div class="app-layout">
+    <!-- Vertical Aside Navigation Rail -->
+    <AsideNavRail
+      :active-tab="activeTab"
+      :pool-count="leadStore.totalLeadsCount"
+      :pursued-count="leadStore.pursuedCount"
+      :clients-count="leadStore.clientsCount"
+      @select-tab="(tab) => { activeTab = tab }"
+      @open-service-catalog="showCatalogModal = true"
+      @open-add-lead="showCreateModal = true"
+    />
 
-    <!-- Navigation Tabs -->
-    <nav class="workspace-tabs">
-      <button
-        type="button"
-        :class="['tab-btn', { active: activeTab === 'pool' }]"
-        @click="activeTab = 'pool'"
-      >
-        Discovery Pool ({{ leadStore.totalLeadsCount }})
-      </button>
-      <button
-        type="button"
-        :class="['tab-btn', { active: activeTab === 'pipeline' }]"
-        @click="activeTab = 'pipeline'"
-      >
-        Pursued Pipeline ({{ leadStore.pursuedCount }})
-      </button>
-      <button
-        type="button"
-        :class="['tab-btn', { active: activeTab === 'clients' }]"
-        @click="activeTab = 'clients'"
-      >
-        Client Accounts ({{ leadStore.clientsCount }})
-      </button>
-    </nav>
+    <main class="page-container">
+      <header class="header">
+        <div class="header-titles">
+          <h1>SMB Consulting Operations</h1>
+          <p class="subtitle">Service-Driven Lead Discovery, Enrichment & Client Operations</p>
+        </div>
+        <div class="header-actions">
+          <BaseButton label="+ Add Lead" @click="showCreateModal = true" />
+        </div>
+      </header>
 
-    <!-- Metrics Ribbon -->
-    <section class="metrics-ribbon">
-      <div class="metric-card">
-        <span class="metric-label">Discovery Pool</span>
-        <span class="metric-value">{{ leadStore.totalLeadsCount }}</span>
-      </div>
-      <div class="metric-card">
-        <span class="metric-label">Pursued Pipeline</span>
-        <span class="metric-value">{{ leadStore.pursuedCount }}</span>
-      </div>
-      <div class="metric-card">
-        <span class="metric-label">Client Accounts</span>
-        <span class="metric-value">{{ leadStore.clientsCount }}</span>
-      </div>
-      <div class="metric-card metric-alert">
-        <span class="metric-label">High Priority (Score &ge; 70)</span>
-        <span class="metric-value">{{ leadStore.highPriorityCount }}</span>
-      </div>
-    </section>
-
-    <!-- Status / Notification Feedback -->
-    <div v-if="leadStore.statusMessage" class="status-banner">
-      {{ leadStore.statusMessage }}
-    </div>
-    <div v-if="leadStore.error" class="error-banner">
-      {{ leadStore.error }}
-    </div>
-
-    <!-- Workspace 1: Discovery Pool -->
-    <section v-if="activeTab === 'pool'" class="workspace-view">
-      <!-- Operational Action Row -->
-      <section class="actions-section">
-        <DiscoveryBar class="discovery-flex" />
-        <div class="batch-flex">
-          <BatchAuditTrigger :limit="15" />
+      <!-- Metrics Ribbon -->
+      <section class="metrics-ribbon">
+        <div class="metric-card">
+          <span class="metric-label">Discovery Pool</span>
+          <span class="metric-value">{{ leadStore.totalLeadsCount }}</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Pursued Pipeline</span>
+          <span class="metric-value">{{ leadStore.pursuedCount }}</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Client Accounts</span>
+          <span class="metric-value">{{ leadStore.clientsCount }}</span>
+        </div>
+        <div class="metric-card metric-alert">
+          <span class="metric-label">High Priority (Score &ge; 70)</span>
+          <span class="metric-value">{{ leadStore.highPriorityCount }}</span>
         </div>
       </section>
 
-      <!-- Service Catalog Filter Pills -->
-      <ServicePills
-        :services="leadStore.services"
-        :active-code="leadStore.activeServiceFilter"
-        @select="(code) => { leadStore.activeServiceFilter = code }"
-      />
+      <!-- Status / Notification Feedback -->
+      <div v-if="leadStore.statusMessage" class="status-banner">
+        {{ leadStore.statusMessage }}
+      </div>
+      <div v-if="leadStore.error" class="error-banner">
+        {{ leadStore.error }}
+      </div>
 
-      <!-- Triage Filter Controls -->
-      <section class="triage-controls">
-        <div class="score-filter">
-          <label for="score-threshold">Filter Min Opportunity Score:</label>
-          <select
-            id="score-threshold"
-            :value="leadStore.minScore"
-            class="score-select"
-            @change="leadStore.setMinScore(Number(($event.target as HTMLSelectElement).value))"
-          >
-            <option :value="0">All Leads (0+)</option>
-            <option :value="40">Moderate & High (&ge; 40)</option>
-            <option :value="70">High Priority Only (&ge; 70)</option>
-          </select>
-        </div>
-      </section>
+      <!-- Workspace 1: Discovery Pool -->
+      <section v-if="activeTab === 'pool'" class="workspace-view">
+        <!-- Operational Action Row -->
+        <section class="actions-section">
+          <DiscoveryBar class="discovery-flex" />
+          <div class="batch-flex">
+            <BatchAuditTrigger :limit="15" />
+          </div>
+        </section>
 
-      <!-- Ranked Lead Triage Table -->
-      <section class="table-section">
-        <LeadTriageTable
-          :leads="leadStore.filteredLeads"
-          :loading="leadStore.loading"
-          @qualify="handleQualify"
-          @disqualify="handleOpenDisqualify"
-          @pursue="handlePursue"
-          @suppress="handleSuppress"
-          @inspect-score="handleInspectScore"
+        <!-- Service Catalog Filter Pills -->
+        <ServicePills
+          :services="leadStore.services"
+          :active-code="leadStore.activeServiceFilter"
+          @select="(code) => { leadStore.activeServiceFilter = code }"
         />
+
+        <!-- Triage Filter Controls -->
+        <section class="triage-controls">
+          <div class="score-filter">
+            <label for="score-threshold">Filter Min Opportunity Score:</label>
+            <select
+              id="score-threshold"
+              :value="leadStore.minScore"
+              class="score-select"
+              @change="leadStore.setMinScore(Number(($event.target as HTMLSelectElement).value))"
+            >
+              <option :value="0">All Leads (0+)</option>
+              <option :value="40">Moderate & High (&ge; 40)</option>
+              <option :value="70">High Priority Only (&ge; 70)</option>
+            </select>
+          </div>
+        </section>
+
+        <!-- Ranked Lead Triage Table -->
+        <section class="table-section">
+          <LeadTriageTable
+            :leads="leadStore.filteredLeads"
+            :loading="leadStore.loading"
+            @qualify="handleQualify"
+            @disqualify="handleOpenDisqualify"
+            @inspect-score="handleInspectScore"
+          />
+        </section>
       </section>
-    </section>
 
     <!-- Workspace 2: Pursued Pipeline -->
     <section v-if="activeTab === 'pipeline'" class="workspace-view">
@@ -291,14 +269,27 @@ function handleInspectScore(lead: RankedLead): void {
       :lead="inspectingLead"
       @close="showRubricModal = false"
     />
-  </main>
+    <ServiceCatalogDrawer
+      :show="showCatalogModal"
+      :services="leadStore.services"
+      @close="showCatalogModal = false"
+    />
+    </main>
+  </div>
 </template>
 
 <style scoped>
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--bg-body);
+}
+
 .page-container {
+  flex: 1;
   max-width: 1200px;
   margin: 1.5rem auto;
-  padding: 0 1.5rem;
+  padding: 0 2rem;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
