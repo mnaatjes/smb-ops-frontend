@@ -7,7 +7,7 @@ const THEME_STORAGE_KEY = 'smb-ops-theme'
 const currentTheme = ref<ThemeMode>(initTheme())
 
 function initTheme(): ThemeMode {
-  if (typeof window === 'undefined') return 'light'
+  if (typeof window === 'undefined' || typeof localStorage === 'undefined') return 'light'
   const saved = localStorage.getItem(THEME_STORAGE_KEY)
   if (saved === 'dark' || saved === 'light') {
     applyDomTheme(saved)

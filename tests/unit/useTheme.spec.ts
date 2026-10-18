@@ -1,6 +1,21 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { useTheme } from '@/shared/composables/useTheme'
 
+const storageMap = new Map<string, string>()
+const mockLocalStorage = {
+  getItem: (key: string) => storageMap.get(key) ?? null,
+  setItem: (key: string, val: string) => storageMap.set(key, String(val)),
+  removeItem: (key: string) => storageMap.delete(key),
+  clear: () => storageMap.clear(),
+}
+
+if (typeof window !== 'undefined' && !window.localStorage) {
+  Object.defineProperty(window, 'localStorage', { value: mockLocalStorage })
+}
+if (typeof globalThis.localStorage === 'undefined') {
+  globalThis.localStorage = mockLocalStorage as unknown as Storage
+}
+
 describe('useTheme composable', () => {
   beforeEach(() => {
     localStorage.clear()

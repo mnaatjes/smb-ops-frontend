@@ -9,6 +9,7 @@ import type {
   DisqualifyPayload,
   CreateServicePayload,
   ServiceCatalogItem,
+  AuditParameterOption,
   ClientAccount
 } from '@/shared/types/lead'
 
@@ -65,6 +66,11 @@ export async function suppressLead(prospectId: string): Promise<Prospect> {
 
 export async function fetchServices(): Promise<ServiceCatalogItem[]> {
   const response = await apiClient.get<ServiceCatalogItem[]>('/services')
+  return response.data
+}
+
+export async function fetchAuditParameters(): Promise<AuditParameterOption[]> {
+  const response = await apiClient.get<AuditParameterOption[]>('/services/audit-parameters')
   return response.data
 }
 

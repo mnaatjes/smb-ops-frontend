@@ -72,12 +72,27 @@ export interface DisqualifyPayload {
   suppress?: boolean
 }
 
+export interface AuditParameterOption {
+  key: string
+  label: string
+  description: string
+  collector_probe: string
+}
+
 export interface CreateServicePayload {
   code: string
   name: string
   description: string
+  rank?: string
+  pricing_model?: string
+  price_min?: number
+  price_max?: number
+  target_profile?: string
+  scope?: string[]
+  deliverables?: string[]
+  exclusions?: string[]
   audit_parameters: string[]
-  minimum_opportunity_score: number
+  minimum_opportunity_score?: number
 }
 
 export interface ServiceCatalogItem {
@@ -85,6 +100,14 @@ export interface ServiceCatalogItem {
   code: string
   name: string
   description: string
+  rank?: string
+  pricing_model?: string
+  price_min?: number
+  price_max?: number
+  target_profile?: string
+  scope?: string[]
+  deliverables?: string[]
+  exclusions?: string[]
   audit_parameters: string[]
   minimum_opportunity_score: number
   created_at: string
