@@ -180,11 +180,39 @@ export interface OnboardClientPayload {
   contact_phone?: string | null
   service_codes?: string[]
   custom_scope_notes?: string | null
+  secrets?: ClientSecretPayload[]
 }
 
 export interface LogTimecardPayload {
   description: string
   minutes_spent: number
   author?: string
+}
+
+export type SecretType =
+  | 'wordpress_admin'
+  | 'hosting_cpanel'
+  | 'sftp_ssh'
+  | 'dns_registrar'
+  | 'database_direct'
+
+export interface ClientSecretMetadata {
+  id: string
+  client_id: string
+  secret_type: SecretType | string
+  label: string
+  username: string
+  login_url?: string | null
+  key_version: string
+  created_at: string
+  updated_at: string
+}
+
+export interface ClientSecretPayload {
+  secret_type: SecretType | string
+  label: string
+  username: string
+  password: string
+  login_url?: string | null
 }
 

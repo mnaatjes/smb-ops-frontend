@@ -15,7 +15,9 @@ import type {
   TimecardEntry,
   ContinuityHealth,
   OnboardClientPayload,
-  LogTimecardPayload
+  LogTimecardPayload,
+  ClientSecretMetadata,
+  ClientSecretPayload
 } from '@/shared/types/lead'
 
 export async function fetchRankedLeads(minScore = 0): Promise<RankedLead[]> {
@@ -127,6 +129,33 @@ export async function pingClientContinuity(clientId: string): Promise<Continuity
 export async function clearLeadsApi(): Promise<{ cleared_count: number; message: string }> {
   const response = await apiClient.delete<{ cleared_count: number; message: string }>('/leads')
   return response.data
+}
+
+export async function fetchClientSecrets(clientId: string): Promise<ClientSecretMetadata[]> {
+  const response = await apiClient.get<ClientSecretMetadata[]>(`/clients/${clientId}/secrets`)
+  return response.data
+}
+
+export async function storeClientSecret(
+  clientId: string,
+  payload: ClientSecretPayload
+): Promise<ClientSecretMetadata> {
+  const response = await apiClient.post<ClientSecretMetadata>(`/clients/${clientId}/secrets`, payload)
+  return response.data
+}
+
+export async function revealClientSecret(
+  clientId: string,
+  secretId: string
+): Promise<{ plaintext: string }> {
+  const response = await apiClient.post<{ plaintext: string }>(
+    `/clients/${clientId}/secrets/${secretId}/reveal`
+  )
+  return response.data
+}
+
+export async function deleteClientSecret(clientId: string, secretId: string): Promise<void> {
+  await apiClient.delete(`/clients/${clientId}/secrets/${secretId}`)
 }
 
 

@@ -4,7 +4,13 @@ import BaseModal from '@/shared/ui/BaseModal.vue'
 import BaseButton from '@/shared/ui/BaseButton.vue'
 import BaseInput from '@/shared/ui/BaseInput.vue'
 import BaseBadge from '@/shared/ui/BaseBadge.vue'
-import type { RankedLead, ServiceCatalogItem, OnboardClientPayload } from '@/shared/types/lead'
+import type {
+  RankedLead,
+  ServiceCatalogItem,
+  OnboardClientPayload,
+  ClientSecretPayload,
+  SecretType
+} from '@/shared/types/lead'
 
 const props = defineProps<{
   show: boolean
@@ -17,7 +23,7 @@ const emit = defineEmits<{
   (e: 'onboard', payload: OnboardClientPayload): void
 }>()
 
-const step = ref<1 | 2 | 3 | 4>(1)
+const step = ref<1 | 2 | 3 | 4 | 5>(1)
 
 // Step 1: Contact
 const contactName = ref('')
@@ -31,12 +37,63 @@ const selectedServiceCodes = ref<string[]>([])
 const customNotes = ref('')
 const slaAccepted = ref(true)
 
+// Step 4: Access & Infrastructure Credentials
+interface CredentialInputRow {
+  secret_type: SecretType
+  label: string
+  login_url: string
+  username: string
+  password: string
+}
+
+const credentials = ref<CredentialInputRow[]>([])
+
+function addCredentialRow(): void {
+  credentials.value.push({
+    secret_type: 'wordpress_admin',
+    label: 'WordPress Admin',
+    login_url: props.lead?.prospect.website_url
+      ? `${props.lead.prospect.website_url.replace(/\/$/, '')}/wp-admin`
+      : '',
+    username: '',
+    password: ''
+  })
+}
+
+function removeCredentialRow(index: number): void {
+  credentials.value.splice(index, 1)
+}
+
+function onSecretTypeChange(row: CredentialInputRow): void {
+  switch (row.secret_type) {
+    case 'wordpress_admin':
+      row.label = 'WordPress Admin'
+      if (props.lead?.prospect.website_url && !row.login_url) {
+        row.login_url = `${props.lead.prospect.website_url.replace(/\/$/, '')}/wp-admin`
+      }
+      break
+    case 'hosting_cpanel':
+      row.label = 'Hosting / cPanel'
+      break
+    case 'sftp_ssh':
+      row.label = 'SFTP / SSH Access'
+      break
+    case 'dns_registrar':
+      row.label = 'DNS / Domain Registrar'
+      break
+    case 'database_direct':
+      row.label = 'Database Direct'
+      break
+  }
+}
+
 // Validation error
 const stepError = ref<string | null>(null)
 
 function initLeadData(): void {
   step.value = 1
   stepError.value = null
+  credentials.value = []
   if (props.lead) {
     contactName.value = props.lead.prospect.business_name
     contactPhone.value = props.lead.prospect.phone ?? ''
@@ -85,24 +142,46 @@ function nextStep(): void {
     step.value = 4
     return
   }
+  if (step.value === 4) {
+    for (let i = 0; i < credentials.value.length; i++) {
+      const c = credentials.value[i]
+      if (!c.username.trim() || !c.password.trim()) {
+        stepError.value = `Credential row ${i + 1} requires both username and password.`
+        return
+      }
+    }
+    step.value = 5
+    return
+  }
 }
 
 function prevStep(): void {
   stepError.value = null
   if (step.value > 1) {
-    step.value = (step.value - 1) as 1 | 2 | 3 | 4
+    step.value = (step.value - 1) as 1 | 2 | 3 | 4 | 5
   }
 }
 
 function handleDispatch(): void {
   if (!props.lead) return
+  const validSecrets: ClientSecretPayload[] = credentials.value
+    .filter((c) => c.username.trim() && c.password.trim())
+    .map((c) => ({
+      secret_type: c.secret_type,
+      label: c.label.trim() || c.secret_type,
+      username: c.username.trim(),
+      password: c.password,
+      login_url: c.login_url.trim() || null
+    }))
+
   emit('onboard', {
     lead_id: props.lead.prospect.id,
     contact_name: contactName.value.trim(),
     contact_email: contactEmail.value.trim(),
     contact_phone: contactPhone.value.trim() || null,
     service_codes: selectedServiceCodes.value,
-    custom_scope_notes: customNotes.value.trim() || null
+    custom_scope_notes: customNotes.value.trim() || null,
+    secrets: validSecrets.length > 0 ? validSecrets : undefined
   })
 }
 
@@ -146,6 +225,11 @@ const chosenServices = computed(() => {
         <div class="step-divider" />
         <div class="step-item" :class="{ active: step === 4, done: step > 4 }">
           <span class="step-circle">4</span>
+          <span class="step-label">Credentials</span>
+        </div>
+        <div class="step-divider" />
+        <div class="step-item" :class="{ active: step === 5, done: step > 5 }">
+          <span class="step-circle">5</span>
           <span class="step-label">Contract</span>
         </div>
       </div>
@@ -233,9 +317,70 @@ const chosenServices = computed(() => {
         </label>
       </div>
 
-      <!-- Step 4: Contract Dispatch & Execution -->
+      <!-- Step 4: Access & Infrastructure Credentials -->
       <div v-if="step === 4" class="wizard-step">
-        <h4 class="step-title">4. Contract Dispatch & Provisioning</h4>
+        <div class="step-header-with-action">
+          <div>
+            <h4 class="step-title">4. Access & Infrastructure Credentials</h4>
+            <p class="step-desc">Capture credentials to be encrypted with AES-256 upon onboarding. (Optional)</p>
+          </div>
+          <BaseButton label="+ Add Credential" variant="secondary" @click="addCredentialRow" />
+        </div>
+
+        <div v-if="credentials.length === 0" class="empty-credentials-notice">
+          No credentials configured yet. Click <strong>+ Add Credential</strong> to ingest WordPress admin, cPanel, or SFTP access.
+        </div>
+
+        <div v-else class="credential-cards-list">
+          <div v-for="(cred, idx) in credentials" :key="idx" class="credential-entry-card">
+            <div class="cred-card-header">
+              <span class="cred-index">Credential #{{ idx + 1 }}</span>
+              <button class="remove-cred-btn" title="Remove" @click="removeCredentialRow(idx)">✕</button>
+            </div>
+
+            <div class="cred-grid">
+              <div class="field-group">
+                <label class="field-label">Type</label>
+                <select
+                  v-model="cred.secret_type"
+                  class="field-select"
+                  @change="onSecretTypeChange(cred)"
+                >
+                  <option value="wordpress_admin">WordPress Admin</option>
+                  <option value="hosting_cpanel">Hosting / cPanel</option>
+                  <option value="sftp_ssh">SFTP / SSH Access</option>
+                  <option value="dns_registrar">DNS / Domain Registrar</option>
+                  <option value="database_direct">Database Direct</option>
+                </select>
+              </div>
+
+              <div class="field-group">
+                <label class="field-label">Label / Identifier</label>
+                <BaseInput v-model="cred.label" placeholder="e.g. Production WP Admin" />
+              </div>
+
+              <div class="field-group full-width">
+                <label class="field-label">Login URL / Endpoint</label>
+                <BaseInput v-model="cred.login_url" placeholder="https://example.com/wp-admin" />
+              </div>
+
+              <div class="field-group">
+                <label class="field-label">Username / Email *</label>
+                <BaseInput v-model="cred.username" placeholder="admin@example.com" />
+              </div>
+
+              <div class="field-group">
+                <label class="field-label">Password *</label>
+                <BaseInput v-model="cred.password" type="password" placeholder="••••••••" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 5: Contract Dispatch & Execution -->
+      <div v-if="step === 5" class="wizard-step">
+        <h4 class="step-title">5. Contract Dispatch & Provisioning</h4>
         <p class="step-desc">Review agreement summary and dispatch contract to {{ contactEmail }}.</p>
 
         <div class="summary-card">
@@ -259,10 +404,14 @@ const chosenServices = computed(() => {
             <span>Monthly Retainer Cap:</span>
             <span>30 minutes / billing cycle</span>
           </div>
+          <div class="summary-row">
+            <span>Vault Credentials:</span>
+            <span>{{ credentials.length }} secret(s) ready for AES-256 envelope encryption</span>
+          </div>
         </div>
 
         <div class="dispatch-notice">
-          Clicking <strong>Dispatch & Onboard</strong> will provision the client account, initialize current month's timecard, configure continuity monitoring, and generate agreement records.
+          Clicking <strong>Dispatch & Onboard</strong> will provision the client account, encrypt stored secrets, initialize current month's timecard, configure continuity monitoring, and generate agreement records.
         </div>
       </div>
 
@@ -271,7 +420,7 @@ const chosenServices = computed(() => {
         <BaseButton v-if="step > 1" label="Back" variant="secondary" @click="prevStep" />
         <BaseButton v-else label="Cancel" variant="secondary" @click="emit('close')" />
 
-        <BaseButton v-if="step < 4" label="Continue" variant="primary" @click="nextStep" />
+        <BaseButton v-if="step < 5" label="Continue" variant="primary" @click="nextStep" />
         <BaseButton v-else label="Dispatch & Onboard" variant="primary" @click="handleDispatch" />
       </div>
     </div>

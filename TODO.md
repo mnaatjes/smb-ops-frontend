@@ -34,10 +34,10 @@
 ---
 
 ## 4. Secure Client Website Credential & Secret Management (Security / Ingestion)
-- [ ] **4.1 Zero-Knowledge / At-Rest Secret Encryption:**
+- [x] **4.1 Zero-Knowledge / At-Rest Secret Encryption:**
   - Design encryption architecture for ingesting client website credentials (CMS logins, hosting panel, SFTP/SSH, domain registrar).
   - Backend envelope encryption or AES-256-GCM symmetric encryption using managed environment secret keys (`SECRET_KEY` / Fernet / KMS).
-- [ ] **4.2 Onboarding Credential Vault Interface:**
+- [x] **4.2 Onboarding Credential Vault Interface:**
   - Implement secure credential input fields in onboarding workflow with masked entries, clipboard copy helpers, and zero plain-text client logging.
 
 ---

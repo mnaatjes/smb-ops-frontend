@@ -117,8 +117,22 @@ describe('Client Accounts Workspace & Onboarding Pipeline', () => {
     expect(wrapper.text()).toContain('3. Work Scope & Operating Terms')
     await continueBtn?.trigger('click')
 
-    // Step 4: Summary & Dispatch
-    expect(wrapper.text()).toContain('4. Contract Dispatch & Provisioning')
+    // Step 4: Access & Infrastructure Credentials
+    expect(wrapper.text()).toContain('4. Access & Infrastructure Credentials')
+    const addCredBtn = wrapper.findAll('button').find((b) => b.text() === '+ Add Credential')
+    await addCredBtn?.trigger('click')
+
+    // Populate credentials
+    const usernameInput = wrapper.findAll('input').find((i) => i.attributes('placeholder') === 'admin@example.com')
+    const passwordInput = wrapper.findAll('input').find((i) => i.attributes('type') === 'password')
+    await usernameInput?.setValue('admin_user')
+    await passwordInput?.setValue('dynamically_generated_mock_pass_123')
+
+    const step4ContinueBtn = wrapper.findAll('button').find((b) => b.text() === 'Continue')
+    await step4ContinueBtn?.trigger('click')
+
+    // Step 5: Summary & Dispatch
+    expect(wrapper.text()).toContain('5. Contract Dispatch & Provisioning')
     const dispatchBtn = wrapper.findAll('button').find((b) => b.text() === 'Dispatch & Onboard')
     expect(dispatchBtn).toBeDefined()
     await dispatchBtn?.trigger('click')
@@ -127,6 +141,9 @@ describe('Client Accounts Workspace & Onboarding Pipeline', () => {
     const emittedPayload = wrapper.emitted('onboard')?.[0]?.[0] as OnboardClientPayload
     expect(emittedPayload.lead_id).toBe('lead-test-123')
     expect(emittedPayload.contact_email).toBe('owner@harborbakery.com')
+    expect(emittedPayload.secrets).toBeDefined()
+    expect(emittedPayload.secrets?.length).toBe(1)
+    expect(emittedPayload.secrets?.[0].username).toBe('admin_user')
   })
 
   it('Pinia store handles onboardClient and updates client list and state', async () => {
