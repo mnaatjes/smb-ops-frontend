@@ -190,7 +190,7 @@ const chosenServices = computed(() => {
           >
             <div class="service-select-head">
               <span class="service-code">{{ svc.code }}</span>
-              <BaseBadge :variant="selectedServiceCodes.includes(svc.code) ? 'success' : 'secondary'">
+              <BaseBadge :variant="selectedServiceCodes.includes(svc.code) ? 'success' : 'neutral'">
                 {{ selectedServiceCodes.includes(svc.code) ? 'Selected' : 'Available' }}
               </BaseBadge>
             </div>
@@ -272,7 +272,7 @@ const chosenServices = computed(() => {
         <BaseButton v-else label="Cancel" variant="secondary" @click="emit('close')" />
 
         <BaseButton v-if="step < 4" label="Continue" variant="primary" @click="nextStep" />
-        <BaseButton v-else label="Dispatch & Onboard" variant="success" @click="handleDispatch" />
+        <BaseButton v-else label="Dispatch & Onboard" variant="primary" @click="handleDispatch" />
       </div>
     </div>
   </BaseModal>

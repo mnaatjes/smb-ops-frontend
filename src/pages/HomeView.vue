@@ -327,7 +327,7 @@ async function handleCreateService(payload: CreateServicePayload): Promise<void>
             <div class="engagements-box">
               <span class="engagements-title">Contracts ({{ client.contracts?.length ?? 0 }}):</span>
               <div v-if="client.contracts && client.contracts.length > 0" class="client-contract-badges">
-                <BaseBadge v-for="c in client.contracts" :key="c.id" variant="secondary">
+                <BaseBadge v-for="c in client.contracts" :key="c.id" variant="neutral">
                   {{ c.service_code }}
                 </BaseBadge>
               </div>
