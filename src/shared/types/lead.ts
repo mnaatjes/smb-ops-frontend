@@ -69,6 +69,7 @@ export interface BatchAuditResponse {
 export interface DisqualifyPayload {
   reason: string
   notes?: string
+  suppress?: boolean
 }
 
 export interface ServiceCatalogItem {

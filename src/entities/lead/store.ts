@@ -14,7 +14,6 @@ import {
   triggerLeadDiscovery,
   triggerBatchAudit,
   createProspect,
-  qualifyLead as apiQualifyLead,
   disqualifyLead as apiDisqualifyLead,
   pursueLead as apiPursueLead,
   suppressLead as apiSuppressLead,
@@ -150,12 +149,18 @@ export const useLeadStore = defineStore('lead', () => {
   async function qualifyLead(prospectId: string): Promise<void> {
     error.value = null
     try {
-      await apiQualifyLead(prospectId)
-      leads.value = leads.value.filter((item) => item.prospect.id !== prospectId)
-      statusMessage.value = 'Lead marked QUALIFIED.'
+      await apiPursueLead(prospectId)
+      const lead = leads.value.find((item) => item.prospect.id === prospectId)
+      if (lead) {
+        lead.prospect.status = 'PURSUED'
+      }
+      statusMessage.value = 'Lead qualified and claimed into Pursued Pipeline.'
     } catch (err: unknown) {
-      leads.value = leads.value.filter((item) => item.prospect.id !== prospectId)
-      statusMessage.value = 'Lead marked QUALIFIED (local).'
+      const lead = leads.value.find((item) => item.prospect.id === prospectId)
+      if (lead) {
+        lead.prospect.status = 'PURSUED'
+      }
+      statusMessage.value = 'Lead qualified and claimed into Pursued Pipeline (local).'
     }
   }
 
@@ -163,11 +168,18 @@ export const useLeadStore = defineStore('lead', () => {
     error.value = null
     try {
       await apiDisqualifyLead(prospectId, payload)
+      if (payload.suppress) {
+        await apiSuppressLead(prospectId)
+      }
       leads.value = leads.value.filter((item) => item.prospect.id !== prospectId)
-      statusMessage.value = `Lead marked DISQUALIFIED (${payload.reason}).`
+      statusMessage.value = payload.suppress
+        ? `Lead disqualified (${payload.reason}) and permanently suppressed.`
+        : `Lead marked DISQUALIFIED (${payload.reason}).`
     } catch (err: unknown) {
       leads.value = leads.value.filter((item) => item.prospect.id !== prospectId)
-      statusMessage.value = `Lead marked DISQUALIFIED: ${payload.reason} (local).`
+      statusMessage.value = payload.suppress
+        ? `Lead disqualified (${payload.reason}) and permanently suppressed (local).`
+        : `Lead marked DISQUALIFIED: ${payload.reason} (local).`
     }
   }
 

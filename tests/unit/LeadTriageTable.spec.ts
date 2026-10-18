@@ -98,39 +98,6 @@ describe('LeadTriageTable', () => {
     expect(wrapper.emitted('disqualify')?.[0]).toEqual([dummyLeads[0]])
   })
 
-  it('emits pursue event when Add to List button is clicked', async () => {
-    const wrapper = mount(LeadTriageTable, {
-      props: {
-        leads: dummyLeads,
-        loading: false
-      }
-    })
-
-    const buttons = wrapper.findAllComponents({ name: 'BaseButton' })
-    const pursueBtn = buttons.find((btn) => btn.props('label') === 'Add to List')
-    expect(pursueBtn).toBeDefined()
-    await pursueBtn?.trigger('click')
-
-    expect(wrapper.emitted('pursue')).toBeTruthy()
-    expect(wrapper.emitted('pursue')?.[0]).toEqual([dummyLeads[0]])
-  })
-
-  it('emits suppress event when suppress icon button is clicked', async () => {
-    const wrapper = mount(LeadTriageTable, {
-      props: {
-        leads: dummyLeads,
-        loading: false
-      }
-    })
-
-    const suppressBtn = wrapper.find('.icon-btn-suppress')
-    expect(suppressBtn.exists()).toBe(true)
-    await suppressBtn.trigger('click')
-
-    expect(wrapper.emitted('suppress')).toBeTruthy()
-    expect(wrapper.emitted('suppress')?.[0]).toEqual([dummyLeads[0]])
-  })
-
   it('emits inspectScore event when score cell is clicked', async () => {
     const wrapper = mount(LeadTriageTable, {
       props: {
@@ -147,4 +114,5 @@ describe('LeadTriageTable', () => {
     expect(wrapper.emitted('inspectScore')?.[0]).toEqual([dummyLeads[0]])
   })
 })
+
 

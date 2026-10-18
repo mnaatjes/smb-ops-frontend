@@ -11,11 +11,12 @@ defineProps<{
 
 const emit = defineEmits<{
   (e: 'close'): void
-  (e: 'confirm', payload: { reason: string; notes?: string }): void
+  (e: 'confirm', payload: { reason: string; notes?: string; suppress?: boolean }): void
 }>()
 
 const reason = ref<string>('')
 const notes = ref<string>('')
+const suppress = ref<boolean>(false)
 const isSubmitting = ref<boolean>(false)
 
 const reasons = [
@@ -33,6 +34,7 @@ const canSubmit = computed(() => {
 function handleClose(): void {
   reason.value = ''
   notes.value = ''
+  suppress.value = false
   isSubmitting.value = false
   emit('close')
 }
@@ -42,7 +44,8 @@ function handleConfirm(): void {
   isSubmitting.value = true
   emit('confirm', {
     reason: reason.value,
-    notes: notes.value ? notes.value.trim() : undefined
+    notes: notes.value ? notes.value.trim() : undefined,
+    suppress: suppress.value
   })
   handleClose()
 }
@@ -74,6 +77,20 @@ function handleConfirm(): void {
           class="form-textarea"
           placeholder="Additional context or verification findings..."
         ></textarea>
+      </div>
+
+      <div class="form-group suppression-group">
+        <label class="checkbox-label">
+          <input
+            v-model="suppress"
+            type="checkbox"
+            class="suppress-checkbox"
+          />
+          <span>Permanently suppress this lead from future discovery queries</span>
+        </label>
+        <span class="suppress-hint">
+          Excludes this domain and name from future geographic searches and batch ingestions.
+        </span>
       </div>
     </div>
 
@@ -139,5 +156,36 @@ function handleConfirm(): void {
 
 .form-textarea {
   resize: vertical;
+}
+
+.suppression-group {
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  background-color: var(--bg-surface-hover);
+  border-radius: 6px;
+  border: 1px dashed var(--border-color);
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.suppress-checkbox {
+  margin-top: 0.15rem;
+  cursor: pointer;
+}
+
+.suppress-hint {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-left: 1.45rem;
+  margin-top: 0.25rem;
 }
 </style>

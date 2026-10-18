@@ -92,8 +92,12 @@ describe('useLeadStore', () => {
     }
   ]
 
+  function getMockLeads(): RankedLead[] {
+    return JSON.parse(JSON.stringify(mockLeads))
+  }
+
   it('computes metrics and filters correctly', async () => {
-    vi.mocked(leadApi.fetchRankedLeads).mockResolvedValue(mockLeads)
+    vi.mocked(leadApi.fetchRankedLeads).mockImplementation(async () => getMockLeads())
     const store = useLeadStore()
 
     await store.loadRankedLeads()
@@ -110,7 +114,7 @@ describe('useLeadStore', () => {
 
   it('handles discovery and updates triage list', async () => {
     vi.mocked(leadApi.triggerLeadDiscovery).mockResolvedValue([mockLeads[2].prospect])
-    vi.mocked(leadApi.fetchRankedLeads).mockResolvedValue(mockLeads)
+    vi.mocked(leadApi.fetchRankedLeads).mockImplementation(async () => getMockLeads())
     const store = useLeadStore()
 
     await store.discoverLeads('Kalamazoo, MI', 10)
@@ -126,7 +130,7 @@ describe('useLeadStore', () => {
       failed_count: 0,
       results: [mockLeads[0].audit!]
     })
-    vi.mocked(leadApi.fetchRankedLeads).mockResolvedValue(mockLeads)
+    vi.mocked(leadApi.fetchRankedLeads).mockImplementation(async () => getMockLeads())
     const store = useLeadStore()
 
     await store.runBatchAudit(15)
@@ -136,25 +140,27 @@ describe('useLeadStore', () => {
     expect(store.statusMessage).toContain('Audited 1 leads')
   })
 
-  it('qualifies a lead and removes it from active list', async () => {
-    vi.mocked(leadApi.fetchRankedLeads).mockResolvedValue(mockLeads)
-    vi.mocked(leadApi.qualifyLead).mockResolvedValue({
+  it('qualifies a lead into the Pursued Pipeline', async () => {
+    vi.mocked(leadApi.fetchRankedLeads).mockImplementation(async () => getMockLeads())
+    vi.mocked(leadApi.pursueLead).mockResolvedValue({
       ...mockLeads[0].prospect,
-      status: 'QUALIFIED'
+      status: 'PURSUED'
     })
     const store = useLeadStore()
     await store.loadRankedLeads()
     expect(store.totalLeadsCount).toBe(3)
+    expect(store.pursuedCount).toBe(0)
 
     await store.qualifyLead('1')
 
     expect(store.totalLeadsCount).toBe(2)
-    expect(store.leads.find((l) => l.prospect.id === '1')).toBeUndefined()
-    expect(store.statusMessage).toContain('QUALIFIED')
+    expect(store.pursuedCount).toBe(1)
+    expect(store.pursuedLeads[0].prospect.id).toBe('1')
+    expect(store.statusMessage).toContain('qualified and claimed into Pursued Pipeline')
   })
 
   it('disqualifies a lead with reason and removes it from active list', async () => {
-    vi.mocked(leadApi.fetchRankedLeads).mockResolvedValue(mockLeads)
+    vi.mocked(leadApi.fetchRankedLeads).mockImplementation(async () => getMockLeads())
     vi.mocked(leadApi.disqualifyLead).mockResolvedValue({
       ...mockLeads[1].prospect,
       status: 'DISQUALIFIED',
@@ -171,8 +177,30 @@ describe('useLeadStore', () => {
     expect(store.statusMessage).toContain('Out of Business')
   })
 
+  it('disqualifies and permanently suppresses a lead when suppress flag is set', async () => {
+    vi.mocked(leadApi.fetchRankedLeads).mockImplementation(async () => getMockLeads())
+    vi.mocked(leadApi.disqualifyLead).mockResolvedValue({
+      ...mockLeads[0].prospect,
+      status: 'DISQUALIFIED',
+      disqualification_reason: 'Enterprise / Non-SMB'
+    })
+    vi.mocked(leadApi.suppressLead).mockResolvedValue({
+      ...mockLeads[0].prospect,
+      status: 'SUPPRESSED'
+    })
+    const store = useLeadStore()
+    await store.loadRankedLeads()
+
+    await store.disqualifyLead('1', { reason: 'Enterprise / Non-SMB', suppress: true })
+
+    expect(leadApi.disqualifyLead).toHaveBeenCalled()
+    expect(leadApi.suppressLead).toHaveBeenCalledWith('1')
+    expect(store.totalLeadsCount).toBe(2)
+    expect(store.statusMessage).toContain('permanently suppressed')
+  })
+
   it('pursues a lead into the pipeline and filters from pool', async () => {
-    vi.mocked(leadApi.fetchRankedLeads).mockResolvedValue(mockLeads)
+    vi.mocked(leadApi.fetchRankedLeads).mockImplementation(async () => getMockLeads())
     vi.mocked(leadApi.pursueLead).mockResolvedValue({
       ...mockLeads[0].prospect,
       status: 'PURSUED'
@@ -192,7 +220,7 @@ describe('useLeadStore', () => {
   })
 
   it('suppresses a lead from future discovery and pool', async () => {
-    vi.mocked(leadApi.fetchRankedLeads).mockResolvedValue(mockLeads)
+    vi.mocked(leadApi.fetchRankedLeads).mockImplementation(async () => getMockLeads())
     vi.mocked(leadApi.suppressLead).mockResolvedValue({
       ...mockLeads[0].prospect,
       status: 'SUPPRESSED'
@@ -208,7 +236,7 @@ describe('useLeadStore', () => {
   })
 
   it('converts a lead into a client account', async () => {
-    vi.mocked(leadApi.fetchRankedLeads).mockResolvedValue(mockLeads)
+    vi.mocked(leadApi.fetchRankedLeads).mockImplementation(async () => getMockLeads())
     vi.mocked(leadApi.convertLeadToClient).mockResolvedValue({
       id: 'client-101',
       business_name: 'Alpha Pizza',
