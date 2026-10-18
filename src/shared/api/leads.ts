@@ -24,7 +24,9 @@ export async function fetchRankedLeads(minScore = 0): Promise<RankedLead[]> {
 }
 
 export async function triggerLeadDiscovery(payload: DiscoverPayload): Promise<Prospect[]> {
-  const response = await apiClient.post<Prospect[]>('/leads/discover', payload)
+  const response = await apiClient.post<Prospect[]>('/leads/discover', payload, {
+    timeout: 120000
+  })
   return response.data
 }
 

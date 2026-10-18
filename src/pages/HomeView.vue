@@ -3,7 +3,6 @@ import { ref, onMounted } from 'vue'
 import { useLeadStore } from '@/entities/lead/store'
 import type { RankedLead } from '@/entities/lead/model'
 import DiscoveryBar from '@/features/lead-discovery/DiscoveryBar.vue'
-import BatchAuditTrigger from '@/features/lead-audit/BatchAuditTrigger.vue'
 import CreateLeadModal from '@/features/manual-lead/CreateLeadModal.vue'
 import LeadTriageTable from '@/features/lead-triage/LeadTriageTable.vue'
 import DisqualifyModal from '@/features/lead-triage/DisqualifyModal.vue'
@@ -143,9 +142,6 @@ async function handleCreateService(payload: CreateServicePayload): Promise<void>
         <!-- Operational Action Row -->
         <section class="actions-section">
           <DiscoveryBar class="discovery-flex" />
-          <div class="batch-flex">
-            <BatchAuditTrigger :limit="15" />
-          </div>
         </section>
 
         <!-- Service Catalog Filter Dropdown -->
@@ -451,11 +447,6 @@ async function handleCreateService(payload: CreateServicePayload): Promise<void>
 .discovery-flex {
   flex: 1;
   min-width: 320px;
-}
-
-.batch-flex {
-  display: flex;
-  align-items: center;
 }
 
 .status-banner {
