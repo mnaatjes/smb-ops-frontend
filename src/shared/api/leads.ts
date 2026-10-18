@@ -89,3 +89,8 @@ export async function fetchClients(): Promise<ClientAccount[]> {
   return response.data
 }
 
+export async function clearLeadsApi(): Promise<{ cleared_count: number; message: string }> {
+  const response = await apiClient.delete<{ cleared_count: number; message: string }>('/leads')
+  return response.data
+}
+

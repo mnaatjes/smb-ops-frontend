@@ -12,6 +12,12 @@ async function handleDiscover() {
   if (!location.value.trim()) return
   await leadStore.discoverLeads(location.value.trim(), Number(limit.value) || 15)
 }
+
+async function handleClear() {
+  if (window.confirm('Clear all un-pursued lead findings and audits?')) {
+    await leadStore.clearLeads()
+  }
+}
 </script>
 
 <template>
@@ -31,15 +37,23 @@ async function handleDiscover() {
         class="limit-field"
       />
     </div>
-    <div class="discover-btn-wrapper" title="Discovers candidates and immediately runs technical inspection audits">
-      <BaseButton
-        label="Discover & Audit Leads"
-        :disabled="leadStore.loading || !location.trim()"
-        @click="handleDiscover"
-      />
-      <div class="hover-tooltip">
-        Discovers local prospects from web directories and immediately inspects their sites to calculate Opportunity Scores
+    <div class="button-group">
+      <div class="discover-btn-wrapper" title="Discovers candidates and immediately runs technical inspection audits">
+        <BaseButton
+          label="Discover & Audit Leads"
+          :disabled="leadStore.loading || !location.trim()"
+          @click="handleDiscover"
+        />
+        <div class="hover-tooltip">
+          Discovers local prospects from web directories and immediately inspects their sites to calculate Opportunity Scores
+        </div>
       </div>
+      <BaseButton
+        label="Clear Findings"
+        variant="secondary"
+        :disabled="leadStore.loading || leadStore.poolLeads.length === 0"
+        @click="handleClear"
+      />
     </div>
   </div>
 </template>
@@ -97,5 +111,11 @@ async function handleDiscover() {
 .discover-btn-wrapper:hover .hover-tooltip {
   visibility: visible;
   opacity: 1;
+}
+
+.button-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 </style>

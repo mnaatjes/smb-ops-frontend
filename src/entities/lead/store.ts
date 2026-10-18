@@ -21,7 +21,8 @@ import {
   fetchServices as apiFetchServices,
   createService as apiCreateService,
   fetchClients as apiFetchClients,
-  convertLeadToClient as apiConvertLeadToClient
+  convertLeadToClient as apiConvertLeadToClient,
+  clearLeadsApi
 } from '@/shared/api/leads'
 
 export const useLeadStore = defineStore('lead', () => {
@@ -29,6 +30,7 @@ export const useLeadStore = defineStore('lead', () => {
   const services = ref<ServiceCatalogItem[]>([])
   const clients = ref<ClientAccount[]>([])
   const activeServiceFilter = ref<string | null>(null)
+  const activeServiceFilters = ref<string[]>([])
   const minScore = ref<number>(0)
   const loading = ref<boolean>(false)
   const error = ref<string | null>(null)
@@ -48,7 +50,37 @@ export const useLeadStore = defineStore('lead', () => {
     return poolLeads.value
       .filter((item) => {
         const score = item.audit ? item.audit.opportunity_score : 0
-        return score >= minScore.value
+        if (score < minScore.value) return false
+
+        // Multi-service filter: if filters are selected, lead must match at least one selected service criteria
+        if (activeServiceFilters.value.length > 0 && services.value.length > 0) {
+          const selectedServices = services.value.filter((s) =>
+            activeServiceFilters.value.includes(s.code)
+          )
+          if (selectedServices.length > 0) {
+            const matchesAny = selectedServices.some((svc) => {
+              // Service match based on minimum_opportunity_score and audit parameters
+              const meetsMinScore = score >= (svc.minimum_opportunity_score || 0)
+              if (!meetsMinScore) return false
+              if (!item.audit || !svc.audit_parameters || svc.audit_parameters.length === 0) return true
+
+              // Check if any audit parameter aligns with identified issues/flags
+              return svc.audit_parameters.some((param) => {
+                if (param === 'ssl_active') return !item.audit?.ssl_active
+                if (param === 'mobile_viewport_present') return !item.audit?.mobile_viewport_present
+                if (param === 'response_time_ms') return (item.audit?.response_time_ms ?? 0) > 2000
+                if (param === 'status_code') return (item.audit?.status_code ?? 200) >= 400
+                if (param === 'pos_integrations') return (item.audit?.pos_integrations?.length ?? 0) > 0
+                if (param === 'pdf_menu_count') return (item.audit?.pdf_menu_count ?? 0) > 0
+                if (param === 'tel_link_present') return !item.audit?.tel_link_present
+                return true
+              })
+            })
+            if (!matchesAny) return false
+          }
+        }
+
+        return true
       })
       .slice()
       .sort((a, b) => {
@@ -243,6 +275,20 @@ export const useLeadStore = defineStore('lead', () => {
   }
 
 
+  async function clearLeads(): Promise<void> {
+    loading.value = true
+    error.value = null
+    try {
+      const res = await clearLeadsApi()
+      await loadRankedLeads()
+      statusMessage.value = res.message || 'Lead findings cleared successfully'
+    } catch (err: unknown) {
+      error.value = err instanceof Error ? err.message : 'Failed to clear lead findings'
+    } finally {
+      loading.value = false
+    }
+  }
+
   function setMinScore(score: number): void {
     minScore.value = score
   }
@@ -252,6 +298,7 @@ export const useLeadStore = defineStore('lead', () => {
     services,
     clients,
     activeServiceFilter,
+    activeServiceFilters,
     minScore,
     loading,
     error,
@@ -276,6 +323,7 @@ export const useLeadStore = defineStore('lead', () => {
     suppressLead,
     convertToClient,
     createServiceOffering,
+    clearLeads,
     setMinScore
   }
 })

@@ -304,5 +304,62 @@ describe('useLeadStore', () => {
     expect(store.services[0].code).toBe('SVC-ADA')
     expect(store.statusMessage).toContain('Accessibility Audit')
   })
+
+  it('filters leads by multiple selected service codes', async () => {
+    vi.mocked(leadApi.fetchRankedLeads).mockResolvedValue(mockLeads)
+    const store = useLeadStore()
+    await store.loadRankedLeads()
+
+    store.services = [
+      {
+        id: 's1',
+        code: 'SVC-SSL',
+        name: 'SSL Fix',
+        description: 'Fix SSL issues',
+        audit_parameters: ['ssl_active'],
+        minimum_opportunity_score: 50,
+        created_at: '2026-10-18T00:00:00Z'
+      },
+      {
+        id: 's2',
+        code: 'SVC-POS',
+        name: 'POS Integration',
+        description: 'POS setup',
+        audit_parameters: ['pos_integrations'],
+        minimum_opportunity_score: 80,
+        created_at: '2026-10-18T00:00:00Z'
+      }
+    ]
+
+    // Default: all leads (mockLeads has 3 unpursued/unsuppressed)
+    expect(store.filteredLeads.length).toBe(3)
+
+    // Select SVC-SSL (Alpha has ssl_active: false and score 85 -> matches)
+    // Beta has ssl_active: true and score 30 (< 50) -> doesn't match
+    // Gamma has audit: null and score 0 (< 50) -> doesn't match
+    store.activeServiceFilters = ['SVC-SSL']
+    expect(store.filteredLeads.length).toBe(1)
+    expect(store.filteredLeads[0].prospect.id).toBe('1')
+
+    // Reset filter
+    store.activeServiceFilters = []
+    expect(store.filteredLeads.length).toBe(3)
+  })
+
+  it('clears unpursued leads findings', async () => {
+    vi.mocked(leadApi.clearLeadsApi).mockResolvedValue({
+      cleared_count: 5,
+      message: 'Successfully cleared 5 lead finding(s)'
+    })
+    vi.mocked(leadApi.fetchRankedLeads).mockResolvedValue([])
+    const store = useLeadStore()
+
+    await store.clearLeads()
+
+    expect(leadApi.clearLeadsApi).toHaveBeenCalled()
+    expect(leadApi.fetchRankedLeads).toHaveBeenCalled()
+    expect(store.statusMessage).toContain('Successfully cleared 5')
+    expect(store.leads.length).toBe(0)
+  })
 })
 

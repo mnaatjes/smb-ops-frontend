@@ -8,7 +8,7 @@ import CreateLeadModal from '@/features/manual-lead/CreateLeadModal.vue'
 import LeadTriageTable from '@/features/lead-triage/LeadTriageTable.vue'
 import DisqualifyModal from '@/features/lead-triage/DisqualifyModal.vue'
 import ScoreRubricModal from '@/features/lead-triage/ScoreRubricModal.vue'
-import ServicePills from '@/features/service-catalog/ServicePills.vue'
+import ServiceFilterDropdown from '@/features/service-catalog/ServiceFilterDropdown.vue'
 import CreateServiceModal from '@/features/service-catalog/CreateServiceModal.vue'
 import ServiceDetailsModal from '@/features/service-catalog/ServiceDetailsModal.vue'
 import AsideNavRail from '@/features/navigation/AsideNavRail.vue'
@@ -148,11 +148,10 @@ async function handleCreateService(payload: CreateServicePayload): Promise<void>
           </div>
         </section>
 
-        <!-- Service Catalog Filter Pills -->
-        <ServicePills
+        <!-- Service Catalog Filter Dropdown -->
+        <ServiceFilterDropdown
+          v-model="leadStore.activeServiceFilters"
           :services="leadStore.services"
-          :active-code="leadStore.activeServiceFilter"
-          @select="(code) => { leadStore.activeServiceFilter = code }"
         />
 
         <!-- Triage Filter Controls -->
