@@ -119,9 +119,13 @@ describe('useLeadStore', () => {
 
     await store.discoverLeads('Kalamazoo, MI', 10)
 
-    expect(leadApi.triggerLeadDiscovery).toHaveBeenCalledWith({ location: 'Kalamazoo, MI', limit: 10 })
+    expect(leadApi.triggerLeadDiscovery).toHaveBeenCalledWith({
+      location: 'Kalamazoo, MI',
+      limit: 10,
+      auto_audit: true,
+    })
     expect(leadApi.fetchRankedLeads).toHaveBeenCalled()
-    expect(store.statusMessage).toContain('Discovered 1 prospects.')
+    expect(store.statusMessage).toContain('Discovered and audited 1 prospects.')
   })
 
   it('handles batch audit triggering', async () => {

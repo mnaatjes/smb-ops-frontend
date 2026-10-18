@@ -103,14 +103,14 @@ export const useLeadStore = defineStore('lead', () => {
   async function discoverLeads(location: string, limit = 15): Promise<void> {
     loading.value = true
     error.value = null
-    statusMessage.value = `Discovering leads for ${location}...`
+    statusMessage.value = `Discovering and auditing leads for ${location}...`
     try {
-      const payload: DiscoverPayload = { location, limit }
+      const payload: DiscoverPayload = { location, limit, auto_audit: true }
       const discovered = await triggerLeadDiscovery(payload)
-      statusMessage.value = `Discovered ${discovered.length} prospects.`
+      statusMessage.value = `Discovered and audited ${discovered.length} prospects.`
       await loadRankedLeads()
     } catch (err: unknown) {
-      error.value = err instanceof Error ? err.message : 'Discovery failed'
+      error.value = err instanceof Error ? err.message : 'Discovery and audit failed'
       statusMessage.value = null
     } finally {
       loading.value = false
