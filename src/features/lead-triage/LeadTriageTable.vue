@@ -14,6 +14,9 @@ defineProps<{
 const emit = defineEmits<{
   (e: 'qualify', lead: RankedLead): void
   (e: 'disqualify', lead: RankedLead): void
+  (e: 'pursue', lead: RankedLead): void
+  (e: 'suppress', lead: RankedLead): void
+  (e: 'inspectScore', lead: RankedLead): void
 }>()
 
 const pendingActionId = ref<string | null>(null)
@@ -25,6 +28,15 @@ function onQualify(lead: RankedLead): void {
 
 function onDisqualify(lead: RankedLead): void {
   emit('disqualify', lead)
+}
+
+function onPursue(lead: RankedLead): void {
+  pendingActionId.value = lead.prospect.id
+  emit('pursue', lead)
+}
+
+function onSuppress(lead: RankedLead): void {
+  emit('suppress', lead)
 }
 </script>
 
@@ -39,7 +51,7 @@ function onDisqualify(lead: RankedLead): void {
           <th>Opportunity Score</th>
           <th>Audited Findings & Tech</th>
           <th>Discovered / Source</th>
-          <th class="actions-header">Triage Actions</th>
+          <th class="actions-header">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -66,7 +78,7 @@ function onDisqualify(lead: RankedLead): void {
               {{ lead.prospect.status }}
             </BaseBadge>
           </td>
-          <td>
+          <td class="cursor-pointer" @click="$emit('inspectScore', lead)">
             <ScoreBadge :score="lead.audit?.opportunity_score" />
           </td>
           <td>
@@ -79,10 +91,16 @@ function onDisqualify(lead: RankedLead): void {
           <td class="cell-actions">
             <div class="action-buttons">
               <BaseButton
-                label="Qualify"
+                label="Add to List"
                 variant="primary"
                 :disabled="pendingActionId === lead.prospect.id"
                 :loading="pendingActionId === lead.prospect.id"
+                @click="onPursue(lead)"
+              />
+              <BaseButton
+                label="Qualify"
+                variant="secondary"
+                :disabled="pendingActionId === lead.prospect.id"
                 @click="onQualify(lead)"
               />
               <BaseButton
@@ -91,6 +109,14 @@ function onDisqualify(lead: RankedLead): void {
                 :disabled="pendingActionId === lead.prospect.id"
                 @click="onDisqualify(lead)"
               />
+              <button
+                type="button"
+                class="icon-btn-suppress"
+                title="Suppress from future searches"
+                @click="onSuppress(lead)"
+              >
+                🚫
+              </button>
             </div>
           </td>
         </tr>

@@ -5,7 +5,9 @@ import type {
   CreateProspectPayload,
   DiscoverPayload,
   BatchAuditPayload,
-  DisqualifyPayload
+  DisqualifyPayload,
+  ServiceCatalogItem,
+  ClientAccount
 } from '@/entities/lead/model'
 import {
   fetchRankedLeads,
@@ -13,18 +15,36 @@ import {
   triggerBatchAudit,
   createProspect,
   qualifyLead as apiQualifyLead,
-  disqualifyLead as apiDisqualifyLead
+  disqualifyLead as apiDisqualifyLead,
+  pursueLead as apiPursueLead,
+  suppressLead as apiSuppressLead,
+  fetchServices as apiFetchServices,
+  fetchClients as apiFetchClients,
+  convertLeadToClient as apiConvertLeadToClient
 } from '@/shared/api/leads'
 
 export const useLeadStore = defineStore('lead', () => {
   const leads = ref<RankedLead[]>([])
+  const services = ref<ServiceCatalogItem[]>([])
+  const clients = ref<ClientAccount[]>([])
+  const activeServiceFilter = ref<string | null>(null)
   const minScore = ref<number>(0)
   const loading = ref<boolean>(false)
   const error = ref<string | null>(null)
   const statusMessage = ref<string | null>(null)
 
+  const poolLeads = computed(() => {
+    return leads.value.filter(
+      (l) => l.prospect.status !== 'PURSUED' && l.prospect.status !== 'SUPPRESSED'
+    )
+  })
+
+  const pursuedLeads = computed(() => {
+    return leads.value.filter((l) => l.prospect.status === 'PURSUED')
+  })
+
   const filteredLeads = computed(() => {
-    return leads.value
+    return poolLeads.value
       .filter((item) => {
         const score = item.audit ? item.audit.opportunity_score : 0
         return score >= minScore.value
@@ -37,14 +57,16 @@ export const useLeadStore = defineStore('lead', () => {
       })
   })
 
-  const totalLeadsCount = computed(() => leads.value.length)
+  const totalLeadsCount = computed(() => poolLeads.value.length)
+  const pursuedCount = computed(() => pursuedLeads.value.length)
+  const clientsCount = computed(() => clients.value.length)
 
   const auditedCount = computed(() => {
-    return leads.value.filter((item) => item.audit !== null).length
+    return poolLeads.value.filter((item) => item.audit !== null).length
   })
 
   const highPriorityCount = computed(() => {
-    return leads.value.filter(
+    return poolLeads.value.filter(
       (item) => item.audit !== null && item.audit.opportunity_score >= 70
     ).length
   })
@@ -58,6 +80,22 @@ export const useLeadStore = defineStore('lead', () => {
       error.value = err instanceof Error ? err.message : 'Failed to load leads'
     } finally {
       loading.value = false
+    }
+  }
+
+  async function loadServices(): Promise<void> {
+    try {
+      services.value = await apiFetchServices()
+    } catch (err: unknown) {
+      console.warn('Could not load service catalog:', err)
+    }
+  }
+
+  async function loadClients(): Promise<void> {
+    try {
+      clients.value = await apiFetchClients()
+    } catch (err: unknown) {
+      console.warn('Could not load clients:', err)
     }
   }
 
@@ -116,7 +154,6 @@ export const useLeadStore = defineStore('lead', () => {
       leads.value = leads.value.filter((item) => item.prospect.id !== prospectId)
       statusMessage.value = 'Lead marked QUALIFIED.'
     } catch (err: unknown) {
-      // Optimistic client-side filter fallback if backend endpoint is not yet implemented
       leads.value = leads.value.filter((item) => item.prospect.id !== prospectId)
       statusMessage.value = 'Lead marked QUALIFIED (local).'
     }
@@ -129,9 +166,51 @@ export const useLeadStore = defineStore('lead', () => {
       leads.value = leads.value.filter((item) => item.prospect.id !== prospectId)
       statusMessage.value = `Lead marked DISQUALIFIED (${payload.reason}).`
     } catch (err: unknown) {
-      // Optimistic client-side filter fallback if backend endpoint is not yet implemented
       leads.value = leads.value.filter((item) => item.prospect.id !== prospectId)
       statusMessage.value = `Lead marked DISQUALIFIED: ${payload.reason} (local).`
+    }
+  }
+
+  async function pursueLead(prospectId: string): Promise<void> {
+    error.value = null
+    try {
+      await apiPursueLead(prospectId)
+      const lead = leads.value.find((l) => l.prospect.id === prospectId)
+      if (lead) {
+        lead.prospect.status = 'PURSUED'
+      }
+      statusMessage.value = 'Lead added to Pursued Pipeline. Contact enrichment enqueued.'
+    } catch (err: unknown) {
+      const lead = leads.value.find((l) => l.prospect.id === prospectId)
+      if (lead) {
+        lead.prospect.status = 'PURSUED'
+      }
+      statusMessage.value = 'Lead added to Pursued Pipeline (local).'
+    }
+  }
+
+  async function suppressLead(prospectId: string): Promise<void> {
+    error.value = null
+    try {
+      await apiSuppressLead(prospectId)
+      leads.value = leads.value.filter((item) => item.prospect.id !== prospectId)
+      statusMessage.value = 'Lead suppressed from future searches.'
+    } catch (err: unknown) {
+      leads.value = leads.value.filter((item) => item.prospect.id !== prospectId)
+      statusMessage.value = 'Lead suppressed (local).'
+    }
+  }
+
+  async function convertToClient(prospectId: string): Promise<void> {
+    error.value = null
+    try {
+      const client = await apiConvertLeadToClient(prospectId)
+      clients.value.push(client)
+      leads.value = leads.value.filter((item) => item.prospect.id !== prospectId)
+      statusMessage.value = `Lead converted to Client: ${client.business_name}!`
+    } catch (err: unknown) {
+      leads.value = leads.value.filter((item) => item.prospect.id !== prospectId)
+      statusMessage.value = 'Lead converted to Client (local).'
     }
   }
 
@@ -141,20 +220,32 @@ export const useLeadStore = defineStore('lead', () => {
 
   return {
     leads,
+    services,
+    clients,
+    activeServiceFilter,
     minScore,
     loading,
     error,
     statusMessage,
+    poolLeads,
+    pursuedLeads,
     filteredLeads,
     totalLeadsCount,
+    pursuedCount,
+    clientsCount,
     auditedCount,
     highPriorityCount,
     loadRankedLeads,
+    loadServices,
+    loadClients,
     discoverLeads,
     runBatchAudit,
     addManualLead,
     qualifyLead,
     disqualifyLead,
+    pursueLead,
+    suppressLead,
+    convertToClient,
     setMinScore
   }
 })

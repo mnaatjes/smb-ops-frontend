@@ -6,7 +6,9 @@ import type {
   DiscoverPayload,
   BatchAuditPayload,
   BatchAuditResponse,
-  DisqualifyPayload
+  DisqualifyPayload,
+  ServiceCatalogItem,
+  ClientAccount
 } from '@/shared/types/lead'
 
 export async function fetchRankedLeads(minScore = 0): Promise<RankedLead[]> {
@@ -47,5 +49,30 @@ export async function disqualifyLead(
   payload: DisqualifyPayload
 ): Promise<Prospect> {
   const response = await apiClient.post<Prospect>(`/leads/${prospectId}/disqualify`, payload)
+  return response.data
+}
+
+export async function pursueLead(prospectId: string): Promise<Prospect> {
+  const response = await apiClient.post<Prospect>(`/leads/${prospectId}/pursue`)
+  return response.data
+}
+
+export async function suppressLead(prospectId: string): Promise<Prospect> {
+  const response = await apiClient.post<Prospect>(`/leads/${prospectId}/suppress`)
+  return response.data
+}
+
+export async function fetchServices(): Promise<ServiceCatalogItem[]> {
+  const response = await apiClient.get<ServiceCatalogItem[]>('/services')
+  return response.data
+}
+
+export async function convertLeadToClient(prospectId: string): Promise<ClientAccount> {
+  const response = await apiClient.post<ClientAccount>(`/clients/convert/${prospectId}`)
+  return response.data
+}
+
+export async function fetchClients(): Promise<ClientAccount[]> {
+  const response = await apiClient.get<ClientAccount[]>('/clients')
   return response.data
 }
