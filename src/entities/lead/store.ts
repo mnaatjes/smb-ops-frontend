@@ -8,7 +8,12 @@ import type {
   DisqualifyPayload,
   CreateServicePayload,
   ServiceCatalogItem,
-  ClientAccount
+  ClientAccount,
+  Timecard,
+  TimecardEntry,
+  ContinuityHealth,
+  OnboardClientPayload,
+  LogTimecardPayload
 } from '@/entities/lead/model'
 import {
   fetchRankedLeads,
@@ -22,6 +27,11 @@ import {
   createService as apiCreateService,
   fetchClients as apiFetchClients,
   convertLeadToClient as apiConvertLeadToClient,
+  onboardClientApi as apiOnboardClient,
+  fetchClientTimecard as apiFetchClientTimecard,
+  logClientTimecardWork as apiLogClientTimecardWork,
+  fetchClientContinuity as apiFetchClientContinuity,
+  pingClientContinuity as apiPingClientContinuity,
   clearLeadsApi
 } from '@/shared/api/leads'
 
@@ -260,6 +270,66 @@ export const useLeadStore = defineStore('lead', () => {
     }
   }
 
+  async function onboardClient(payload: OnboardClientPayload): Promise<ClientAccount> {
+    loading.value = true
+    error.value = null
+    try {
+      const client = await apiOnboardClient(payload)
+      const existingIdx = clients.value.findIndex((c) => c.id === client.id)
+      if (existingIdx >= 0) {
+        clients.value[existingIdx] = client
+      } else {
+        clients.value.push(client)
+      }
+      leads.value = leads.value.filter((item) => item.prospect.id !== payload.lead_id)
+      statusMessage.value = `Onboarding completed for: ${client.business_name}`
+      return client
+    } catch (err: unknown) {
+      error.value = err instanceof Error ? err.message : 'Failed to complete client onboarding'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function getTimecard(clientId: string): Promise<Timecard> {
+    return await apiFetchClientTimecard(clientId)
+  }
+
+  async function logWork(clientId: string, payload: LogTimecardPayload): Promise<TimecardEntry> {
+    loading.value = true
+    error.value = null
+    try {
+      const entry = await apiLogClientTimecardWork(clientId, payload)
+      statusMessage.value = `Logged ${payload.minutes_spent}m to client timecard`
+      return entry
+    } catch (err: unknown) {
+      error.value = err instanceof Error ? err.message : 'Failed to log work to timecard'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function getContinuity(clientId: string): Promise<ContinuityHealth> {
+    return await apiFetchClientContinuity(clientId)
+  }
+
+  async function pingContinuity(clientId: string): Promise<ContinuityHealth> {
+    loading.value = true
+    error.value = null
+    try {
+      const health = await apiPingClientContinuity(clientId)
+      statusMessage.value = 'Continuity diagnostic ping successful'
+      return health
+    } catch (err: unknown) {
+      error.value = err instanceof Error ? err.message : 'Continuity ping failed'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
   async function createServiceOffering(payload: CreateServicePayload): Promise<void> {
     loading.value = true
     error.value = null
@@ -322,6 +392,11 @@ export const useLeadStore = defineStore('lead', () => {
     pursueLead,
     suppressLead,
     convertToClient,
+    onboardClient,
+    getTimecard,
+    logWork,
+    getContinuity,
+    pingContinuity,
     createServiceOffering,
     clearLeads,
     setMinScore

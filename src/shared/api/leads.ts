@@ -10,7 +10,12 @@ import type {
   CreateServicePayload,
   ServiceCatalogItem,
   AuditParameterOption,
-  ClientAccount
+  ClientAccount,
+  Timecard,
+  TimecardEntry,
+  ContinuityHealth,
+  OnboardClientPayload,
+  LogTimecardPayload
 } from '@/shared/types/lead'
 
 export async function fetchRankedLeads(minScore = 0): Promise<RankedLead[]> {
@@ -86,8 +91,36 @@ export async function convertLeadToClient(prospectId: string): Promise<ClientAcc
   return response.data
 }
 
+export async function onboardClientApi(payload: OnboardClientPayload): Promise<ClientAccount> {
+  const response = await apiClient.post<ClientAccount>('/clients/onboard', payload)
+  return response.data
+}
+
 export async function fetchClients(): Promise<ClientAccount[]> {
   const response = await apiClient.get<ClientAccount[]>('/clients')
+  return response.data
+}
+
+export async function fetchClientTimecard(clientId: string): Promise<Timecard> {
+  const response = await apiClient.get<Timecard>(`/clients/${clientId}/timecard`)
+  return response.data
+}
+
+export async function logClientTimecardWork(
+  clientId: string,
+  payload: LogTimecardPayload
+): Promise<TimecardEntry> {
+  const response = await apiClient.post<TimecardEntry>(`/clients/${clientId}/timecard/log`, payload)
+  return response.data
+}
+
+export async function fetchClientContinuity(clientId: string): Promise<ContinuityHealth> {
+  const response = await apiClient.get<ContinuityHealth>(`/clients/${clientId}/continuity`)
+  return response.data
+}
+
+export async function pingClientContinuity(clientId: string): Promise<ContinuityHealth> {
+  const response = await apiClient.post<ContinuityHealth>(`/clients/${clientId}/continuity/ping`)
   return response.data
 }
 
@@ -95,4 +128,5 @@ export async function clearLeadsApi(): Promise<{ cleared_count: number; message:
   const response = await apiClient.delete<{ cleared_count: number; message: string }>('/leads')
   return response.data
 }
+
 
