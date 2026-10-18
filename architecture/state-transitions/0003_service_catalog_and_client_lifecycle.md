@@ -44,9 +44,10 @@ This specification governs the transformation lifecycle from raw discovered lead
 | Entity | Source State | Trigger Event | Guard / Precondition | Target State | Side Effect / Action |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | `Lead` | `[*] (None)` | `QUERY_LOCATION` | Valid city/state/zip | `DISCOVERED` | Lightweight scan; populate discovery pool |
-| `Lead` | `DISCOVERED` | `PURSUED_BY_OPERATOR` | None | `PURSUED` | Assign durable UID; enqueue Stage 2 contact scraper |
+| `Lead` | `DISCOVERED` | `QUALIFY_LEAD` | None | `PURSUED` | Assign durable UID; migrate from Discovery Pool to Pursued Pipeline |
 | `Lead` | `PURSUED` | `ENRICHMENT_COMPLETED` | Scraper returns contacts | `ENRICHED` | Populate key people, emails, phone numbers |
-| `Lead` | `DISCOVERED` / `PURSUED` | `SUPPRESS_LEAD` | None | `SUPPRESSED` | Add domain/name to exclusion table |
+| `Lead` | `DISCOVERED` / `PURSUED` | `DISQUALIFY_LEAD` | Reason code specified | `DISQUALIFIED` | Archive lead; remove row from Discovery Pool |
+| `Lead` | `DISCOVERED` / `PURSUED` | `DISQUALIFY_AND_SUPPRESS` | Reason code + suppress toggle | `SUPPRESSED` | Mark disqualified and add domain to permanent exclusion blacklist |
 | `Lead` | `ENRICHED` | `INITIATE_OUTREACH` | Channel specified (email/call) | `CONTACTED` | Record outreach timestamp |
 | `Lead` | `CONTACTED` | `SCHEDULE_MEETING` | Meeting timestamp set | `FOLLOW_UP` | Set calendar reminder |
 | `Lead` | `CONTACTED` / `FOLLOW_UP` | `DECLINED_OFFER` | Reason code recorded | `DENIED` | Archive lead with feedback |
