@@ -12,6 +12,7 @@ import CreateServiceModal from '@/features/service-catalog/CreateServiceModal.vu
 import ServiceDetailsModal from '@/features/service-catalog/ServiceDetailsModal.vue'
 import ClientOnboardingModal from '@/features/client-onboarding/ClientOnboardingModal.vue'
 import ClientDossierDrawer from '@/features/client-dossier/ClientDossierDrawer.vue'
+import OpportunityDossierDrawer from '@/features/opportunity-dossier/OpportunityDossierDrawer.vue'
 import LogMaintenanceModal from '@/features/client-maintenance/LogMaintenanceModal.vue'
 import AsideNavRail from '@/features/navigation/AsideNavRail.vue'
 import DoctrineWorkspace from '@/features/business-doctrine/DoctrineWorkspace.vue'
@@ -36,9 +37,11 @@ const showRubricModal = ref(false)
 const showServiceDetailsModal = ref(false)
 const showOnboardingModal = ref(false)
 const showDossierDrawer = ref(false)
+const showOpportunityDrawer = ref(false)
 const showLogMaintenanceModal = ref(false)
 const selectedLead = ref<RankedLead | null>(null)
 const inspectingLead = ref<RankedLead | null>(null)
+const activeOpportunityLead = ref<RankedLead | null>(null)
 const inspectingService = ref<ServiceCatalogItem | null>(null)
 const activeDossierClient = ref<ClientAccount | null>(null)
 const activeLogClient = ref<ClientAccount | null>(null)
@@ -103,6 +106,23 @@ async function handleConfirmLogWork(payload: LogTimecardPayload): Promise<void> 
 function handleInspectScore(lead: RankedLead): void {
   inspectingLead.value = lead
   showRubricModal.value = true
+}
+
+function handleOpenOpportunityDossier(lead: RankedLead): void {
+  activeOpportunityLead.value = lead
+  showOpportunityDrawer.value = true
+}
+
+function handleConvertFromOpportunityDrawer(lead: RankedLead): void {
+  showOpportunityDrawer.value = false
+  activeOpportunityLead.value = null
+  handleOpenOnboard(lead)
+}
+
+function handleDisqualifyFromOpportunityDrawer(lead: RankedLead): void {
+  showOpportunityDrawer.value = false
+  activeOpportunityLead.value = null
+  handleOpenDisqualify(lead)
 }
 
 function handleInspectService(svc: ServiceCatalogItem): void {
@@ -273,7 +293,7 @@ async function handleCreateService(payload: CreateServicePayload): Promise<void>
           :key="lead.prospect.id"
           class="pipeline-card"
         >
-          <div class="card-content" @click="handleInspectScore(lead)">
+          <div class="card-content" @click="handleOpenOpportunityDossier(lead)">
             <div class="card-head">
               <div>
                 <span class="tracking-uid">UID: {{ lead.prospect.id.slice(0, 8) }}</span>
@@ -474,6 +494,14 @@ async function handleCreateService(payload: CreateServicePayload): Promise<void>
       :client="activeDossierClient"
       @close="showDossierDrawer = false; activeDossierClient = null"
       @log-work="handleOpenLogWork"
+    />
+    <OpportunityDossierDrawer
+      :show="showOpportunityDrawer"
+      :lead="activeOpportunityLead"
+      :services="leadStore.services"
+      @close="showOpportunityDrawer = false; activeOpportunityLead = null"
+      @convert="handleConvertFromOpportunityDrawer"
+      @disqualify="handleDisqualifyFromOpportunityDrawer"
     />
     <LogMaintenanceModal
       :show="showLogMaintenanceModal"
