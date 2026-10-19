@@ -63,13 +63,17 @@ export const useLeadStore = defineStore('lead', () => {
   const statusMessage = ref<string | null>(null)
 
   const poolLeads = computed(() => {
-    return leads.value.filter(
-      (l) => l.prospect.status !== 'PURSUED' && l.prospect.status !== 'SUPPRESSED'
-    )
+    return leads.value.filter((l) => {
+      const s = l.prospect.status?.toUpperCase()
+      return s !== 'PURSUED' && s !== 'QUALIFIED' && s !== 'SUPPRESSED'
+    })
   })
 
   const pursuedLeads = computed(() => {
-    return leads.value.filter((l) => l.prospect.status === 'PURSUED')
+    return leads.value.filter((l) => {
+      const s = l.prospect.status?.toUpperCase()
+      return s === 'PURSUED' || s === 'QUALIFIED'
+    })
   })
 
   const filteredLeads = computed(() => {
@@ -447,7 +451,11 @@ export const useLeadStore = defineStore('lead', () => {
     const updated = await apiUpdateLeadStage(leadId, stage)
     const idx = leads.value.findIndex((l) => l.prospect.id === leadId)
     if (idx !== -1) {
-      leads.value[idx].prospect = updated
+      const currentStatus = leads.value[idx].prospect.status
+      leads.value[idx].prospect = {
+        ...updated,
+        status: (updated.status ? (updated.status.toUpperCase() as import('@/entities/lead/model').ProspectStatus) : currentStatus)
+      }
     }
     statusMessage.value = `Updated opportunity stage: ${stage}`
   }

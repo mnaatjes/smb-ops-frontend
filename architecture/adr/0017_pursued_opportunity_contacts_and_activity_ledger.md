@@ -33,3 +33,5 @@ We will enhance `OpportunityDossierDrawer.vue` with three dedicated cards:
 
 * Operators have a complete CRM interaction hub inside the sliding drawer without navigating away from the pipeline.
 * Scheduled appointments are surfaced prominently on the card grid and drawer header.
+* Stage progression in the drawer maintains prospect status continuity (`PURSUED` / `QUALIFIED`), ensuring pursued pipeline cards remain pinned to the dashboard across stage updates.
+

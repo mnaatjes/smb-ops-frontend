@@ -6,6 +6,13 @@ export type ProspectStatus =
   | 'QUALIFIED'
   | 'DISQUALIFIED'
   | 'SUPPRESSED'
+  | 'pending'
+  | 'audited'
+  | 'pursued'
+  | 'enriched'
+  | 'qualified'
+  | 'disqualified'
+  | 'suppressed'
 
 export interface Prospect {
   id: string
