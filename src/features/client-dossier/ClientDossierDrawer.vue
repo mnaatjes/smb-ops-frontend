@@ -240,238 +240,270 @@ async function handlePing(): Promise<void> {
 </script>
 
 <template>
-  <div v-if="show && client" class="drawer-overlay" @click.self="emit('close')">
-    <div class="dossier-drawer">
-      <!-- Drawer Header -->
-      <div class="drawer-header">
-        <div>
-          <span class="tracking-uid">CLIENT-ID: {{ client.id.slice(0, 8) }}</span>
-          <h3 class="client-title">{{ client.business_name }}</h3>
-        </div>
-        <button class="close-btn" @click="emit('close')">✕</button>
-      </div>
-
-      <!-- Drawer Body -->
-      <div class="drawer-body">
-        <!-- Status & Contact Section -->
-        <div class="dossier-section">
-          <div class="section-title-row">
-            <h4>Account Profile</h4>
+  <div v-if="show && client" class="workspace-overlay" @click.self="emit('close')">
+    <div class="workspace-canvas">
+      <!-- Full-Canvas Workspace Header -->
+      <header class="workspace-header">
+        <div class="header-identity">
+          <div class="breadcrumbs-row">
+            <span class="workspace-tag">Client Accounts</span>
+            <span class="crumb-separator">/</span>
+            <span class="tracking-uid">CLIENT-ID: {{ client.id.slice(0, 8) }}</span>
+          </div>
+          <div class="title-status-row">
+            <h2 class="workspace-title">{{ client.business_name }}</h2>
             <BaseBadge variant="primary">{{ client.state }}</BaseBadge>
           </div>
-          <div class="profile-grid">
-            <div class="profile-item">
-              <span class="profile-label">Primary Contact:</span>
-              <span class="profile-val">{{ client.primary_contact_name ?? 'N/A' }}</span>
-            </div>
-            <div class="profile-item">
-              <span class="profile-label">Email:</span>
-              <span class="profile-val">{{ client.primary_contact_email ?? 'N/A' }}</span>
-            </div>
-            <div class="profile-item">
-              <span class="profile-label">Phone:</span>
-              <span class="profile-val">{{ client.phone ?? 'N/A' }}</span>
-            </div>
-            <div class="profile-item">
-              <span class="profile-label">Website:</span>
-              <a
-                v-if="client.website_url"
-                :href="client.website_url"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="website-link"
-              >
-                {{ client.website_url }}
-              </a>
-              <span v-else class="profile-val">N/A</span>
-            </div>
-          </div>
         </div>
 
-        <!-- Continuity Health Section -->
-        <div class="dossier-section">
-          <div class="section-title-row">
-            <h4>Continuity & SLA Health</h4>
-            <BaseButton
-              label="Run Diagnostics Ping"
-              variant="secondary"
-              :disabled="pingingContinuity"
-              @click="handlePing"
-            />
-          </div>
-
-          <div v-if="continuity" class="continuity-card">
-            <div class="health-item">
-              <span class="health-bullet green" />
-              <span>SSL Certificate: Monitored & Valid</span>
-            </div>
-            <div class="health-item">
-              <span class="health-bullet" :class="continuity.uptime_healthy ? 'green' : 'red'" />
-              <span>Endpoint Uptime: {{ continuity.uptime_healthy ? 'Operational' : 'Degraded' }}</span>
-            </div>
-            <div class="health-item">
-              <span class="health-bullet green" />
-              <span>Weekly Backup: {{ continuity.backup_bucket }}</span>
-            </div>
-            <div class="ping-meta">
-              Last probe ping: {{ new Date(continuity.last_ping_at).toLocaleTimeString() }}
-            </div>
-          </div>
-          <div v-else class="empty-state">
-            Continuity diagnostics not initialized. Click "Run Diagnostics Ping" to check status.
-          </div>
+        <div class="header-actions">
+          <BaseButton
+            label="+ Log Work"
+            variant="primary"
+            @click="emit('log-work', client)"
+          />
+          <button type="button" class="close-btn" title="Close Workspace (Esc)" @click="emit('close')">
+            ✕
+          </button>
         </div>
+      </header>
 
-        <!-- Monthly Retainer & Timecard Section -->
-        <div class="dossier-section">
-          <div class="section-title-row">
-            <h4>Monthly Retainer Timecard</h4>
-            <BaseButton
-              label="+ Log Work"
-              variant="primary"
-              @click="emit('log-work', client)"
-            />
-          </div>
-
-          <div v-if="timecard" class="timecard-box">
-            <MaintenanceGauge
-              :total-minutes="timecard.total_minutes_logged"
-              :cap-minutes="timecard.monthly_retainer_cap_minutes"
-              :out-of-scope="timecard.out_of_scope_flag"
-            />
-
-            <!-- Work Log Entries Table -->
-            <div class="work-log-history">
-              <h5>Recent Maintenance Entries ({{ timecard.entries.length }})</h5>
-              <div v-if="timecard.entries.length === 0" class="empty-log">
-                No maintenance time logged this billing cycle.
+      <!-- Full-Canvas Dual-Column Split Workspace Body -->
+      <main class="workspace-body">
+        <!-- COLUMN 1: Account Context & Continuity Telemetry (44%) -->
+        <section class="workspace-col col-left">
+          <!-- Account Profile & Identity -->
+          <div class="panel-card">
+            <div class="panel-header">
+              <h3 class="panel-title">👤 Account Profile</h3>
+              <BaseBadge variant="primary">{{ client.state }}</BaseBadge>
+            </div>
+            <div class="meta-vitals-grid">
+              <div class="vital-item">
+                <span class="vital-label">Primary Contact</span>
+                <span class="vital-text">{{ client.primary_contact_name ?? 'N/A' }}</span>
               </div>
-              <div v-else class="log-entries-list">
-                <div v-for="entry in timecard.entries" :key="entry.id" class="log-entry-item">
-                  <div class="log-entry-head">
-                    <span class="log-desc">{{ entry.description }}</span>
-                    <strong class="log-duration">{{ entry.minutes_spent }}m</strong>
+              <div class="vital-item">
+                <span class="vital-label">Contact Email</span>
+                <span class="vital-text">{{ client.primary_contact_email ?? 'N/A' }}</span>
+              </div>
+              <div class="vital-item">
+                <span class="vital-label">Phone</span>
+                <span class="vital-text">{{ client.phone ?? 'N/A' }}</span>
+              </div>
+              <div class="vital-item">
+                <span class="vital-label">Website</span>
+                <a
+                  v-if="client.website_url"
+                  :href="client.website_url"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="website-link"
+                >
+                  {{ client.website_url }} ↗
+                </a>
+                <span v-else class="vital-empty">N/A</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Continuity & SLA Health Probes -->
+          <div class="panel-card">
+            <div class="panel-header">
+              <h3 class="panel-title">🛡️ Continuity & SLA Health</h3>
+              <BaseButton
+                label="Run Diagnostics Ping"
+                variant="secondary"
+                :disabled="pingingContinuity"
+                @click="handlePing"
+              />
+            </div>
+
+            <div v-if="continuity" class="continuity-card">
+              <div class="health-item">
+                <span class="health-bullet green" />
+                <span>SSL Certificate: Monitored & Valid</span>
+              </div>
+              <div class="health-item">
+                <span class="health-bullet" :class="continuity.uptime_healthy ? 'green' : 'red'" />
+                <span>Endpoint Uptime: {{ continuity.uptime_healthy ? 'Operational' : 'Degraded' }}</span>
+              </div>
+              <div class="health-item">
+                <span class="health-bullet green" />
+                <span>Weekly Backup: {{ continuity.backup_bucket }}</span>
+              </div>
+              <div class="ping-meta">
+                Last probe ping: {{ new Date(continuity.last_ping_at).toLocaleTimeString() }}
+              </div>
+            </div>
+            <div v-else class="empty-state">
+              Continuity diagnostics not initialized. Click "Run Diagnostics Ping" to check status.
+            </div>
+          </div>
+
+          <!-- Governed Active Service Contracts -->
+          <div class="panel-card">
+            <div class="panel-header">
+              <h3 class="panel-title">📄 Active Service Contracts</h3>
+              <span class="panel-count">{{ client.contracts?.length ?? 0 }}</span>
+            </div>
+            <div v-if="client.contracts && client.contracts.length > 0" class="contracts-list">
+              <div v-for="c in client.contracts" :key="c.id" class="contract-card">
+                <div class="contract-head">
+                  <span class="contract-code">{{ c.service_code }}</span>
+                  <BaseBadge variant="success">{{ c.status }}</BaseBadge>
+                </div>
+                <div class="contract-body">
+                  <div>Rate: <strong>${{ c.billing_rate }}</strong> / {{ c.billing_frequency }}</div>
+                  <div>Type: {{ c.contract_type }}</div>
+                  <div class="contract-date">Started: {{ c.start_date }}</div>
+                </div>
+              </div>
+            </div>
+            <div v-else class="empty-state">
+              No service contracts attached.
+            </div>
+          </div>
+        </section>
+
+        <!-- COLUMN 2: Operations, Retainer Timecard & Secret Vault (56%) -->
+        <section class="workspace-col col-right">
+          <!-- Monthly Retainer & Timecard Section -->
+          <div class="panel-card">
+            <div class="panel-header">
+              <h3 class="panel-title">⏱️ Monthly Retainer Timecard</h3>
+              <BaseButton
+                label="+ Log Work"
+                variant="primary"
+                @click="emit('log-work', client)"
+              />
+            </div>
+
+            <div v-if="timecard" class="timecard-box">
+              <MaintenanceGauge
+                :total-minutes="timecard.total_minutes_logged"
+                :cap-minutes="timecard.monthly_retainer_cap_minutes"
+                :out-of-scope="timecard.out_of_scope_flag"
+              />
+
+              <!-- Work Log Entries Table -->
+              <div class="work-log-history">
+                <h5 class="history-title">Recent Maintenance Entries ({{ timecard.entries.length }})</h5>
+                <div v-if="timecard.entries.length === 0" class="empty-log">
+                  No maintenance time logged this billing cycle.
+                </div>
+                <div v-else class="log-entries-list">
+                  <div v-for="entry in timecard.entries" :key="entry.id" class="log-entry-item">
+                    <div class="log-entry-head">
+                      <span class="log-desc">{{ entry.description }}</span>
+                      <strong class="log-duration">{{ entry.minutes_spent }}m</strong>
+                    </div>
+                    <div class="log-entry-meta">
+                      <span>Logged by {{ entry.author }}</span>
+                      <span>{{ new Date(entry.performed_at).toLocaleDateString() }}</span>
+                    </div>
                   </div>
-                  <div class="log-entry-meta">
-                    <span>Logged by {{ entry.author }}</span>
-                    <span>{{ new Date(entry.performed_at).toLocaleDateString() }}</span>
+                </div>
+              </div>
+            </div>
+            <div v-else class="empty-state">
+              Loading timecard telemetry...
+            </div>
+          </div>
+
+          <!-- Credentials & Access Vault Section -->
+          <div class="panel-card">
+            <div class="panel-header">
+              <div class="title-with-badge">
+                <h3 class="panel-title">🔐 Credentials & Access Vault</h3>
+                <span class="panel-count">{{ secrets.length }}</span>
+              </div>
+              <BaseButton
+                label="+ Add Secret"
+                variant="secondary"
+                @click="openAddSecretModal"
+              />
+            </div>
+
+            <div v-if="loadingSecrets" class="empty-state">
+              Loading encrypted vault credentials...
+            </div>
+
+            <div v-else-if="secrets.length === 0" class="empty-state">
+              No credentials stored in vault. Click "+ Add Secret" to safely ingest website or server logins.
+            </div>
+
+            <div v-else class="vault-credentials-list">
+              <div v-for="sec in secrets" :key="sec.id" class="vault-credential-card">
+                <div class="vault-card-head">
+                  <div class="vault-card-title-group">
+                    <span class="vault-sec-type">{{ sec.secret_type }}</span>
+                    <strong class="vault-sec-label">{{ sec.label }}</strong>
                   </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Governed Service Contracts Section -->
-        <div class="dossier-section">
-          <h4>Active Service Contracts</h4>
-          <div v-if="client.contracts && client.contracts.length > 0" class="contracts-list">
-            <div v-for="c in client.contracts" :key="c.id" class="contract-card">
-              <div class="contract-head">
-                <span class="contract-code">{{ c.service_code }}</span>
-                <BaseBadge variant="success">{{ c.status }}</BaseBadge>
-              </div>
-              <div class="contract-body">
-                <div>Rate: <strong>${{ c.billing_rate }}</strong> / {{ c.billing_frequency }}</div>
-                <div>Type: {{ c.contract_type }}</div>
-                <div class="contract-date">Started: {{ c.start_date }}</div>
-              </div>
-            </div>
-          </div>
-          <div v-else class="empty-state">
-            No service contracts attached.
-          </div>
-        </div>
-
-        <!-- Credentials & Access Vault Section -->
-        <div class="dossier-section">
-          <div class="section-title-row">
-            <h4>Credentials & Access Vault</h4>
-            <BaseButton
-              label="+ Add Secret"
-              variant="secondary"
-              @click="openAddSecretModal"
-            />
-          </div>
-
-          <div v-if="loadingSecrets" class="empty-state">
-            Loading encrypted vault credentials...
-          </div>
-
-          <div v-else-if="secrets.length === 0" class="empty-state">
-            No credentials stored in vault. Click "+ Add Secret" to safely ingest website or server logins.
-          </div>
-
-          <div v-else class="vault-credentials-list">
-            <div v-for="sec in secrets" :key="sec.id" class="vault-credential-card">
-              <div class="vault-card-head">
-                <div class="vault-card-title-group">
-                  <span class="vault-sec-type">{{ sec.secret_type }}</span>
-                  <strong class="vault-sec-label">{{ sec.label }}</strong>
-                </div>
-                <div class="vault-card-actions">
-                  <button
-                    class="vault-action-btn delete-btn"
-                    title="Purge Secret"
-                    @click="handleDeleteSecret(sec.id)"
-                  >
-                    🗑️
-                  </button>
-                </div>
-              </div>
-
-              <div class="vault-card-details">
-                <div v-if="sec.login_url" class="vault-row">
-                  <span class="vault-field-label">URL:</span>
-                  <a :href="sec.login_url" target="_blank" rel="noopener noreferrer" class="vault-link">
-                    {{ sec.login_url }}
-                  </a>
-                </div>
-                <div class="vault-row">
-                  <span class="vault-field-label">Username:</span>
-                  <code class="vault-username">{{ sec.username }}</code>
-                </div>
-                <div class="vault-row vault-secret-row">
-                  <span class="vault-field-label">Password:</span>
-                  <div class="vault-secret-reveal-box">
-                    <span v-if="activeReveals[sec.id]" class="revealed-plaintext">
-                      {{ activeReveals[sec.id].plaintext }}
-                    </span>
-                    <span v-else class="masked-dots">
-                      ••••••••••••••••
-                    </span>
-
-                    <span v-if="activeReveals[sec.id]" class="countdown-badge">
-                      {{ activeReveals[sec.id].remainingSeconds }}s
-                    </span>
-
+                  <div class="vault-card-actions">
                     <button
-                      class="reveal-toggle-btn"
-                      :title="activeReveals[sec.id] ? 'Hide Password' : 'Audit Reveal Password'"
-                      :disabled="revealingIds[sec.id]"
-                      @click="handleReveal(sec.id)"
+                      class="vault-action-btn delete-btn"
+                      title="Purge Secret"
+                      @click="handleDeleteSecret(sec.id)"
                     >
-                      {{ activeReveals[sec.id] ? '👁️‍🗨️' : '👁️' }}
-                    </button>
-
-                    <button
-                      class="copy-btn"
-                      :title="copyingIds[sec.id] ? 'Copied!' : 'Copy to Clipboard'"
-                      @click="handleCopy(sec.id)"
-                    >
-                      {{ copyingIds[sec.id] ? '✓' : '📋' }}
+                      🗑️
                     </button>
                   </div>
                 </div>
-                <div class="vault-meta-row">
-                  <span>AES-256 ({{ sec.key_version }})</span>
-                  <span>Updated {{ new Date(sec.updated_at).toLocaleDateString() }}</span>
+
+                <div class="vault-card-details">
+                  <div v-if="sec.login_url" class="vault-row">
+                    <span class="vault-field-label">URL:</span>
+                    <a :href="sec.login_url" target="_blank" rel="noopener noreferrer" class="vault-link">
+                      {{ sec.login_url }}
+                    </a>
+                  </div>
+                  <div class="vault-row">
+                    <span class="vault-field-label">Username:</span>
+                    <code class="vault-username">{{ sec.username }}</code>
+                  </div>
+                  <div class="vault-row vault-secret-row">
+                    <span class="vault-field-label">Password:</span>
+                    <div class="vault-secret-reveal-box">
+                      <span v-if="activeReveals[sec.id]" class="revealed-plaintext">
+                        {{ activeReveals[sec.id].plaintext }}
+                      </span>
+                      <span v-else class="masked-dots">
+                        ••••••••••••••••
+                      </span>
+
+                      <span v-if="activeReveals[sec.id]" class="countdown-badge">
+                        {{ activeReveals[sec.id].remainingSeconds }}s
+                      </span>
+
+                      <button
+                        class="reveal-toggle-btn"
+                        :title="activeReveals[sec.id] ? 'Hide Password' : 'Audit Reveal Password'"
+                        :disabled="revealingIds[sec.id]"
+                        @click="handleReveal(sec.id)"
+                      >
+                        {{ activeReveals[sec.id] ? '👁️‍🗨️' : '👁️' }}
+                      </button>
+
+                      <button
+                        class="copy-btn"
+                        :title="copyingIds[sec.id] ? 'Copied!' : 'Copy to Clipboard'"
+                        @click="handleCopy(sec.id)"
+                      >
+                        {{ copyingIds[sec.id] ? '✓' : '📋' }}
+                      </button>
+                    </div>
+                  </div>
+                  <div class="vault-meta-row">
+                    <span>AES-256 ({{ sec.key_version }})</span>
+                    <span>Updated {{ new Date(sec.updated_at).toLocaleDateString() }}</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        </section>
+      </main>
     </div>
 
     <!-- Add Secret Modal -->
@@ -543,28 +575,30 @@ async function handlePing(): Promise<void> {
 </template>
 
 <style scoped>
-.drawer-overlay {
+.workspace-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: rgba(0, 0, 0, 0.7);
   z-index: 50;
   display: flex;
   justify-content: flex-end;
 }
 
-.dossier-drawer {
-  width: 100%;
-  max-width: 540px;
-  height: 100%;
+/* Expands across full dashboard width minus 260px vertical navigation rail */
+.workspace-canvas {
+  width: calc(100vw - 260px);
+  max-width: calc(100vw - 260px);
+  height: 100vh;
   background-color: var(--color-background, #090d16);
   border-left: 1px solid var(--color-border, #1e293b);
   display: flex;
   flex-direction: column;
-  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.5);
-  animation: slideIn 0.25s ease-out;
+  box-shadow: -6px 0 32px rgba(0, 0, 0, 0.6);
+  animation: slideInWorkspace 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
 }
 
-@keyframes slideIn {
+@keyframes slideInWorkspace {
   from {
     transform: translateX(100%);
   }
@@ -573,25 +607,56 @@ async function handlePing(): Promise<void> {
   }
 }
 
-.drawer-header {
-  padding: 1.25rem 1.5rem;
+/* Header */
+.workspace-header {
+  padding: 1rem 1.75rem;
   border-bottom: 1px solid var(--color-border, #1e293b);
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   background-color: var(--color-surface, #0f172a);
+  flex-shrink: 0;
 }
 
-.tracking-uid {
-  font-family: monospace;
+.breadcrumbs-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-size: 0.75rem;
   color: var(--color-text-muted, #94a3b8);
 }
 
-.client-title {
-  margin: 0.25rem 0 0;
-  font-size: 1.2rem;
+.workspace-tag {
+  font-weight: 600;
+  color: var(--color-primary, #3b82f6);
+}
+
+.crumb-separator {
+  color: var(--color-text-muted, #64748b);
+}
+
+.tracking-uid {
+  font-family: monospace;
+}
+
+.title-status-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.workspace-title {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
   color: var(--color-text, #f1f5f9);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .close-btn {
@@ -600,61 +665,128 @@ async function handlePing(): Promise<void> {
   color: var(--color-text-muted, #94a3b8);
   font-size: 1.25rem;
   cursor: pointer;
+  padding: 0.35rem 0.6rem;
+  border-radius: 6px;
+  transition: all 0.15s ease;
 }
 
-.drawer-body {
-  padding: 1.5rem;
+.close-btn:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: var(--color-text, #f1f5f9);
+}
+
+/* Body: 2 Independent Columns */
+.workspace-body {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  background-color: var(--color-background, #090d16);
+}
+
+.workspace-col {
+  height: 100%;
   overflow-y: auto;
+  padding: 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
 
-.dossier-section {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+.col-left {
+  width: 44%;
+  border-right: 1px solid var(--color-border, #1e293b);
+  background-color: rgba(15, 23, 42, 0.4);
+}
+
+.col-right {
+  width: 56%;
+  background-color: var(--color-background, #090d16);
+}
+
+/* Generic Panel Cards */
+.panel-card {
   background-color: var(--color-surface, #0f172a);
   border: 1px solid var(--color-border, #1e293b);
   border-radius: 8px;
-  padding: 1rem;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-.section-title-row {
+.panel-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.dossier-section h4 {
+.panel-title {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
   color: var(--color-text, #f1f5f9);
 }
 
-.profile-grid {
+.title-with-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.panel-count {
+  font-size: 0.72rem;
+  padding: 0.15rem 0.5rem;
+  background-color: var(--color-surface-muted, #1e293b);
+  border-radius: 9999px;
+  color: var(--color-text-muted, #94a3b8);
+  font-weight: 600;
+}
+
+/* Meta vitals */
+.meta-vitals-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
-  font-size: 0.8rem;
+  gap: 0.85rem;
 }
 
-.profile-label {
+.vital-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.vital-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
   color: var(--color-text-muted, #94a3b8);
-  display: block;
 }
 
-.profile-val {
+.vital-text {
+  font-size: 0.82rem;
   color: var(--color-text, #f1f5f9);
-  font-weight: 500;
+}
+
+.vital-empty {
+  font-size: 0.82rem;
+  color: var(--color-text-muted, #94a3b8);
+  font-style: italic;
 }
 
 .website-link {
+  font-size: 0.82rem;
   color: var(--color-primary, #3b82f6);
   text-decoration: none;
   word-break: break-all;
 }
 
+.website-link:hover {
+  text-decoration: underline;
+}
+
+/* Continuity */
 .continuity-card {
   display: flex;
   flex-direction: column;
@@ -691,63 +823,18 @@ async function handlePing(): Promise<void> {
   margin-top: 0.25rem;
 }
 
-.timecard-box {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.work-log-history h5 {
-  margin: 0 0 0.5rem;
-  font-size: 0.8rem;
-  color: var(--color-text-muted, #94a3b8);
-}
-
-.log-entries-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  max-height: 180px;
-  overflow-y: auto;
-}
-
-.log-entry-item {
-  background-color: var(--color-surface-muted, #1e293b);
-  border: 1px solid var(--color-border, #334155);
-  border-radius: 6px;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.75rem;
-}
-
-.log-entry-head {
-  display: flex;
-  justify-content: space-between;
-  color: var(--color-text, #f1f5f9);
-}
-
-.log-duration {
-  color: var(--color-primary, #3b82f6);
-}
-
-.log-entry-meta {
-  display: flex;
-  justify-content: space-between;
-  color: var(--color-text-muted, #94a3b8);
-  font-size: 0.7rem;
-  margin-top: 0.25rem;
-}
-
+/* Contracts */
 .contracts-list {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 0.5rem;
+  gap: 0.6rem;
 }
 
 .contract-card {
   background-color: var(--color-surface-muted, #1e293b);
   border: 1px solid var(--color-border, #334155);
   border-radius: 6px;
-  padding: 0.6rem 0.75rem;
+  padding: 0.75rem;
   font-size: 0.8rem;
 }
 
@@ -771,23 +858,78 @@ async function handlePing(): Promise<void> {
   font-size: 0.75rem;
 }
 
+.contract-date {
+  font-style: italic;
+}
+
+/* Timecard */
+.timecard-box {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.history-title {
+  margin: 0 0 0.5rem;
+  font-size: 0.8rem;
+  color: var(--color-text-muted, #94a3b8);
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.log-entries-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.log-entry-item {
+  background-color: var(--color-surface-muted, #1e293b);
+  border: 1px solid var(--color-border, #334155);
+  border-radius: 6px;
+  padding: 0.6rem 0.85rem;
+  font-size: 0.78rem;
+}
+
+.log-entry-head {
+  display: flex;
+  justify-content: space-between;
+  color: var(--color-text, #f1f5f9);
+}
+
+.log-duration {
+  color: var(--color-primary, #3b82f6);
+}
+
+.log-entry-meta {
+  display: flex;
+  justify-content: space-between;
+  color: var(--color-text-muted, #94a3b8);
+  font-size: 0.7rem;
+  margin-top: 0.25rem;
+}
+
 .empty-state, .empty-log {
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   color: var(--color-text-muted, #94a3b8);
   font-style: italic;
 }
 
+/* Secret Vault */
 .vault-credentials-list {
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  gap: 0.75rem;
 }
 
 .vault-credential-card {
   background-color: var(--color-surface-muted, #1e293b);
   border: 1px solid var(--color-border, #334155);
   border-radius: 6px;
-  padding: 0.75rem;
+  padding: 0.85rem;
 }
 
 .vault-card-head {
@@ -836,8 +978,8 @@ async function handlePing(): Promise<void> {
 .vault-card-details {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
-  font-size: 0.75rem;
+  gap: 0.4rem;
+  font-size: 0.78rem;
 }
 
 .vault-row {
@@ -847,7 +989,7 @@ async function handlePing(): Promise<void> {
 }
 
 .vault-field-label {
-  width: 70px;
+  width: 75px;
   color: var(--color-text-muted, #94a3b8);
   flex-shrink: 0;
 }
@@ -864,7 +1006,7 @@ async function handlePing(): Promise<void> {
   font-family: monospace;
   color: var(--color-text, #f1f5f9);
   background-color: rgba(0, 0, 0, 0.3);
-  padding: 0.1rem 0.3rem;
+  padding: 0.1rem 0.35rem;
   border-radius: 3px;
 }
 
@@ -972,31 +1114,23 @@ async function handlePing(): Promise<void> {
   margin-top: 0.5rem;
 }
 
-@media (max-width: 768px) {
-  .dossier-drawer {
+@media (max-width: 1024px) {
+  .workspace-canvas {
     width: 100vw;
     max-width: 100vw;
-    border-left: none;
-    box-shadow: none;
   }
 
-  .drawer-header {
-    padding: 1rem 1.25rem;
-  }
-
-  .drawer-body {
-    padding: 1rem;
-    gap: 1rem;
-  }
-
-  .profile-grid {
-    grid-template-columns: 1fr;
-    gap: 0.5rem;
-  }
-
-  .contract-body {
+  .workspace-body {
     flex-direction: column;
-    gap: 0.25rem;
+    overflow-y: auto;
+  }
+
+  .col-left, .col-right {
+    width: 100%;
+    border-right: none;
+    height: auto;
+    overflow-y: visible;
   }
 }
 </style>
+
