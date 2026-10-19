@@ -13,14 +13,17 @@ const props = withDefaults(
   }
 )
 
+const hasPlan = computed(() => (props.capMinutes ?? 0) > 0)
+
 const percentage = computed(() => {
-  if (props.capMinutes <= 0) return 0
-  return Math.min(100, Math.round((props.totalMinutes / props.capMinutes) * 100))
+  if (!hasPlan.value || props.capMinutes! <= 0) return 0
+  return Math.min(100, Math.round((props.totalMinutes / props.capMinutes!) * 100))
 })
 
-const gaugeStatus = computed<'normal' | 'warning' | 'danger'>(() => {
-  if (props.outOfScope || props.totalMinutes > props.capMinutes) return 'danger'
-  if (props.totalMinutes >= 25) return 'warning'
+const gaugeStatus = computed<'normal' | 'warning' | 'danger' | 'none'>(() => {
+  if (!hasPlan.value) return 'none'
+  if (props.outOfScope || props.totalMinutes > props.capMinutes!) return 'danger'
+  if (props.totalMinutes >= props.capMinutes! * 0.8) return 'warning'
   return 'normal'
 })
 </script>
@@ -29,12 +32,15 @@ const gaugeStatus = computed<'normal' | 'warning' | 'danger'>(() => {
   <div class="maintenance-gauge">
     <div class="gauge-labels">
       <span class="gauge-title">Monthly Maintenance (Retainer)</span>
-      <span class="gauge-metrics">
+      <span v-if="hasPlan" class="gauge-metrics">
         <strong>{{ totalMinutes }}</strong> / {{ capMinutes }} mins
+      </span>
+      <span v-else class="gauge-metrics no-plan">
+        No Active Care Plan
       </span>
     </div>
 
-    <div class="progress-bar-container">
+    <div v-if="hasPlan" class="progress-bar-container">
       <div
         class="progress-fill"
         :class="gaugeStatus"
@@ -42,11 +48,14 @@ const gaugeStatus = computed<'normal' | 'warning' | 'danger'>(() => {
       />
     </div>
 
-    <div v-if="gaugeStatus === 'danger'" class="out-of-scope-badge">
+    <div v-if="!hasPlan && totalMinutes > 0" class="out-of-scope-badge">
+      ℹ️ {{ totalMinutes }}m Logged (Ad-Hoc / Out-of-Scope)
+    </div>
+    <div v-else-if="gaugeStatus === 'danger'" class="out-of-scope-badge">
       ⚠️ Out-of-Scope (Additional SOW Required)
     </div>
     <div v-else-if="gaugeStatus === 'warning'" class="warning-badge">
-      ⚡ Near Cap ({{ capMinutes - totalMinutes }} mins remaining)
+      ⚡ Near Cap ({{ (capMinutes ?? 0) - totalMinutes }} mins remaining)
     </div>
   </div>
 </template>
