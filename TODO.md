@@ -2,15 +2,18 @@
 
 ## Active Priority Tasks (Item Evaluation & ROI Breakdown)
 
-- [ ] **1. Small Quality of Life Improvements to Dashboard**
-  - **ROI:** Low
-  - **Scope:** Fix high-friction UI bugs only. Cap strictly at 1 hour max.
-  - **Restrictions:** No new components, no new pages, no visual redesigns.
+- [x] **1. Small Quality of Life Improvements to Dashboard** (Completed in PR #35 & #36)
+  - Full-canvas dual-column Client Account workspace (`calc(100vw - 260px)`).
+  - Decoupled Care Plan retainers with dynamic cap calculation and neutral 0-plan gauge.
 
 - [ ] **2. Finalize Timecard System in Dashboard**
-  - **ROI:** Zero (until clients exist)
-  - **Scope:** Connect existing timecard frontend view to minimal backend persistence if already in flight.
-  - **Restrictions:** Hard stop after basic hookup; do not build automated billing, invoice generation, or complex analytics.
+  - **ROI:** Medium (Direct tracking of billable extra hours vs. monthly retainer)
+  - **Scope:**
+    - Add 3-way entry categorization (`retainer_maintenance`, `billable_extra`, `internal_non_billable`).
+    - Enforce only retainer maintenance consuming monthly plan cap.
+    - Add entry category dropdown in `LogMaintenanceModal.vue`.
+    - Display entry type badges in `ClientDossierDrawer.vue` maintenance history.
+  - **Restrictions:** Hard stop after category tagging; no complex analytics or PDF invoice generators on this pass.
 
 - [ ] **3. Client Contract PDF Storage Port**
   - **ROI:** Low-Medium
@@ -86,4 +89,12 @@
   - Structure client-facing invoice generation for fixed milestone / retainer fees.
 - [ ] **6.3 Profitability & ROI Reporting:**
   - Metrics dashboard correlating logged hours against fixed contract revenue.
+
+### 7. Administration KPI & Business Metrics Dashboard (Analytics / Reporting)
+- [ ] **7.1 KPI Executive Cards:**
+  - Total active client count, monthly recurring revenue (MRR) gauge, and total billed vs. retainer hours.
+- [ ] **7.2 Aggregate Timecard Table & Visual Breakdown:**
+  - Cross-client table of all logged maintenance entries for the active billing cycle.
+  - Category breakdown chart (Retainer Maintenance vs. Billable Extra vs. Internal Pro-Bono).
+
 

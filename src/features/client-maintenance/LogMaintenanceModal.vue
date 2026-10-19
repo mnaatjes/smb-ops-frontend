@@ -18,6 +18,7 @@ const emit = defineEmits<{
 
 const description = ref('')
 const minutesSpent = ref<number>(15)
+const entryType = ref<'retainer_maintenance' | 'billable_extra' | 'internal_non_billable'>('retainer_maintenance')
 const author = ref('operator')
 const errorMessage = ref<string | null>(null)
 
@@ -35,11 +36,13 @@ function handleSubmit(): void {
   emit('submit', {
     description: description.value.trim(),
     minutes_spent: Number(minutesSpent.value),
+    entry_type: entryType.value,
     author: author.value.trim() || 'operator'
   })
 
   description.value = ''
   minutesSpent.value = 15
+  entryType.value = 'retainer_maintenance'
 }
 </script>
 
@@ -51,12 +54,21 @@ function handleSubmit(): void {
   >
     <div class="log-maintenance-form">
       <p class="modal-intro">
-        Log support or ad-hoc maintenance minutes worked for
-        <strong>{{ clientName }}</strong> against this month's retainer timecard.
+        Log support or maintenance minutes worked for
+        <strong>{{ clientName }}</strong>.
       </p>
 
       <div v-if="errorMessage" class="error-banner">
         {{ errorMessage }}
+      </div>
+
+      <div class="field-group">
+        <label for="entry-type" class="field-label">Work Category *</label>
+        <select id="entry-type" v-model="entryType" class="field-select">
+          <option value="retainer_maintenance">Monthly Care Plan Check (Retainer)</option>
+          <option value="billable_extra">Extra Billable Work (Invoice Line Item)</option>
+          <option value="internal_non_billable">Internal / Non-Billable</option>
+        </select>
       </div>
 
       <div class="field-group">
@@ -91,6 +103,7 @@ function handleSubmit(): void {
           />
         </div>
       </div>
+
 
       <div class="modal-actions">
         <BaseButton label="Cancel" variant="secondary" @click="emit('close')" />
@@ -143,6 +156,21 @@ function handleSubmit(): void {
   color: var(--color-text, #f1f5f9);
 }
 
+.field-select {
+  background-color: var(--color-surface, #0f172a);
+  border: 1px solid var(--color-border, #334155);
+  border-radius: 6px;
+  color: var(--color-text, #f1f5f9);
+  padding: 0.6rem 0.8rem;
+  font-family: inherit;
+  font-size: 0.85rem;
+}
+
+.field-select:focus {
+  outline: none;
+  border-color: var(--color-primary, #3b82f6);
+}
+
 .field-textarea {
   background-color: var(--color-surface, #0f172a);
   border: 1px solid var(--color-border, #334155);
@@ -153,6 +181,7 @@ function handleSubmit(): void {
   font-size: 0.85rem;
   resize: vertical;
 }
+
 
 .field-textarea:focus {
   outline: none;
