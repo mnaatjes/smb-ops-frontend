@@ -19,7 +19,8 @@ import type {
   ContactPerson,
   CreateContactPayload,
   OutreachActivity,
-  CreateActivityPayload
+  CreateActivityPayload,
+  OpportunityPlaybook
 } from '@/entities/lead/model'
 import {
   fetchRankedLeads,
@@ -48,7 +49,9 @@ import {
   deleteLeadContact as apiDeleteLeadContact,
   fetchLeadActivities as apiFetchLeadActivities,
   logLeadActivity as apiLogLeadActivity,
-  updateLeadStage as apiUpdateLeadStage
+  updateLeadStage as apiUpdateLeadStage,
+  fetchOpportunityPlaybook as apiFetchOpportunityPlaybook,
+  discoverLeadContacts as apiDiscoverLeadContacts
 } from '@/shared/api/leads'
 
 export const useLeadStore = defineStore('lead', () => {
@@ -460,6 +463,21 @@ export const useLeadStore = defineStore('lead', () => {
     statusMessage.value = `Updated opportunity stage: ${stage}`
   }
 
+  async function getPlaybook(leadId: string): Promise<OpportunityPlaybook> {
+    return await apiFetchOpportunityPlaybook(leadId)
+  }
+
+  async function discoverContacts(leadId: string): Promise<ContactPerson[]> {
+    loading.value = true
+    try {
+      const discovered = await apiDiscoverLeadContacts(leadId)
+      statusMessage.value = `Enriched ${discovered.length} stakeholder contacts.`
+      return discovered
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     leads,
     services,
@@ -506,7 +524,9 @@ export const useLeadStore = defineStore('lead', () => {
     removeContact,
     getActivities,
     addActivity,
-    setOpportunityStage
+    setOpportunityStage,
+    getPlaybook,
+    discoverContacts
   }
 })
 

@@ -21,7 +21,8 @@ import type {
   ContactPerson,
   CreateContactPayload,
   OutreachActivity,
-  CreateActivityPayload
+  CreateActivityPayload,
+  OpportunityPlaybook
 } from '@/shared/types/lead'
 
 export async function fetchRankedLeads(minScore = 0): Promise<RankedLead[]> {
@@ -196,5 +197,16 @@ export async function updateLeadStage(leadId: string, stage: string): Promise<Pr
   const response = await apiClient.patch<Prospect>(`/leads/${leadId}/stage`, { stage })
   return response.data
 }
+
+export async function fetchOpportunityPlaybook(leadId: string): Promise<OpportunityPlaybook> {
+  const response = await apiClient.get<OpportunityPlaybook>(`/leads/${leadId}/playbook`)
+  return response.data
+}
+
+export async function discoverLeadContacts(leadId: string): Promise<ContactPerson[]> {
+  const response = await apiClient.post<ContactPerson[]>(`/leads/${leadId}/contacts/discover`)
+  return response.data
+}
+
 
 
