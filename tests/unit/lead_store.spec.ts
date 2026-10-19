@@ -408,7 +408,7 @@ describe('useLeadStore', () => {
         phone: '111',
         address: '100 Main St',
         source: 'DISCOVERY',
-        status: 'pursued' as any,
+        status: 'pursued',
         opportunity_stage: 'claimed',
         disqualification_reason: null,
         created_at: '2026-10-19T00:00:00Z',
@@ -421,7 +421,7 @@ describe('useLeadStore', () => {
     vi.mocked(leadApi.updateLeadStage).mockResolvedValue({
       ...mockLead.prospect,
       opportunity_stage: 'contact_attempted',
-      status: 'pursued' as any
+      status: 'pursued'
     })
 
     const store = useLeadStore()
