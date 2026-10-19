@@ -398,5 +398,44 @@ describe('useLeadStore', () => {
     await store.deleteSecret('client-1', 'sec-1')
     expect(leadApi.deleteClientSecret).toHaveBeenCalledWith('client-1', 'sec-1')
   })
+
+  it('maintains pursued lead visibility in pursuedLeads when setOpportunityStage is called', async () => {
+    const mockLead: RankedLead = {
+      prospect: {
+        id: 'lead-stage-1',
+        business_name: 'Stage Test Lead',
+        website_url: 'http://stagetest.com',
+        phone: '111',
+        address: '100 Main St',
+        source: 'DISCOVERY',
+        status: 'pursued' as any,
+        opportunity_stage: 'claimed',
+        disqualification_reason: null,
+        created_at: '2026-10-19T00:00:00Z',
+        updated_at: '2026-10-19T00:00:00Z'
+      },
+      audit: null
+    }
+
+    vi.mocked(leadApi.fetchRankedLeads).mockResolvedValue([mockLead])
+    vi.mocked(leadApi.updateLeadStage).mockResolvedValue({
+      ...mockLead.prospect,
+      opportunity_stage: 'contact_attempted',
+      status: 'pursued' as any
+    })
+
+    const store = useLeadStore()
+    await store.loadRankedLeads()
+
+    expect(store.pursuedLeads.length).toBe(1)
+    expect(store.pursuedLeads[0].prospect.id).toBe('lead-stage-1')
+
+    await store.setOpportunityStage('lead-stage-1', 'contact_attempted')
+
+    expect(leadApi.updateLeadStage).toHaveBeenCalledWith('lead-stage-1', 'contact_attempted')
+    expect(store.pursuedLeads.length).toBe(1)
+    expect(store.pursuedLeads[0].prospect.opportunity_stage).toBe('contact_attempted')
+    expect(store.pursuedLeads[0].prospect.status).toBe('PURSUED')
+  })
 })
 
