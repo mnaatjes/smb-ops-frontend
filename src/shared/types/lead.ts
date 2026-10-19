@@ -16,6 +16,7 @@ export interface Prospect {
   source: string
   status: ProspectStatus
   disqualification_reason: string | null
+  opportunity_stage?: OpportunityStage | string | null
   created_at: string
   updated_at: string
 }
@@ -214,5 +215,63 @@ export interface ClientSecretPayload {
   username: string
   password: string
   login_url?: string | null
+}
+
+export type OpportunityStage =
+  | 'claimed'
+  | 'contact_attempted'
+  | 'engaged'
+  | 'appointment_scheduled'
+  | 'proposal_presented'
+  | 'converted'
+  | 'disqualified'
+
+export type ActivityChannel =
+  | 'phone_call'
+  | 'voicemail'
+  | 'email'
+  | 'in_person_visit'
+  | 'appointment'
+  | 'note'
+
+export interface ContactPerson {
+  id: string
+  lead_id: string
+  name: string
+  role_title: string
+  phone?: string | null
+  email?: string | null
+  is_primary: boolean
+  notes?: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface CreateContactPayload {
+  name: string
+  role_title: string
+  phone?: string | null
+  email?: string | null
+  is_primary?: boolean
+  notes?: string | null
+}
+
+export interface OutreachActivity {
+  id: string
+  lead_id: string
+  contact_id?: string | null
+  channel: ActivityChannel | string
+  summary: string
+  scheduled_at?: string | null
+  performed_by: string
+  created_at: string
+}
+
+export interface CreateActivityPayload {
+  channel: ActivityChannel | string
+  summary: string
+  contact_id?: string | null
+  scheduled_at?: string | null
+  performed_by?: string
 }
 

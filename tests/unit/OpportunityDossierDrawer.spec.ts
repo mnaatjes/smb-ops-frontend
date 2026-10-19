@@ -1,9 +1,14 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { setActivePinia, createPinia } from 'pinia'
 import OpportunityDossierDrawer from '@/features/opportunity-dossier/OpportunityDossierDrawer.vue'
 import type { RankedLead, ServiceCatalogItem } from '@/shared/types/lead'
 
 describe('OpportunityDossierDrawer.vue', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+    vi.clearAllMocks()
+  })
   const mockLead: RankedLead = {
     prospect: {
       id: 'lead-test-opp-1',
