@@ -136,14 +136,18 @@ export interface ContractAgreement {
   created_at: string
 }
 
+export type TimecardEntryType = 'retainer_maintenance' | 'billable_extra' | 'internal_non_billable'
+
 export interface TimecardEntry {
   id: string
   timecard_id: string
   description: string
   minutes_spent: number
+  entry_type?: TimecardEntryType
   performed_at: string
   author: string
 }
+
 
 export interface Timecard {
   id: string
@@ -194,8 +198,10 @@ export interface OnboardClientPayload {
 export interface LogTimecardPayload {
   description: string
   minutes_spent: number
+  entry_type?: TimecardEntryType
   author?: string
 }
+
 
 export type SecretType =
   | 'wordpress_admin'

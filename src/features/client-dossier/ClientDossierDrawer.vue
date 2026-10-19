@@ -237,7 +237,19 @@ async function handlePing(): Promise<void> {
     pingingContinuity.value = false
   }
 }
+
+function formatEntryType(entryType?: string): string {
+  switch (entryType) {
+    case 'billable_extra':
+      return 'Billable Extra'
+    case 'internal_non_billable':
+      return 'Internal'
+    default:
+      return 'Retainer'
+  }
+}
 </script>
+
 
 <template>
   <div v-if="show && client" class="workspace-overlay" @click.self="emit('close')">
@@ -395,7 +407,15 @@ async function handlePing(): Promise<void> {
                 <div v-else class="log-entries-list">
                   <div v-for="entry in timecard.entries" :key="entry.id" class="log-entry-item">
                     <div class="log-entry-head">
-                      <span class="log-desc">{{ entry.description }}</span>
+                      <div class="log-title-group">
+                        <span
+                          class="log-type-tag"
+                          :class="entry.entry_type || 'retainer_maintenance'"
+                        >
+                          {{ formatEntryType(entry.entry_type) }}
+                        </span>
+                        <span class="log-desc">{{ entry.description }}</span>
+                      </div>
                       <strong class="log-duration">{{ entry.minutes_spent }}m</strong>
                     </div>
                     <div class="log-entry-meta">
@@ -403,6 +423,7 @@ async function handlePing(): Promise<void> {
                       <span>{{ new Date(entry.performed_at).toLocaleDateString() }}</span>
                     </div>
                   </div>
+
                 </div>
               </div>
             </div>
@@ -897,8 +918,46 @@ async function handlePing(): Promise<void> {
 .log-entry-head {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
   color: var(--color-text, #f1f5f9);
 }
+
+.log-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  overflow: hidden;
+}
+
+.log-type-tag {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 0.1rem 0.35rem;
+  border-radius: 3px;
+  flex-shrink: 0;
+  letter-spacing: 0.03em;
+}
+
+.log-type-tag.retainer_maintenance {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.log-type-tag.billable_extra {
+  background-color: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.log-type-tag.internal_non_billable {
+  background-color: rgba(148, 163, 184, 0.15);
+  color: #94a3b8;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
 
 .log-duration {
   color: var(--color-primary, #3b82f6);
