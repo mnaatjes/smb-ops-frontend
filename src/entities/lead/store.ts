@@ -15,7 +15,11 @@ import type {
   OnboardClientPayload,
   LogTimecardPayload,
   ClientSecretMetadata,
-  ClientSecretPayload
+  ClientSecretPayload,
+  ContactPerson,
+  CreateContactPayload,
+  OutreachActivity,
+  CreateActivityPayload
 } from '@/entities/lead/model'
 import {
   fetchRankedLeads,
@@ -38,7 +42,13 @@ import {
   fetchClientSecrets as apiFetchClientSecrets,
   storeClientSecret as apiStoreClientSecret,
   revealClientSecret as apiRevealClientSecret,
-  deleteClientSecret as apiDeleteClientSecret
+  deleteClientSecret as apiDeleteClientSecret,
+  fetchLeadContacts as apiFetchLeadContacts,
+  createLeadContact as apiCreateLeadContact,
+  deleteLeadContact as apiDeleteLeadContact,
+  fetchLeadActivities as apiFetchLeadActivities,
+  logLeadActivity as apiLogLeadActivity,
+  updateLeadStage as apiUpdateLeadStage
 } from '@/shared/api/leads'
 
 export const useLeadStore = defineStore('lead', () => {
@@ -401,6 +411,47 @@ export const useLeadStore = defineStore('lead', () => {
     statusMessage.value = 'Secret record purged from vault.'
   }
 
+  async function getContacts(leadId: string): Promise<ContactPerson[]> {
+    return await apiFetchLeadContacts(leadId)
+  }
+
+  async function addContact(
+    leadId: string,
+    payload: CreateContactPayload
+  ): Promise<ContactPerson> {
+    const contact = await apiCreateLeadContact(leadId, payload)
+    statusMessage.value = `Added stakeholder contact: ${contact.name}`
+    return contact
+  }
+
+  async function removeContact(leadId: string, contactId: string): Promise<void> {
+    await apiDeleteLeadContact(leadId, contactId)
+    statusMessage.value = 'Contact removed from opportunity.'
+  }
+
+  async function getActivities(leadId: string): Promise<OutreachActivity[]> {
+    return await apiFetchLeadActivities(leadId)
+  }
+
+  async function addActivity(
+    leadId: string,
+    payload: CreateActivityPayload
+  ): Promise<OutreachActivity> {
+    const act = await apiLogLeadActivity(leadId, payload)
+    statusMessage.value = `Logged outreach activity: ${act.channel}`
+    await loadRankedLeads()
+    return act
+  }
+
+  async function setOpportunityStage(leadId: string, stage: string): Promise<void> {
+    const updated = await apiUpdateLeadStage(leadId, stage)
+    const idx = leads.value.findIndex((l) => l.prospect.id === leadId)
+    if (idx !== -1) {
+      leads.value[idx].prospect = updated
+    }
+    statusMessage.value = `Updated opportunity stage: ${stage}`
+  }
+
   return {
     leads,
     services,
@@ -441,7 +492,13 @@ export const useLeadStore = defineStore('lead', () => {
     getClientSecrets,
     storeSecret,
     revealSecret,
-    deleteSecret
+    deleteSecret,
+    getContacts,
+    addContact,
+    removeContact,
+    getActivities,
+    addActivity,
+    setOpportunityStage
   }
 })
 

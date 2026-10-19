@@ -17,7 +17,11 @@ import type {
   OnboardClientPayload,
   LogTimecardPayload,
   ClientSecretMetadata,
-  ClientSecretPayload
+  ClientSecretPayload,
+  ContactPerson,
+  CreateContactPayload,
+  OutreachActivity,
+  CreateActivityPayload
 } from '@/shared/types/lead'
 
 export async function fetchRankedLeads(minScore = 0): Promise<RankedLead[]> {
@@ -156,6 +160,41 @@ export async function revealClientSecret(
 
 export async function deleteClientSecret(clientId: string, secretId: string): Promise<void> {
   await apiClient.delete(`/clients/${clientId}/secrets/${secretId}`)
+}
+
+export async function fetchLeadContacts(leadId: string): Promise<ContactPerson[]> {
+  const response = await apiClient.get<ContactPerson[]>(`/leads/${leadId}/contacts`)
+  return response.data
+}
+
+export async function createLeadContact(
+  leadId: string,
+  payload: CreateContactPayload
+): Promise<ContactPerson> {
+  const response = await apiClient.post<ContactPerson>(`/leads/${leadId}/contacts`, payload)
+  return response.data
+}
+
+export async function deleteLeadContact(leadId: string, contactId: string): Promise<void> {
+  await apiClient.delete(`/leads/${leadId}/contacts/${contactId}`)
+}
+
+export async function fetchLeadActivities(leadId: string): Promise<OutreachActivity[]> {
+  const response = await apiClient.get<OutreachActivity[]>(`/leads/${leadId}/activities`)
+  return response.data
+}
+
+export async function logLeadActivity(
+  leadId: string,
+  payload: CreateActivityPayload
+): Promise<OutreachActivity> {
+  const response = await apiClient.post<OutreachActivity>(`/leads/${leadId}/activities`, payload)
+  return response.data
+}
+
+export async function updateLeadStage(leadId: string, stage: string): Promise<Prospect> {
+  const response = await apiClient.patch<Prospect>(`/leads/${leadId}/stage`, { stage })
+  return response.data
 }
 
 

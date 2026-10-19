@@ -299,7 +299,15 @@ async function handleCreateService(payload: CreateServicePayload): Promise<void>
                 <span class="tracking-uid">UID: {{ lead.prospect.id.slice(0, 8) }}</span>
                 <h4 class="business-title">{{ lead.prospect.business_name }}</h4>
               </div>
-              <BaseBadge variant="primary">{{ lead.prospect.status }}</BaseBadge>
+              <div class="badge-stack">
+                <BaseBadge variant="primary">{{ lead.prospect.status }}</BaseBadge>
+                <span
+                  v-if="lead.prospect.opportunity_stage"
+                  class="stage-tag"
+                >
+                  {{ lead.prospect.opportunity_stage.replace('_', ' ').toUpperCase() }}
+                </span>
+              </div>
             </div>
 
             <div class="card-body">
@@ -752,6 +760,25 @@ async function handleCreateService(payload: CreateServicePayload): Promise<void>
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 0.75rem;
+}
+
+.badge-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+}
+
+.stage-tag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  font-family: monospace;
+  color: var(--accent-primary, #3b82f6);
+  background-color: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  white-space: nowrap;
 }
 
 .tracking-uid {
