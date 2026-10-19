@@ -282,3 +282,20 @@ export interface CreateActivityPayload {
   performed_by?: string
 }
 
+export interface PlaybookScript {
+  service_code: string
+  service_name: string
+  hook: string
+  phone_pitch: string
+  email_template: string
+  objection_handler: string
+}
+
+export interface OpportunityPlaybook {
+  lead_id: string
+  business_name: string
+  opportunity_score: number
+  scripts: PlaybookScript[]
+}
+
+

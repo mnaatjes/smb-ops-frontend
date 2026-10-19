@@ -100,7 +100,7 @@ describe('OpportunityDossierDrawer.vue', () => {
       }
     })
 
-    expect(wrapper.find('.dossier-drawer').exists()).toBe(false)
+    expect(wrapper.find('.workspace-canvas').exists()).toBe(false)
   })
 
   it('emits close event on close button click', async () => {
