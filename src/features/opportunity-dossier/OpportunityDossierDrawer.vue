@@ -345,6 +345,32 @@ const matchingServices = computed<ServiceCatalogItem[]>(() => {
         </div>
       </header>
 
+      <!-- Full-Width Pipeline Stage Stepper Strip -->
+      <nav class="workspace-stepper-strip" aria-label="Opportunity Stage Stepper">
+        <div class="stepper-strip-inner">
+          <div class="stepper-strip-meta">
+            <span class="stepper-meta-title">Pipeline Stage:</span>
+            <span class="active-stage-label">{{ currentOpportunityStage.toUpperCase().replace('_', ' ') }}</span>
+          </div>
+          <div class="stage-stepper-bar">
+            <button
+              v-for="(st, idx) in STAGES"
+              :key="st.key"
+              type="button"
+              class="stage-pill-step"
+              :class="{
+                active: currentOpportunityStage === st.key,
+                passed: STAGES.findIndex(s => s.key === currentOpportunityStage) > idx
+              }"
+              @click="handleStageClick(st.key)"
+            >
+              <span class="step-num">{{ idx + 1 }}</span>
+              <span class="step-label">{{ st.label }}</span>
+            </button>
+          </div>
+        </div>
+      </nav>
+
       <!-- Full-Canvas Dual-Column Split Workspace Body -->
       <main class="workspace-body">
         <!-- COLUMN 1: Location, Intelligence, Rubric & Sales Playbook (42%) -->
@@ -508,33 +534,8 @@ const matchingServices = computed<ServiceCatalogItem[]>(() => {
           </div>
         </section>
 
-        <!-- COLUMN 2: Stage Stepper, Stakeholders, Logger & Timeline (58%) -->
+        <!-- COLUMN 2: Stakeholders, Outreach Logger & Timeline (58%) -->
         <section class="workspace-col col-right">
-          <!-- Interactive Stage Stepper -->
-          <div class="panel-card stage-stepper-card">
-            <div class="panel-header">
-              <h3 class="panel-title">Opportunity Pipeline Stage</h3>
-              <span class="active-stage-label">Current: {{ currentOpportunityStage.toUpperCase().replace('_', ' ') }}</span>
-            </div>
-
-            <div class="stage-stepper-bar">
-              <button
-                v-for="(st, idx) in STAGES"
-                :key="st.key"
-                type="button"
-                class="stage-pill-step"
-                :class="{
-                  active: currentOpportunityStage === st.key,
-                  passed: STAGES.findIndex(s => s.key === currentOpportunityStage) > idx
-                }"
-                @click="handleStageClick(st.key)"
-              >
-                <span class="step-num">{{ idx + 1 }}</span>
-                <span class="step-label">{{ st.label }}</span>
-              </button>
-            </div>
-          </div>
-
           <!-- Stakeholder Contacts Hub -->
           <div class="panel-card">
             <div class="panel-header">
@@ -1239,20 +1240,50 @@ const matchingServices = computed<ServiceCatalogItem[]>(() => {
   line-height: 1.35;
 }
 
-/* Stage Stepper */
-.stage-stepper-card {
-  padding: 1rem 1.25rem;
+/* Stage Stepper Full-Width Header Strip */
+.workspace-stepper-strip {
+  width: 100%;
+  background-color: var(--color-surface, #0f172a);
+  border-bottom: 1px solid var(--color-border, #1e293b);
+  padding: 0.75rem 2rem;
+}
+
+.stepper-strip-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.stepper-strip-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.stepper-meta-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-muted, #94a3b8);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .active-stage-label {
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: var(--color-primary, #3b82f6);
+  background-color: rgba(59, 130, 246, 0.1);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
 }
 
 .stage-stepper-bar {
   display: flex;
-  gap: 0.4rem;
+  flex: 1;
+  max-width: 850px;
+  gap: 0.5rem;
 }
 
 .stage-pill-step {

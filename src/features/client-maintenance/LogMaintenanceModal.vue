@@ -1,15 +1,21 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import BaseModal from '@/shared/ui/BaseModal.vue'
 import BaseButton from '@/shared/ui/BaseButton.vue'
 import BaseInput from '@/shared/ui/BaseInput.vue'
 import type { LogTimecardPayload } from '@/shared/types/lead'
 
-defineProps<{
-  show: boolean
-  clientId: string
-  clientName: string
-}>()
+const props = withDefaults(
+  defineProps<{
+    show: boolean
+    clientId: string
+    clientName: string
+    hasActiveCarePlan?: boolean
+  }>(),
+  {
+    hasActiveCarePlan: true
+  }
+)
 
 const emit = defineEmits<{
   (e: 'close'): void
@@ -21,6 +27,20 @@ const minutesSpent = ref<number>(15)
 const entryType = ref<'retainer_maintenance' | 'billable_extra' | 'internal_non_billable'>('retainer_maintenance')
 const author = ref('operator')
 const errorMessage = ref<string | null>(null)
+
+watch(
+  () => [props.show, props.hasActiveCarePlan],
+  ([show, hasCare]) => {
+    if (show) {
+      if (!hasCare) {
+        entryType.value = 'billable_extra'
+      } else {
+        entryType.value = 'retainer_maintenance'
+      }
+    }
+  },
+  { immediate: true }
+)
 
 function handleSubmit(): void {
   errorMessage.value = null
@@ -42,7 +62,7 @@ function handleSubmit(): void {
 
   description.value = ''
   minutesSpent.value = 15
-  entryType.value = 'retainer_maintenance'
+  entryType.value = props.hasActiveCarePlan ? 'retainer_maintenance' : 'billable_extra'
 }
 </script>
 
@@ -65,10 +85,15 @@ function handleSubmit(): void {
       <div class="field-group">
         <label for="entry-type" class="field-label">Work Category *</label>
         <select id="entry-type" v-model="entryType" class="field-select">
-          <option value="retainer_maintenance">Monthly Care Plan Check (Retainer)</option>
+          <option value="retainer_maintenance" :disabled="!hasActiveCarePlan">
+            Monthly Care Plan Check (Retainer){{ !hasActiveCarePlan ? ' — [Disabled: No Active Care Plan]' : '' }}
+          </option>
           <option value="billable_extra">Extra Billable Work (Invoice Line Item)</option>
           <option value="internal_non_billable">Internal / Non-Billable</option>
         </select>
+        <span v-if="!hasActiveCarePlan" class="field-hint-disabled">
+          ℹ️ Client does not have an active Care Plan retainer. Work defaults to Extra Billable or Internal.
+        </span>
       </div>
 
       <div class="field-group">
@@ -169,6 +194,13 @@ function handleSubmit(): void {
 .field-select:focus {
   outline: none;
   border-color: var(--color-primary, #3b82f6);
+}
+
+.field-hint-disabled {
+  font-size: 0.75rem;
+  color: var(--color-warning, #f59e0b);
+  margin-top: 0.25rem;
+  line-height: 1.3;
 }
 
 .field-textarea {
