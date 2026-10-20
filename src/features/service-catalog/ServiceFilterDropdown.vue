@@ -78,7 +78,13 @@ onUnmounted(() => {
         @click="toggleDropdown"
       >
         <span class="trigger-text">{{ labelText }}</span>
-        <span v-if="!isAllSelected" class="selection-badge">{{ modelValue.length }}</span>
+        <span
+          v-if="!isAllSelected"
+          class="selection-badge"
+          :title="`${modelValue.length} active service filter(s) applied`"
+        >
+          {{ modelValue.length }} active
+        </span>
         <svg
           class="chevron"
           :class="{ open: isOpen }"

@@ -677,7 +677,7 @@ function handleTriggerLogWork(): void {
           <!-- Monthly Retainer & Timecard Section -->
           <div class="panel-card">
             <div class="panel-header">
-              <h3 class="panel-title">⏱️ Monthly Retainer Timecard</h3>
+              <h3 class="panel-title">⏱️ Timecards & Retainer Maintenance</h3>
               <BaseButton
                 label="+ Log Work"
                 variant="primary"

@@ -280,6 +280,7 @@ async function handleCreateService(payload: CreateServicePayload): Promise<void>
           <LeadTriageTable
             :leads="leadStore.filteredLeads"
             :loading="leadStore.loading"
+            :active-filter-count="leadStore.activeServiceFilters.length"
             @qualify="handleQualify"
             @disqualify="handleOpenDisqualify"
             @inspect-score="handleInspectScore"

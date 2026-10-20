@@ -8,6 +8,7 @@ import type { RankedLead } from '@/entities/lead/model'
 defineProps<{
   leads: RankedLead[]
   loading?: boolean
+  activeFilterCount?: number
 }>()
 
 const emit = defineEmits<{
@@ -42,7 +43,14 @@ function onDisqualify(lead: RankedLead): void {
       </thead>
       <tbody>
         <tr v-if="leads.length === 0">
-          <td colspan="4" class="empty-state">No leads available. Run discovery or add a lead manually.</td>
+          <td colspan="4" class="empty-state">
+            <span v-if="activeFilterCount && activeFilterCount > 0">
+              No leads match the score and audit parameter thresholds for the selected service filter(s). Try selecting "All Services (Default)".
+            </span>
+            <span v-else>
+              No leads available. Run discovery or add a lead manually.
+            </span>
+          </td>
         </tr>
         <tr v-for="lead in leads" :key="lead.prospect.id" class="lead-row">
           <td class="cell-primary">

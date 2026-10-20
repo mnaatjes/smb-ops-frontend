@@ -8,8 +8,8 @@ Feature: Lead Discovery and Triage Lifecycle
     And the application is viewing the "pool" workspace
 
   Scenario: Run unified discover and audit on a target market
-    When the operator enters query "HVAC" and location "Des Moines, IA"
-    And clicks "Discover & Audit"
+    When the operator enters location "Kalamazoo, MI" and limit "10"
+    And clicks "Discover & Audit Leads"
     Then the discovery bar displays an active scan spinner
     And upon completion new prospects appear in the triage table
 
