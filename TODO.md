@@ -5,14 +5,14 @@
 - [x] **1. Clean Onboarding Pipeline Add-on Terminology** (Completed in PR #38)
   - Remove legacy language regarding "30 minute add-on" across `ClientOnboardingModal.vue` and service catalog selection steps to reflect decoupled care plans.
 
-- [ ] **2. Client Dossier Add-on Attachment & Contract Triggering** (Active Phase 2)
+- [x] **2. Client Dossier Add-on Attachment & Contract Triggering** (Completed in PR #39)
   - Enable attaching/adding an Add-on Care Plan package directly within the Client Account Dashboard/dossier/workspace (`ClientDossierDrawer.vue`).
   - Action should trigger a new Contract creation via backend client contract endpoints.
 
 - [x] **3. Guard Retainer Option in Work Logging Modal** (Completed in PR #38)
   - In `LogMaintenanceModal.vue` ("+ Log Work"), disable the "Monthly Care Plan (Retainer)" option if the client account does not have an active Add-on Care Plan registered.
 
-- [ ] **4. Active Service Contracts Discrete Actions Checklist**
+- [ ] **4. Active Service Contracts Discrete Actions Checklist** (Active Phase 3)
   - In `ClientDossierDrawer.vue` > Active Service Contracts, clicking a Service Item triggers an accordion element or popover displaying the list of discrete service deliverables/actions.
   - Include an interactive checkbox indicating completion status per service action (designed for future git commit UUID linkage).
 

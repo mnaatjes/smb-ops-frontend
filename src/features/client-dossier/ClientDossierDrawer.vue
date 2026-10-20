@@ -105,6 +105,146 @@ async function handleConfirmAttachContract(): Promise<void> {
   }
 }
 
+// Contract Accordion & Discrete Actions Checklist
+const expandedContractIds = ref<Record<string, boolean>>({})
+
+// Persistent checklist state: Record<contractId, Record<actionIndex, { completed: boolean; commitUuid?: string }>>
+const contractActionStates = ref<Record<string, Record<number, { completed: boolean; commitUuid?: string }>>>({})
+const editingCommitContractId = ref<string | null>(null)
+const editingCommitActionIdx = ref<number | null>(null)
+const editingCommitInput = ref('')
+
+function getStorageKey(clientId: string): string {
+  return `smb_contract_actions:${clientId}`
+}
+
+function loadContractActionStates(): void {
+  if (!props.client) return
+  try {
+    const raw = localStorage.getItem(getStorageKey(props.client.id))
+    if (raw) {
+      contractActionStates.value = JSON.parse(raw)
+    } else {
+      contractActionStates.value = {}
+    }
+  } catch {
+    contractActionStates.value = {}
+  }
+}
+
+function saveContractActionStates(): void {
+  if (!props.client) return
+  try {
+    localStorage.setItem(getStorageKey(props.client.id), JSON.stringify(contractActionStates.value))
+  } catch (err: unknown) {
+    console.error('Failed to persist contract actions to localStorage:', err)
+  }
+}
+
+function toggleContractAccordion(contractId: string): void {
+  expandedContractIds.value[contractId] = !expandedContractIds.value[contractId]
+}
+
+function getContractDiscreteActions(serviceCode: string): string[] {
+  // 1. Cross-reference catalog service offerings
+  const catalogMatch = leadStore.services.find((s) => s.code === serviceCode)
+  if (catalogMatch && ((catalogMatch.scope && catalogMatch.scope.length > 0) || (catalogMatch.deliverables && catalogMatch.deliverables.length > 0))) {
+    const list: string[] = []
+    if (catalogMatch.scope) list.push(...catalogMatch.scope)
+    if (catalogMatch.deliverables) list.push(...catalogMatch.deliverables)
+    return list
+  }
+
+  // 2. Default standard care plan and add-on action checklists
+  switch (serviceCode) {
+    case 'CARE_PLAN_30':
+    case 'DYNAMIC_CMS_RETAINER':
+      return [
+        'Perform monthly CMS core and active plugin security updates',
+        'Verify HTTPS TLS certificate validity and renewal schedule',
+        'Inspect offsite snapshot backup integrity and restoration bucket',
+        'Audit contact forms, lead webhook endpoints, and Google Maps sync'
+      ]
+    case 'CARE_PLAN_60':
+      return [
+        'Perform monthly CMS core, plugin, and PHP runtime patch testing',
+        'Verify uptime monitor, response latency (<800ms), and error logs',
+        'Audit mobile responsive layout, navigation menu, and tap-to-call actions',
+        'Verify weekly offsite database snapshots and automated staging restore',
+        'Provide monthly executive health digest and SLA adherence verification'
+      ]
+    case 'CARE_PLAN_90':
+      return [
+        'High-frequency bi-weekly CMS patch and security vulnerability mitigation',
+        'Full performance optimization: image WebP conversion and asset minification',
+        'Continuous uptime & SSL probe audit with prioritized 4-hour SLA response',
+        'Bi-weekly database optimization, spam purging, and transactional email checks',
+        'Detailed monthly performance audit report with Lighthouse benchmark tracking'
+      ]
+    case 'SVC-SEC':
+      return [
+        'Provision trusted SSL certificate and enforce HTTPS redirect',
+        'Harden HTTP security headers (HSTS, CSP, X-Frame-Options)',
+        'Sanitize admin ingress and configure brute-force rate limiting',
+        'Verify zero mixed-content warnings on primary landing views'
+      ]
+    case 'SVC-WEB':
+      return [
+        'Replace static PDF menus with responsive, accessible semantic HTML tables',
+        'Optimize viewport meta tags for modern mobile browsers',
+        'Ensure touch targets meet 48px minimum accessibility guidelines',
+        'Perform cross-device mobile rendering QA verification'
+      ]
+    default:
+      return [
+        'Scope alignment and baseline environment configuration',
+        'Execution of contracted service deliverable milestones',
+        'Production verification and operator client signoff'
+      ]
+  }
+}
+
+function isActionCompleted(contractId: string, idx: number): boolean {
+  return Boolean(contractActionStates.value[contractId]?.[idx]?.completed)
+}
+
+function getActionCommitUuid(contractId: string, idx: number): string | undefined {
+  return contractActionStates.value[contractId]?.[idx]?.commitUuid
+}
+
+function toggleActionCompletion(contractId: string, idx: number): void {
+  if (!contractActionStates.value[contractId]) {
+    contractActionStates.value[contractId] = {}
+  }
+  const current = contractActionStates.value[contractId][idx] ?? { completed: false }
+  contractActionStates.value[contractId][idx] = {
+    ...current,
+    completed: !current.completed
+  }
+  saveContractActionStates()
+}
+
+function openEditCommit(contractId: string, idx: number): void {
+  editingCommitContractId.value = contractId
+  editingCommitActionIdx.value = idx
+  editingCommitInput.value = contractActionStates.value[contractId]?.[idx]?.commitUuid ?? ''
+}
+
+function saveActionCommit(contractId: string, idx: number): void {
+  if (!contractActionStates.value[contractId]) {
+    contractActionStates.value[contractId] = {}
+  }
+  const current = contractActionStates.value[contractId][idx] ?? { completed: true }
+  contractActionStates.value[contractId][idx] = {
+    ...current,
+    commitUuid: editingCommitInput.value.trim() || undefined
+  }
+  saveContractActionStates()
+  editingCommitContractId.value = null
+  editingCommitActionIdx.value = null
+  editingCommitInput.value = ''
+}
+
 function onNewSecretTypeChange(): void {
   switch (newSecretType.value) {
     case 'wordpress_admin':
@@ -277,9 +417,11 @@ watch(
   (newClient) => {
     if (newClient) {
       contracts.value = [...(newClient.contracts ?? [])]
+      loadContractActionStates()
       loadClientData()
     } else {
       contracts.value = []
+      contractActionStates.value = {}
     }
   },
   { immediate: true }
@@ -431,15 +573,96 @@ function handleTriggerLogWork(): void {
               />
             </div>
             <div v-if="contracts.length > 0" class="contracts-list">
-              <div v-for="c in contracts" :key="c.id" class="contract-card">
-                <div class="contract-head">
-                  <span class="contract-code">{{ c.service_code }}</span>
+              <div
+                v-for="c in contracts"
+                :key="c.id"
+                class="contract-card"
+                :class="{ expanded: expandedContractIds[c.id] }"
+              >
+                <div class="contract-head" @click="toggleContractAccordion(c.id)">
+                  <div class="contract-head-left">
+                    <span class="accordion-chevron">{{ expandedContractIds[c.id] ? '▼' : '▶' }}</span>
+                    <span class="contract-code">{{ c.service_code }}</span>
+                  </div>
                   <BaseBadge variant="success">{{ c.status }}</BaseBadge>
                 </div>
                 <div class="contract-body">
                   <div>Rate: <strong>${{ c.billing_rate }}</strong> / {{ c.billing_frequency }}</div>
                   <div>Type: {{ c.contract_type }}</div>
                   <div class="contract-date">Started: {{ c.start_date }}</div>
+                </div>
+
+                <!-- Expandable Discrete Deliverables & Actions Checklist -->
+                <div v-if="expandedContractIds[c.id]" class="contract-actions-drawer">
+                  <div class="actions-drawer-header">
+                    <h5 class="actions-drawer-title">Discrete Service Deliverables & Checklist</h5>
+                    <span class="actions-completion-counter">
+                      {{
+                        getContractDiscreteActions(c.service_code).filter((_, idx) => isActionCompleted(c.id, idx)).length
+                      }} / {{ getContractDiscreteActions(c.service_code).length }} Completed
+                    </span>
+                  </div>
+
+                  <ul class="discrete-actions-list">
+                    <li
+                      v-for="(action, idx) in getContractDiscreteActions(c.service_code)"
+                      :key="idx"
+                      class="discrete-action-item"
+                      :class="{ completed: isActionCompleted(c.id, idx) }"
+                    >
+                      <div class="action-item-main">
+                        <label class="action-checkbox-label">
+                          <input
+                            type="checkbox"
+                            :checked="isActionCompleted(c.id, idx)"
+                            @change="toggleActionCompletion(c.id, idx)"
+                          />
+                          <span class="action-text">{{ action }}</span>
+                        </label>
+                      </div>
+
+                      <div class="action-commit-block">
+                        <div
+                          v-if="editingCommitContractId === c.id && editingCommitActionIdx === idx"
+                          class="commit-edit-row"
+                        >
+                          <BaseInput
+                            v-model="editingCommitInput"
+                            placeholder="Git Commit SHA (e.g. a1b2c3d)"
+                            class="commit-sha-input"
+                          />
+                          <BaseButton
+                            label="Save"
+                            variant="primary"
+                            @click="saveActionCommit(c.id, idx)"
+                          />
+                          <BaseButton
+                            label="Cancel"
+                            variant="secondary"
+                            @click="editingCommitContractId = null; editingCommitActionIdx = null"
+                          />
+                        </div>
+                        <div v-else class="commit-display-row">
+                          <span
+                            v-if="getActionCommitUuid(c.id, idx)"
+                            class="commit-sha-badge"
+                            title="Associated Git Commit UUID"
+                            @click="openEditCommit(c.id, idx)"
+                          >
+                            🔗 {{ getActionCommitUuid(c.id, idx) }}
+                          </span>
+                          <button
+                            v-else
+                            type="button"
+                            class="add-commit-btn"
+                            @click="openEditCommit(c.id, idx)"
+                          >
+                            + Tag Commit UUID
+                          </button>
+                        </div>
+                      </div>
+                    </li>
+                  </ul>
                 </div>
               </div>
             </div>
@@ -997,6 +1220,12 @@ function handleTriggerLogWork(): void {
   border-radius: 6px;
   padding: 0.75rem;
   font-size: 0.8rem;
+  transition: all 0.2s ease;
+}
+
+.contract-card.expanded {
+  border-color: var(--color-primary, #3b82f6);
+  background-color: rgba(30, 41, 59, 0.9);
 }
 
 .contract-head {
@@ -1004,6 +1233,20 @@ function handleTriggerLogWork(): void {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 0.35rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.contract-head-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.accordion-chevron {
+  font-size: 0.65rem;
+  color: var(--color-text-muted, #94a3b8);
+  transition: transform 0.2s ease;
 }
 
 .contract-code {
@@ -1021,6 +1264,143 @@ function handleTriggerLogWork(): void {
 
 .contract-date {
   font-style: italic;
+}
+
+/* Contract Actions Drawer Accordion Content */
+.contract-actions-drawer {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--color-border, #334155);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.actions-drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.actions-drawer-title {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-primary, #3b82f6);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.actions-completion-counter {
+  font-size: 0.7rem;
+  color: var(--color-text-muted, #94a3b8);
+  font-weight: 600;
+}
+
+.discrete-actions-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.discrete-action-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.5rem 0.6rem;
+  background-color: rgba(15, 23, 42, 0.6);
+  border: 1px solid var(--color-border, rgba(51, 65, 85, 0.6));
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.discrete-action-item.completed {
+  border-color: rgba(16, 185, 129, 0.3);
+  background-color: rgba(16, 185, 129, 0.05);
+}
+
+.action-item-main {
+  display: flex;
+  align-items: center;
+}
+
+.action-checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 0.75rem;
+  color: var(--color-text, #f1f5f9);
+  line-height: 1.35;
+}
+
+.action-checkbox-label input[type='checkbox'] {
+  margin-top: 0.15rem;
+  cursor: pointer;
+}
+
+.discrete-action-item.completed .action-text {
+  text-decoration: line-through;
+  color: var(--color-text-muted, #94a3b8);
+}
+
+.action-commit-block {
+  display: flex;
+  align-items: center;
+  padding-left: 1.4rem;
+}
+
+.commit-display-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.commit-sha-badge {
+  font-family: monospace;
+  font-size: 0.7rem;
+  padding: 0.15rem 0.4rem;
+  background-color: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 4px;
+  color: #60a5fa;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.commit-sha-badge:hover {
+  background-color: rgba(59, 130, 246, 0.25);
+  border-color: #60a5fa;
+}
+
+.add-commit-btn {
+  background: none;
+  border: none;
+  color: var(--color-text-muted, #64748b);
+  font-size: 0.7rem;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  transition: color 0.15s ease;
+}
+
+.add-commit-btn:hover {
+  color: var(--color-primary, #3b82f6);
+}
+
+.commit-edit-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.commit-sha-input {
+  font-size: 0.72rem;
+  padding: 0.2rem 0.4rem;
+  max-width: 200px;
 }
 
 /* Timecard */
