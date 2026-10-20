@@ -11,6 +11,8 @@ import type {
   ServiceCatalogItem,
   AuditParameterOption,
   ClientAccount,
+  ContractAgreement,
+  AttachContractPayload,
   Timecard,
   TimecardEntry,
   ContinuityHealth,
@@ -100,6 +102,14 @@ export async function convertLeadToClient(prospectId: string): Promise<ClientAcc
 
 export async function onboardClientApi(payload: OnboardClientPayload): Promise<ClientAccount> {
   const response = await apiClient.post<ClientAccount>('/clients/onboard', payload)
+  return response.data
+}
+
+export async function addClientContractApi(
+  clientId: string,
+  payload: AttachContractPayload
+): Promise<ContractAgreement> {
+  const response = await apiClient.post<ContractAgreement>(`/clients/${clientId}/contracts`, payload)
   return response.data
 }
 
