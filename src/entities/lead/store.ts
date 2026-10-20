@@ -178,7 +178,12 @@ export const useLeadStore = defineStore('lead', () => {
       statusMessage.value = `Discovered and audited ${discovered.length} prospects.`
       await loadRankedLeads()
     } catch (err: unknown) {
-      error.value = err instanceof Error ? err.message : 'Discovery and audit failed'
+      const msg = err instanceof Error ? err.message : 'Discovery and audit failed'
+      if (msg.includes('504') || msg.toLowerCase().includes('timeout')) {
+        error.value = 'Public directory service timed out. Please try again or reduce candidate limit.'
+      } else {
+        error.value = msg
+      }
       statusMessage.value = null
     } finally {
       loading.value = false

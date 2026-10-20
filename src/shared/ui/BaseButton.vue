@@ -5,11 +5,13 @@ withDefaults(
     disabled?: boolean
     loading?: boolean
     variant?: 'primary' | 'secondary' | 'danger'
+    buttonType?: 'button' | 'submit' | 'reset'
   }>(),
   {
     disabled: false,
     loading: false,
-    variant: 'primary'
+    variant: 'primary',
+    buttonType: 'button'
   }
 )
 
@@ -20,7 +22,7 @@ defineEmits<{
 
 <template>
   <button
-    type="button"
+    :type="buttonType"
     :class="['base-button', `variant-${variant}`]"
     :disabled="disabled || loading"
     @click="$emit('click')"

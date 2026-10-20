@@ -662,7 +662,9 @@ const matchingServices = computed<ServiceCatalogItem[]>(() => {
                 <BaseButton
                   :label="actScheduledAt ? 'Schedule & Record' : 'Record Touchpoint'"
                   variant="primary"
+                  button-type="submit"
                   :disabled="savingActivity"
+                  @click="handleLogActivity"
                 />
               </div>
             </form>
@@ -778,7 +780,9 @@ const matchingServices = computed<ServiceCatalogItem[]>(() => {
           <BaseButton
             label="Save Contact"
             variant="primary"
+            button-type="submit"
             :disabled="savingContact"
+            @click="handleSaveContact"
           />
         </div>
       </form>
