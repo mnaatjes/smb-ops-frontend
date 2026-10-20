@@ -45,6 +45,7 @@ const activeOpportunityLead = ref<RankedLead | null>(null)
 const inspectingService = ref<ServiceCatalogItem | null>(null)
 const activeDossierClient = ref<ClientAccount | null>(null)
 const activeLogClient = ref<ClientAccount | null>(null)
+const activeLogClientHasCarePlan = ref(true)
 
 onMounted(async () => {
   await Promise.all([
@@ -87,8 +88,18 @@ function handleInspectClient(client: ClientAccount): void {
   showDossierDrawer.value = true
 }
 
-function handleOpenLogWork(client: ClientAccount): void {
+async function handleOpenLogWork(client: ClientAccount, hasCarePlan?: boolean): Promise<void> {
   activeLogClient.value = client
+  if (hasCarePlan !== undefined) {
+    activeLogClientHasCarePlan.value = hasCarePlan
+  } else {
+    try {
+      const tc = await leadStore.getTimecard(client.id)
+      activeLogClientHasCarePlan.value = Boolean(tc && tc.monthly_retainer_cap_minutes > 0)
+    } catch {
+      activeLogClientHasCarePlan.value = true
+    }
+  }
   showLogMaintenanceModal.value = true
 }
 
@@ -515,6 +526,7 @@ async function handleCreateService(payload: CreateServicePayload): Promise<void>
       :show="showLogMaintenanceModal"
       :client-id="activeLogClient?.id ?? ''"
       :client-name="activeLogClient?.business_name ?? ''"
+      :has-active-care-plan="activeLogClientHasCarePlan"
       @close="showLogMaintenanceModal = false; activeLogClient = null"
       @submit="handleConfirmLogWork"
     />

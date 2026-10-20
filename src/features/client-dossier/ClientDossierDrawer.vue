@@ -22,7 +22,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'close'): void
-  (e: 'log-work', client: ClientAccount): void
+  (e: 'log-work', client: ClientAccount, hasActiveCarePlan?: boolean): void
 }>()
 
 const leadStore = useLeadStore()
@@ -248,6 +248,12 @@ function formatEntryType(entryType?: string): string {
       return 'Retainer'
   }
 }
+
+function handleTriggerLogWork(): void {
+  if (!props.client) return
+  const hasPlan = Boolean(timecard.value && timecard.value.monthly_retainer_cap_minutes > 0)
+  emit('log-work', props.client, hasPlan)
+}
 </script>
 
 
@@ -272,7 +278,7 @@ function formatEntryType(entryType?: string): string {
           <BaseButton
             label="+ Log Work"
             variant="primary"
-            @click="emit('log-work', client)"
+            @click="handleTriggerLogWork"
           />
           <button type="button" class="close-btn" title="Close Workspace (Esc)" @click="emit('close')">
             ✕
@@ -387,7 +393,7 @@ function formatEntryType(entryType?: string): string {
               <BaseButton
                 label="+ Log Work"
                 variant="primary"
-                @click="emit('log-work', client)"
+                @click="handleTriggerLogWork"
               />
             </div>
 

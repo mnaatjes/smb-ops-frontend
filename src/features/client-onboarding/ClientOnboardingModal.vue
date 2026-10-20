@@ -197,6 +197,20 @@ function toggleService(code: string): void {
 const chosenServices = computed(() => {
   return props.services.filter((s) => selectedServiceCodes.value.includes(s.code))
 })
+
+const estimatedRetainerCapMinutes = computed(() => {
+  let cap = 0
+  for (const s of chosenServices.value) {
+    if (s.code === 'CARE_PLAN_90' || s.code === 'RANK_2_GOLD') {
+      cap += 90
+    } else if (s.code === 'CARE_PLAN_60' || s.code === 'RANK_2_SILVER') {
+      cap += 60
+    } else if (['CARE_PLAN_30', 'RANK_2', 'RANK_2_BRONZE', 'DYNAMIC_CMS_RETAINER'].includes(s.code)) {
+      cap += 30
+    }
+  }
+  return cap
+})
 </script>
 
 <template>
@@ -291,7 +305,9 @@ const chosenServices = computed(() => {
 
         <div class="sla-box">
           <div class="sla-item">
-            <strong>Maintenance Retainer Cap:</strong> 30 minutes monthly support included.
+            <strong>Maintenance Retainer Cap:</strong>
+            <span v-if="estimatedRetainerCapMinutes > 0"> {{ estimatedRetainerCapMinutes }} minutes monthly care support included.</span>
+            <span v-else> None (0 min - one-off project scope). Care Plan add-ons can be attached anytime.</span>
           </div>
           <div class="sla-item">
             <strong>Support Hours:</strong> Mon–Fri 9:00 AM – 5:00 PM EST.
@@ -402,7 +418,7 @@ const chosenServices = computed(() => {
           </div>
           <div class="summary-row">
             <span>Monthly Retainer Cap:</span>
-            <span>30 minutes / billing cycle</span>
+            <span>{{ estimatedRetainerCapMinutes > 0 ? `${estimatedRetainerCapMinutes} minutes / billing cycle` : '0 minutes (No Care Plan)' }}</span>
           </div>
           <div class="summary-row">
             <span>Vault Credentials:</span>
