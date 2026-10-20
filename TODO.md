@@ -1,5 +1,30 @@
 # SMB Ops Business Alignment & Action Plan
 
+## Active Priority Tasks (Immediate Follow-ups & Remediations)
+
+- [x] **1. Clean Onboarding Pipeline Add-on Terminology** (Completed in PR #38)
+  - Remove legacy language regarding "30 minute add-on" across `ClientOnboardingModal.vue` and service catalog selection steps to reflect decoupled care plans.
+
+- [ ] **2. Client Dossier Add-on Attachment & Contract Triggering** (Active Phase 2)
+  - Enable attaching/adding an Add-on Care Plan package directly within the Client Account Dashboard/dossier/workspace (`ClientDossierDrawer.vue`).
+  - Action should trigger a new Contract creation via backend client contract endpoints.
+
+- [x] **3. Guard Retainer Option in Work Logging Modal** (Completed in PR #38)
+  - In `LogMaintenanceModal.vue` ("+ Log Work"), disable the "Monthly Care Plan (Retainer)" option if the client account does not have an active Add-on Care Plan registered.
+
+- [ ] **4. Active Service Contracts Discrete Actions Checklist**
+  - In `ClientDossierDrawer.vue` > Active Service Contracts, clicking a Service Item triggers an accordion element or popover displaying the list of discrete service deliverables/actions.
+  - Include an interactive checkbox indicating completion status per service action (designed for future git commit UUID linkage).
+
+- [x] **5. Pursued Pipeline Workspace Stepper Bar Header Span** (Completed in PR #38)
+  - Resolve horizontal overflow of `stage-stepper-bar` inside the column layout.
+  - Migrate `stage-stepper-bar` to the top of the workspace (as part of or directly beneath `workspace-header`), spanning across both `workspace-col` columns.
+
+- [x] **6. Bespoke Minimal Scrollbar on Workspace Columns** (Completed in PR #38)
+  - Replace default Google Chrome scrollbars on `workspace-col col-left` with a sleek, minimalist custom scrollbar or styled overflow utility.
+
+---
+
 ## Active Priority Tasks (Item Evaluation & ROI Breakdown)
 
 - [x] **1. Small Quality of Life Improvements to Dashboard** (Completed in PR #35 & #36)

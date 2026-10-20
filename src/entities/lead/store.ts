@@ -13,6 +13,8 @@ import type {
   TimecardEntry,
   ContinuityHealth,
   OnboardClientPayload,
+  AttachContractPayload,
+  ContractAgreement,
   LogTimecardPayload,
   ClientSecretMetadata,
   ClientSecretPayload,
@@ -35,6 +37,7 @@ import {
   fetchClients as apiFetchClients,
   convertLeadToClient as apiConvertLeadToClient,
   onboardClientApi as apiOnboardClient,
+  addClientContractApi as apiAddClientContract,
   fetchClientTimecard as apiFetchClientTimecard,
   logClientTimecardWork as apiLogClientTimecardWork,
   fetchClientContinuity as apiFetchClientContinuity,
@@ -324,6 +327,25 @@ export const useLeadStore = defineStore('lead', () => {
     }
   }
 
+  async function attachContract(
+    clientId: string,
+    payload: AttachContractPayload
+  ): Promise<ContractAgreement> {
+    loading.value = true
+    error.value = null
+    try {
+      const contract = await apiAddClientContract(clientId, payload)
+      statusMessage.value = `Attached contract: ${contract.service_code}`
+      await loadClients()
+      return contract
+    } catch (err: unknown) {
+      error.value = err instanceof Error ? err.message : 'Failed to attach contract'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
   async function getTimecard(clientId: string): Promise<Timecard> {
     return await apiFetchClientTimecard(clientId)
   }
@@ -508,6 +530,7 @@ export const useLeadStore = defineStore('lead', () => {
     suppressLead,
     convertToClient,
     onboardClient,
+    attachContract,
     getTimecard,
     logWork,
     getContinuity,

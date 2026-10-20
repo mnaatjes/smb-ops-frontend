@@ -202,6 +202,12 @@ export interface LogTimecardPayload {
   author?: string
 }
 
+export interface AttachContractPayload {
+  service_code: string
+  billing_rate: number
+  contract_type: 'retainer' | 'fixed_fee' | string
+}
+
 
 export type SecretType =
   | 'wordpress_admin'

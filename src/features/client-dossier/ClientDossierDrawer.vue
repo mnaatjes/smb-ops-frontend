@@ -7,6 +7,7 @@ import BaseModal from '@/shared/ui/BaseModal.vue'
 import MaintenanceGauge from '@/shared/ui/MaintenanceGauge.vue'
 import type {
   ClientAccount,
+  ContractAgreement,
   Timecard,
   ContinuityHealth,
   ClientSecretMetadata,
@@ -29,6 +30,7 @@ const leadStore = useLeadStore()
 const timecard = ref<Timecard | null>(null)
 const continuity = ref<ContinuityHealth | null>(null)
 const secrets = ref<ClientSecretMetadata[]>([])
+const contracts = ref<ContractAgreement[]>([])
 const loadingTelemetry = ref(false)
 const loadingSecrets = ref(false)
 const pingingContinuity = ref(false)
@@ -49,6 +51,59 @@ const newSecretUsername = ref('')
 const newSecretPassword = ref('')
 const savingSecret = ref(false)
 const addSecretError = ref<string | null>(null)
+
+// Attach Care Plan Contract Modal State
+const showAttachContractModal = ref(false)
+const attachServiceCode = ref('CARE_PLAN_30')
+const attachBillingRate = ref(150)
+const attachContractType = ref('retainer')
+const attachingContract = ref(false)
+const attachContractError = ref<string | null>(null)
+
+const CARE_PLAN_OPTIONS = [
+  { code: 'CARE_PLAN_30', name: 'Basic Care Plan (30 min / mo)', defaultRate: 150, type: 'retainer' },
+  { code: 'CARE_PLAN_60', name: 'Standard Care Plan (60 min / mo)', defaultRate: 275, type: 'retainer' },
+  { code: 'CARE_PLAN_90', name: 'Premium Care Plan (90 min / mo)', defaultRate: 375, type: 'retainer' },
+  { code: 'DYNAMIC_CMS_RETAINER', name: 'Custom CMS Retainer (30 min / mo)', defaultRate: 150, type: 'retainer' },
+  { code: 'SVC-SEC', name: 'Domain & SSL Hardening (Fixed Fee)', defaultRate: 350, type: 'fixed_fee' },
+  { code: 'SVC-WEB', name: 'Mobile Web Modernization (Fixed Fee)', defaultRate: 1200, type: 'fixed_fee' }
+]
+
+function openAttachContractModal(): void {
+  attachServiceCode.value = 'CARE_PLAN_30'
+  attachBillingRate.value = 150
+  attachContractType.value = 'retainer'
+  attachContractError.value = null
+  showAttachContractModal.value = true
+}
+
+function onAttachServiceCodeChange(): void {
+  const found = CARE_PLAN_OPTIONS.find((c) => c.code === attachServiceCode.value)
+  if (found) {
+    attachBillingRate.value = found.defaultRate
+    attachContractType.value = found.type
+  }
+}
+
+async function handleConfirmAttachContract(): Promise<void> {
+  if (!props.client) return
+  attachingContract.value = true
+  attachContractError.value = null
+  try {
+    const created = await leadStore.attachContract(props.client.id, {
+      service_code: attachServiceCode.value,
+      billing_rate: Number(attachBillingRate.value),
+      contract_type: attachContractType.value
+    })
+    contracts.value.push(created)
+    await loadClientData()
+    showAttachContractModal.value = false
+  } catch (err: unknown) {
+    attachContractError.value = err instanceof Error ? err.message : 'Failed to attach contract'
+  } finally {
+    attachingContract.value = false
+  }
+}
 
 function onNewSecretTypeChange(): void {
   switch (newSecretType.value) {
@@ -221,7 +276,10 @@ watch(
   () => props.client,
   (newClient) => {
     if (newClient) {
+      contracts.value = [...(newClient.contracts ?? [])]
       loadClientData()
+    } else {
+      contracts.value = []
     }
   },
   { immediate: true }
@@ -362,11 +420,18 @@ function handleTriggerLogWork(): void {
           <!-- Governed Active Service Contracts -->
           <div class="panel-card">
             <div class="panel-header">
-              <h3 class="panel-title">📄 Active Service Contracts</h3>
-              <span class="panel-count">{{ client.contracts?.length ?? 0 }}</span>
+              <div class="title-with-badge">
+                <h3 class="panel-title">📄 Active Service Contracts</h3>
+                <span class="panel-count">{{ contracts.length }}</span>
+              </div>
+              <BaseButton
+                label="+ Attach Care Plan"
+                variant="secondary"
+                @click="openAttachContractModal"
+              />
             </div>
-            <div v-if="client.contracts && client.contracts.length > 0" class="contracts-list">
-              <div v-for="c in client.contracts" :key="c.id" class="contract-card">
+            <div v-if="contracts.length > 0" class="contracts-list">
+              <div v-for="c in contracts" :key="c.id" class="contract-card">
                 <div class="contract-head">
                   <span class="contract-code">{{ c.service_code }}</span>
                   <BaseBadge variant="success">{{ c.status }}</BaseBadge>
@@ -594,6 +659,75 @@ function handleTriggerLogWork(): void {
             variant="primary"
             :disabled="savingSecret"
             @click="handleSaveNewSecret"
+          />
+        </div>
+      </div>
+    </BaseModal>
+
+    <!-- Attach Care Plan Contract Modal -->
+    <BaseModal
+      :show="showAttachContractModal"
+      title="Attach Add-on Care Plan / Contract"
+      @close="showAttachContractModal = false"
+    >
+      <div class="modal-form-body">
+        <p class="modal-intro">
+          Attach a recurring Care Plan retainer or fixed consulting contract to
+          <strong>{{ client.business_name }}</strong>.
+        </p>
+
+        <div v-if="attachContractError" class="modal-error-banner">
+          {{ attachContractError }}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Service Package / Care Plan *</label>
+          <select
+            v-model="attachServiceCode"
+            class="modal-select"
+            @change="onAttachServiceCodeChange"
+          >
+            <option
+              v-for="opt in CARE_PLAN_OPTIONS"
+              :key="opt.code"
+              :value="opt.code"
+            >
+              {{ opt.name }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group half">
+            <label class="form-label">Billing Rate ($ USD) *</label>
+            <BaseInput
+              v-model.number="attachBillingRate"
+              type="number"
+              min="0"
+              placeholder="150"
+            />
+          </div>
+
+          <div class="form-group half">
+            <label class="form-label">Contract Type</label>
+            <select v-model="attachContractType" class="modal-select">
+              <option value="retainer">Monthly Retainer</option>
+              <option value="fixed_fee">Fixed Fee Project</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-form-actions">
+          <BaseButton
+            label="Cancel"
+            variant="secondary"
+            @click="showAttachContractModal = false"
+          />
+          <BaseButton
+            label="Attach Contract"
+            variant="primary"
+            :disabled="attachingContract"
+            @click="handleConfirmAttachContract"
           />
         </div>
       </div>
