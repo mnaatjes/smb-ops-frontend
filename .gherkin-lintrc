@@ -1,0 +1,19 @@
+{
+  "no-empty-file": "on",
+  "no-duplicate-scenario-names": "on",
+  "scenario-outlines-must-have-examples": "on",
+  "indentation": [
+    "on",
+    {
+      "Feature": 0,
+      "Background": 0,
+      "Scenario": 0,
+      "Step": 2,
+      "given": 2,
+      "when": 2,
+      "then": 2,
+      "and": 2,
+      "but": 2
+    }
+  ]
+}
