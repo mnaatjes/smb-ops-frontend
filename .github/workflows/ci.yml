@@ -38,6 +38,9 @@ jobs:
       - name: "Lint & Boundary Check"
         run: "pnpm run lint"
 
+      - name: "Gherkin Feature Lint"
+        run: "pnpm run lint:gherkin"
+
       - name: "Type Check (vue-tsc)"
         run: "pnpm run type-check"
 
