@@ -12,7 +12,7 @@
 - [x] **3. Guard Retainer Option in Work Logging Modal** (Completed in PR #38)
   - In `LogMaintenanceModal.vue` ("+ Log Work"), disable the "Monthly Care Plan (Retainer)" option if the client account does not have an active Add-on Care Plan registered.
 
-- [ ] **4. Active Service Contracts Discrete Actions Checklist** (Active Phase 3)
+- [x] **4. Active Service Contracts Discrete Actions Checklist** (Completed in PR #40)
   - In `ClientDossierDrawer.vue` > Active Service Contracts, clicking a Service Item triggers an accordion element or popover displaying the list of discrete service deliverables/actions.
   - Include an interactive checkbox indicating completion status per service action (designed for future git commit UUID linkage).
 
