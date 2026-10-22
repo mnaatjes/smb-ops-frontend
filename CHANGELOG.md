@@ -10,6 +10,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Component Living Workbench Dynamic Stage & Review Harness (ADR-0027, ADR-0028):**
+  - Enhanced `/dev/components` (`DevComponentsView.vue`) into a dual-mode workbench: directory index of all 10 reconstructed components with `target="_blank"` links, and an isolated single dynamic stage (`/dev/components?c=<component-id>`).
+  * Rendered isolated component review stages with clean, neutral white canvas (`bg-white`) and centered geometry (`max-w-xl`), eliminating visual distractions and dark dashboard styling bleed.
+  * Verified and executed on conversation UUID: `97669aa6-40bb-40b4-8ff4-1cecf813f5e0`.
+- **Bottom-Up Presentation Layer Reconstruction (PR #46, ADR-0027, ADR-0028, SDD-0010, SDD-0011):**
+  - Scaffold-retained complete bottom-up rebuild of presentation layers across Wave 1 primitives (`BaseButton`, `BaseBadge`, `BaseInput`), Wave 2 structural shells (`BaseModal`), Wave 3 telemetry controls (`MaintenanceGauge`, `ServiceFilterDropdown`), and Wave 4 domain feature modals (`ContractAgreementModal`, `LogWorkModal`, `VaultSecretModal`, `ClientOnboardingModal`).
+  - Purged deprecated `.legacy.vue` components and transient UAT run checklist.
+  - Authored fresh high-level business workflow Gherkin specifications (`01_client_onboarding_wizard.feature`, `02_client_workspace_and_contracts.feature`, `03_timecard_and_maintenance.feature`) and release UAT checklist (`architecture/uat/0001_release_uat_checklist.md`).
+  - Authored industry-standard component specification artifacts reference note (`architecture/notes/ui_component_specification_artifacts.md`).
+  - Verified and executed on conversation UUID: `97669aa6-40bb-40b4-8ff4-1cecf813f5e0`.
 - **UAT Cycle 1 Defect Remediations & Form Submit Contracts (PR #43, ADR-0026):**
   - Added `buttonType?: 'button' | 'submit' | 'reset'` prop to `BaseButton.vue` to allow native form submission.
   - Resolved blocked form submission on Add Contact Modal and Record Touchpoint forms in `OpportunityDossierDrawer.vue`.
