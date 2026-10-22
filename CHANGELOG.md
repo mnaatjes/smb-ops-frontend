@@ -10,10 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- **Component Living Workbench Dynamic Stage & Review Harness (ADR-0027, ADR-0028):**
-  - Enhanced `/dev/components` (`DevComponentsView.vue`) into a dual-mode workbench: directory index of all 10 reconstructed components with `target="_blank"` links, and an isolated single dynamic stage (`/dev/components?c=<component-id>`).
-  * Rendered isolated component review stages with clean, neutral white canvas (`bg-white`) and centered geometry (`max-w-xl`), eliminating visual distractions and dark dashboard styling bleed.
-  * Verified and executed on conversation UUID: `97669aa6-40bb-40b4-8ff4-1cecf813f5e0`.
+- **ADHD-Friendly Continuous Component Living Workbench (ADR-0027, ADR-0028):**
+  - Refactored `/dev/components` (`DevComponentsView.vue`) into a unified, continuous single-page review dashboard.
+  - Eliminated multi-page tab friction in favor of a sticky quick-jump navigation header (`#primitives`, `#structural-shell`, `#telemetry`, `#domain-modals`).
+  - Encapsulated each component in a crisp, isolated white card (`bg-white` inside `border-slate-200`) with discrete controls, explicit state readouts, and collapsible emission payload trays.
+  - Verified and executed on conversation UUID: `97669aa6-40bb-40b4-8ff4-1cecf813f5e0`.
 - **Bottom-Up Presentation Layer Reconstruction (PR #46, ADR-0027, ADR-0028, SDD-0010, SDD-0011):**
   - Scaffold-retained complete bottom-up rebuild of presentation layers across Wave 1 primitives (`BaseButton`, `BaseBadge`, `BaseInput`), Wave 2 structural shells (`BaseModal`), Wave 3 telemetry controls (`MaintenanceGauge`, `ServiceFilterDropdown`), and Wave 4 domain feature modals (`ContractAgreementModal`, `LogWorkModal`, `VaultSecretModal`, `ClientOnboardingModal`).
   - Purged deprecated `.legacy.vue` components and transient UAT run checklist.
