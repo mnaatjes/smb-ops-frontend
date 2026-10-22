@@ -8,6 +8,11 @@ export const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView
+    },
+    {
+      path: '/dev/components',
+      name: 'dev-components',
+      component: () => import('@/pages/DevComponentsView.vue')
     }
   ]
 })

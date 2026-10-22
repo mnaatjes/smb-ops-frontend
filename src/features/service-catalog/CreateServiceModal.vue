@@ -58,382 +58,131 @@ onMounted(async () => {
 const canSubmit = computed(() => {
   return (
     code.value.trim().length >= 2 &&
-    name.value.trim().length >= 2 &&
+    name.value.trim().length >= 3 &&
     description.value.trim().length >= 5 &&
-    priceMin.value >= 0 &&
-    priceMax.value >= priceMin.value &&
-    selectedParameters.value.length > 0 &&
-    !isSubmitting.value
+    priceMin.value > 0 &&
+    priceMax.value >= priceMin.value
   )
 })
 
-function toggleParameter(key: string): void {
-  if (selectedParameters.value.includes(key)) {
-    selectedParameters.value = selectedParameters.value.filter((k) => k !== key)
-  } else {
-    selectedParameters.value.push(key)
-  }
-}
-
-function handleClose(): void {
-  code.value = ''
-  name.value = ''
-  description.value = ''
-  targetProfile.value = ''
-  scopeInput.value = ''
-  deliverablesInput.value = ''
-  exclusionsInput.value = ''
-  selectedParameters.value = []
-  minScore.value = 50
-  isSubmitting.value = false
-  emit('close')
-}
-
-function handleSubmit(): void {
+async function handleSubmit() {
   if (!canSubmit.value) return
   isSubmitting.value = true
 
-  const rankMatch = rankOptions.find((r) => r.value === selectedRank.value)
-  const pricingModel = rankMatch ? rankMatch.model : 'FLAT_FEE'
-
-  const scopeList = scopeInput.value
+  const scopeArray = scopeInput.value
     .split('\n')
     .map((s) => s.trim())
-    .filter((s) => s.length > 0)
+    .filter(Boolean)
 
-  const deliverablesList = deliverablesInput.value
+  const deliverablesArray = deliverablesInput.value
     .split('\n')
-    .map((d) => d.trim())
-    .filter((d) => d.length > 0)
+    .map((s) => s.trim())
+    .filter(Boolean)
 
-  const exclusionsList = exclusionsInput.value
+  const exclusionsArray = exclusionsInput.value
     .split('\n')
-    .map((e) => e.trim())
-    .filter((e) => e.length > 0)
+    .map((s) => s.trim())
+    .filter(Boolean)
 
-  emit('create', {
+  const payload: CreateServicePayload = {
     code: code.value.trim().toUpperCase(),
     name: name.value.trim(),
     description: description.value.trim(),
     rank: selectedRank.value,
-    pricing_model: pricingModel,
-    price_min: Number(priceMin.value),
-    price_max: Number(priceMax.value),
-    target_profile: targetProfile.value.trim(),
-    scope: scopeList,
-    deliverables: deliverablesList,
-    exclusions: exclusionsList,
-    audit_parameters: [...selectedParameters.value],
-    minimum_opportunity_score: Number(minScore.value) || 50,
-  })
+    price_min: priceMin.value,
+    price_max: priceMax.value,
+    target_profile: targetProfile.value.trim() || undefined,
+    scope: scopeArray.length > 0 ? scopeArray : undefined,
+    deliverables: deliverablesArray.length > 0 ? deliverablesArray : undefined,
+    exclusions: exclusionsArray.length > 0 ? exclusionsArray : undefined,
+    audit_parameters: selectedParameters.value,
+    minimum_opportunity_score: minScore.value
+  }
 
-  handleClose()
+  emit('create', payload)
+  isSubmitting.value = false
+}
+
+function handleClose() {
+  emit('close')
 }
 </script>
 
 <template>
   <BaseModal :show="show" title="Register New Canonical Service Offering" @close="handleClose">
-    <form class="service-form" @submit.prevent="handleSubmit">
-      <!-- Rank Hierarchy Selection -->
-      <div class="form-group">
-        <label class="form-label" for="svc-rank">
-          Governing Service Rank & Pricing Tier <span class="required">*</span>
+    <form class="space-y-4" @submit.prevent="handleSubmit">
+      <div class="space-y-1">
+        <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider" for="svc-rank">
+          Governing Service Rank & Pricing Tier <span class="text-rose-400">*</span>
         </label>
-        <select id="svc-rank" v-model="selectedRank" class="form-select">
+        <select
+          id="svc-rank"
+          v-model="selectedRank"
+          class="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-blue-500 focus:outline-none"
+        >
           <option v-for="opt in rankOptions" :key="opt.value" :value="opt.value">
             {{ opt.label }}
           </option>
         </select>
-        <span class="field-hint">
-          Offerings strictly align to the approved four-tier operational consulting structure.
-        </span>
       </div>
 
-      <div class="form-row">
-        <div class="form-group flex-1">
-          <label class="form-label" for="svc-code">
-            Service Code <span class="required">*</span>
-          </label>
-          <BaseInput
-            id="svc-code"
-            v-model="code"
-            placeholder="e.g. SVC-RANK-1A"
-            required
-          />
-        </div>
-
-        <div class="form-group flex-2">
-          <label class="form-label" for="svc-name">
-            Service Name <span class="required">*</span>
-          </label>
-          <BaseInput
-            id="svc-name"
-            v-model="name"
-            placeholder="e.g. Performance & SSL In-Depth Audit"
-            required
-          />
-        </div>
+      <div class="grid grid-cols-2 gap-4">
+        <BaseInput
+          id="svc-code"
+          v-model="code"
+          label="Service Code *"
+          placeholder="e.g. SVC-WP-MAINT"
+          required
+        />
+        <BaseInput
+          id="svc-name"
+          v-model="name"
+          label="Display Name *"
+          placeholder="e.g. Core WP Maintenance"
+          required
+        />
       </div>
 
-      <div class="form-row">
-        <div class="form-group flex-1">
-          <label class="form-label" for="svc-price-min">
-            Price Min ($ USD) <span class="required">*</span>
-          </label>
-          <BaseInput
-            id="svc-price-min"
-            v-model="priceMin"
-            type="number"
-            min="0"
-            required
-          />
-        </div>
-
-        <div class="form-group flex-1">
-          <label class="form-label" for="svc-price-max">
-            Price Max ($ USD) <span class="required">*</span>
-          </label>
-          <BaseInput
-            id="svc-price-max"
-            v-model="priceMax"
-            type="number"
-            min="0"
-            required
-          />
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label" for="svc-desc">
-          Overview & Value Proposition <span class="required">*</span>
+      <div class="space-y-1">
+        <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider" for="svc-desc">
+          Service Description *
         </label>
         <textarea
           id="svc-desc"
           v-model="description"
           rows="2"
-          class="form-textarea"
-          placeholder="Brief commercial summary..."
+          placeholder="Comprehensive summary of service deliverables and operational expectations..."
+          class="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:border-blue-500 focus:outline-none"
           required
-        ></textarea>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label" for="svc-target">
-          Target Client Profile
-        </label>
-        <BaseInput
-          id="svc-target"
-          v-model="targetProfile"
-          placeholder="e.g. Restaurants running 10+ yr old static HTML with lost webmasters"
         />
       </div>
 
-      <!-- Technical Scope of Work -->
-      <div class="form-group">
-        <label class="form-label" for="svc-scope">
-          Technical Scope of Work (1 task per line)
-        </label>
-        <span class="field-hint">
-          Operational engineering tasks performed during service delivery (e.g., updates, backups, caching, edge deployment).
-        </span>
-        <textarea
-          id="svc-scope"
-          v-model="scopeInput"
-          rows="4"
-          class="form-textarea"
-          placeholder="Snapshot backup taken to offsite storage&#10;Core CMS and plugin security updates&#10;SSL verification and HTTPS enforcement"
-        ></textarea>
+      <div class="grid grid-cols-2 gap-4">
+        <BaseInput
+          id="svc-price-min"
+          v-model.number="priceMin"
+          type="number"
+          label="Minimum Price ($) *"
+          required
+        />
+        <BaseInput
+          id="svc-price-max"
+          v-model.number="priceMax"
+          type="number"
+          label="Maximum Price ($) *"
+          required
+        />
       </div>
 
-      <!-- Client Deliverables -->
-      <div class="form-group">
-        <label class="form-label" for="svc-deliverables">
-          Client Deliverables (1 tangible artifact per line)
-        </label>
-        <span class="field-hint">
-          Tangible artifacts, reports, and accounts handed to the client upon project completion.
-        </span>
-        <textarea
-          id="svc-deliverables"
-          v-model="deliverablesInput"
-          rows="3"
-          class="form-textarea"
-          placeholder="1-page before-and-after health report&#10;Live production site deployed to edge CDN"
-        ></textarea>
-      </div>
-
-      <!-- Out of Scope / Contractual Boundaries -->
-      <div class="form-group">
-        <label class="form-label" for="svc-exclusions">
-          Out of Scope / Contractual Boundaries (1 item per line)
-        </label>
-        <span class="field-hint">
-          Explicit non-goals protecting against scope creep during engagement delivery.
-        </span>
-        <textarea
-          id="svc-exclusions"
-          v-model="exclusionsInput"
-          rows="3"
-          class="form-textarea"
-          placeholder="Zero graphic design or visual logo redesign&#10;Zero complex CMS database installations"
-        ></textarea>
-      </div>
-
-      <!-- Verified Audit Parameter Multi-Select Checklist -->
-      <div class="form-group">
-        <label class="form-label">
-          Backend Audit Parameters (Required: Select 1 or more) <span class="required">*</span>
-        </label>
-        <span class="field-hint">
-          Parameters are validated against active backend probe collectors.
-        </span>
-
-        <div class="parameter-grid">
-          <div
-            v-for="param in availableAuditParameters"
-            :key="param.key"
-            class="parameter-chip"
-            :class="{ active: selectedParameters.includes(param.key) }"
-            @click="toggleParameter(param.key)"
-          >
-            <input
-              type="checkbox"
-              :checked="selectedParameters.includes(param.key)"
-              class="param-check"
-              @click.stop="toggleParameter(param.key)"
-            />
-            <div class="param-info">
-              <span class="param-title">{{ param.label }}</span>
-              <span class="param-probe"><code>{{ param.key }}</code> ({{ param.collector_probe }})</span>
-            </div>
-          </div>
-        </div>
+      <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
+        <BaseButton label="Cancel" variant="secondary" @click="handleClose" />
+        <BaseButton
+          label="Register Service Offering"
+          button-type="submit"
+          :disabled="!canSubmit"
+          :loading="isSubmitting"
+        />
       </div>
     </form>
-
-    <template #footer>
-      <BaseButton label="Cancel" variant="secondary" @click="handleClose" />
-      <BaseButton
-        label="Register Service"
-        variant="primary"
-        :disabled="!canSubmit"
-        :loading="isSubmitting"
-        @click="handleSubmit"
-      />
-    </template>
   </BaseModal>
 </template>
-
-<style scoped>
-.service-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  max-height: 70vh;
-  overflow-y: auto;
-  padding-right: 0.25rem;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.form-row {
-  display: flex;
-  gap: 1rem;
-}
-
-.flex-1 {
-  flex: 1;
-}
-
-.flex-2 {
-  flex: 2;
-}
-
-.form-label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.required {
-  color: var(--banner-error-text, #ef4444);
-}
-
-.form-select,
-.form-textarea {
-  width: 100%;
-  padding: 0.55rem 0.75rem;
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  background-color: var(--bg-surface);
-  color: var(--text-primary);
-  font-size: 0.9rem;
-  box-sizing: border-box;
-}
-
-.form-select:focus,
-.form-textarea:focus {
-  outline: none;
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 3px var(--focus-ring);
-}
-
-.field-hint {
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-}
-
-.parameter-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 0.5rem;
-  margin-top: 0.25rem;
-}
-
-.parameter-chip {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.5rem;
-  padding: 0.5rem 0.65rem;
-  background-color: var(--bg-surface-subtle);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.15s ease-in-out;
-}
-
-.parameter-chip:hover {
-  border-color: var(--accent-primary);
-  background-color: var(--bg-surface-hover);
-}
-
-.parameter-chip.active {
-  border-color: var(--accent-primary);
-  background-color: var(--badge-primary-bg, #eff6ff);
-}
-
-.param-check {
-  margin-top: 0.15rem;
-  cursor: pointer;
-}
-
-.param-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.param-title {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.param-probe {
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-}
-</style>

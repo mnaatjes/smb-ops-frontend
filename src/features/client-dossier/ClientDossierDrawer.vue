@@ -3,16 +3,13 @@ import { ref, watch, onUnmounted } from 'vue'
 import BaseBadge from '@/shared/ui/BaseBadge.vue'
 import BaseButton from '@/shared/ui/BaseButton.vue'
 import BaseInput from '@/shared/ui/BaseInput.vue'
-import BaseModal from '@/shared/ui/BaseModal.vue'
 import MaintenanceGauge from '@/shared/ui/MaintenanceGauge.vue'
 import type {
   ClientAccount,
   ContractAgreement,
   Timecard,
   ContinuityHealth,
-  ClientSecretMetadata,
-  ClientSecretPayload,
-  SecretType
+  ClientSecretMetadata
 } from '@/shared/types/lead'
 import { useLeadStore } from '@/entities/lead/store'
 
@@ -24,6 +21,8 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'close'): void
   (e: 'log-work', client: ClientAccount, hasActiveCarePlan?: boolean): void
+  (e: 'attach-contract', client: ClientAccount): void
+  (e: 'add-secret', client: ClientAccount): void
 }>()
 
 const leadStore = useLeadStore()
@@ -42,66 +41,10 @@ const activeReveals = ref<
 const revealingIds = ref<Record<string, boolean>>({})
 const copyingIds = ref<Record<string, boolean>>({})
 
-// Add Secret Modal State
-const showAddSecretModal = ref(false)
-const newSecretType = ref<SecretType>('wordpress_admin')
-const newSecretLabel = ref('WordPress Admin')
-const newSecretLoginUrl = ref('')
-const newSecretUsername = ref('')
-const newSecretPassword = ref('')
-const savingSecret = ref(false)
-const addSecretError = ref<string | null>(null)
-
-// Attach Care Plan Contract Modal State
-const showAttachContractModal = ref(false)
-const attachServiceCode = ref('CARE_PLAN_30')
-const attachBillingRate = ref(150)
-const attachContractType = ref('retainer')
-const attachingContract = ref(false)
-const attachContractError = ref<string | null>(null)
-
-const CARE_PLAN_OPTIONS = [
-  { code: 'CARE_PLAN_30', name: 'Basic Care Plan (30 min / mo)', defaultRate: 150, type: 'retainer' },
-  { code: 'CARE_PLAN_60', name: 'Standard Care Plan (60 min / mo)', defaultRate: 275, type: 'retainer' },
-  { code: 'CARE_PLAN_90', name: 'Premium Care Plan (90 min / mo)', defaultRate: 375, type: 'retainer' },
-  { code: 'DYNAMIC_CMS_RETAINER', name: 'Custom CMS Retainer (30 min / mo)', defaultRate: 150, type: 'retainer' },
-  { code: 'SVC-SEC', name: 'Domain & SSL Hardening (Fixed Fee)', defaultRate: 350, type: 'fixed_fee' },
-  { code: 'SVC-WEB', name: 'Mobile Web Modernization (Fixed Fee)', defaultRate: 1200, type: 'fixed_fee' }
-]
-
+// Attach Care Plan Contract Trigger
 function openAttachContractModal(): void {
-  attachServiceCode.value = 'CARE_PLAN_30'
-  attachBillingRate.value = 150
-  attachContractType.value = 'retainer'
-  attachContractError.value = null
-  showAttachContractModal.value = true
-}
-
-function onAttachServiceCodeChange(): void {
-  const found = CARE_PLAN_OPTIONS.find((c) => c.code === attachServiceCode.value)
-  if (found) {
-    attachBillingRate.value = found.defaultRate
-    attachContractType.value = found.type
-  }
-}
-
-async function handleConfirmAttachContract(): Promise<void> {
-  if (!props.client) return
-  attachingContract.value = true
-  attachContractError.value = null
-  try {
-    const created = await leadStore.attachContract(props.client.id, {
-      service_code: attachServiceCode.value,
-      billing_rate: Number(attachBillingRate.value),
-      contract_type: attachContractType.value
-    })
-    contracts.value.push(created)
-    await loadClientData()
-    showAttachContractModal.value = false
-  } catch (err: unknown) {
-    attachContractError.value = err instanceof Error ? err.message : 'Failed to attach contract'
-  } finally {
-    attachingContract.value = false
+  if (props.client) {
+    emit('attach-contract', props.client)
   }
 }
 
@@ -245,64 +188,9 @@ function saveActionCommit(contractId: string, idx: number): void {
   editingCommitInput.value = ''
 }
 
-function onNewSecretTypeChange(): void {
-  switch (newSecretType.value) {
-    case 'wordpress_admin':
-      newSecretLabel.value = 'WordPress Admin'
-      if (props.client?.website_url && !newSecretLoginUrl.value) {
-        newSecretLoginUrl.value = `${props.client.website_url.replace(/\/$/, '')}/wp-admin`
-      }
-      break
-    case 'hosting_cpanel':
-      newSecretLabel.value = 'Hosting / cPanel'
-      break
-    case 'sftp_ssh':
-      newSecretLabel.value = 'SFTP / SSH Access'
-      break
-    case 'dns_registrar':
-      newSecretLabel.value = 'DNS / Domain Registrar'
-      break
-    case 'database_direct':
-      newSecretLabel.value = 'Database Direct'
-      break
-  }
-}
-
 function openAddSecretModal(): void {
-  newSecretType.value = 'wordpress_admin'
-  newSecretLabel.value = 'WordPress Admin'
-  newSecretLoginUrl.value = props.client?.website_url
-    ? `${props.client.website_url.replace(/\/$/, '')}/wp-admin`
-    : ''
-  newSecretUsername.value = ''
-  newSecretPassword.value = ''
-  addSecretError.value = null
-  showAddSecretModal.value = true
-}
-
-async function handleSaveNewSecret(): Promise<void> {
-  if (!props.client) return
-  if (!newSecretUsername.value.trim() || !newSecretPassword.value.trim()) {
-    addSecretError.value = 'Username and password are required.'
-    return
-  }
-  savingSecret.value = true
-  addSecretError.value = null
-  try {
-    const payload: ClientSecretPayload = {
-      secret_type: newSecretType.value,
-      label: newSecretLabel.value.trim() || newSecretType.value,
-      username: newSecretUsername.value.trim(),
-      password: newSecretPassword.value,
-      login_url: newSecretLoginUrl.value.trim() || null
-    }
-    const created = await leadStore.storeSecret(props.client.id, payload)
-    secrets.value.push(created)
-    showAddSecretModal.value = false
-  } catch (err: unknown) {
-    addSecretError.value = err instanceof Error ? err.message : 'Failed to store secret in vault'
-  } finally {
-    savingSecret.value = false
+  if (props.client) {
+    emit('add-secret', props.client)
   }
 }
 
@@ -820,141 +708,6 @@ function handleTriggerLogWork(): void {
         </section>
       </main>
     </div>
-
-    <!-- Add Secret Modal -->
-    <BaseModal
-      :show="showAddSecretModal"
-      title="Store Encrypted Credential"
-      @close="showAddSecretModal = false"
-    >
-      <div class="add-secret-modal-form">
-        <p class="modal-instruction">
-          Credentials are encrypted via Fernet AES-256 before persisting. Operators can reveal passwords on-demand with automatic 30-second masking.
-        </p>
-
-        <div v-if="addSecretError" class="add-secret-error">
-          {{ addSecretError }}
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Secret Category</label>
-          <select
-            v-model="newSecretType"
-            class="modal-select"
-            @change="onNewSecretTypeChange"
-          >
-            <option value="wordpress_admin">WordPress Admin</option>
-            <option value="hosting_cpanel">Hosting / cPanel</option>
-            <option value="sftp_ssh">SFTP / SSH Access</option>
-            <option value="dns_registrar">DNS / Domain Registrar</option>
-            <option value="database_direct">Database Direct</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Label</label>
-          <BaseInput v-model="newSecretLabel" placeholder="e.g. Production WP Admin" />
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Login URL / Endpoint</label>
-          <BaseInput v-model="newSecretLoginUrl" placeholder="https://example.com/wp-admin" />
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Username / Identifier *</label>
-          <BaseInput v-model="newSecretUsername" placeholder="admin@example.com" />
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Password / Secret *</label>
-          <BaseInput v-model="newSecretPassword" type="password" placeholder="••••••••" />
-        </div>
-
-        <div class="modal-form-actions">
-          <BaseButton
-            label="Cancel"
-            variant="secondary"
-            @click="showAddSecretModal = false"
-          />
-          <BaseButton
-            label="Encrypt & Store"
-            variant="primary"
-            :disabled="savingSecret"
-            @click="handleSaveNewSecret"
-          />
-        </div>
-      </div>
-    </BaseModal>
-
-    <!-- Attach Care Plan Contract Modal -->
-    <BaseModal
-      :show="showAttachContractModal"
-      title="Attach Add-on Care Plan / Contract"
-      @close="showAttachContractModal = false"
-    >
-      <div class="modal-form-body">
-        <p class="modal-intro">
-          Attach a recurring Care Plan retainer or fixed consulting contract to
-          <strong>{{ client.business_name }}</strong>.
-        </p>
-
-        <div v-if="attachContractError" class="modal-error-banner">
-          {{ attachContractError }}
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Service Package / Care Plan *</label>
-          <select
-            v-model="attachServiceCode"
-            class="modal-select"
-            @change="onAttachServiceCodeChange"
-          >
-            <option
-              v-for="opt in CARE_PLAN_OPTIONS"
-              :key="opt.code"
-              :value="opt.code"
-            >
-              {{ opt.name }}
-            </option>
-          </select>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group half">
-            <label class="form-label">Billing Rate ($ USD) *</label>
-            <BaseInput
-              v-model.number="attachBillingRate"
-              type="number"
-              min="0"
-              placeholder="150"
-            />
-          </div>
-
-          <div class="form-group half">
-            <label class="form-label">Contract Type</label>
-            <select v-model="attachContractType" class="modal-select">
-              <option value="retainer">Monthly Retainer</option>
-              <option value="fixed_fee">Fixed Fee Project</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="modal-form-actions">
-          <BaseButton
-            label="Cancel"
-            variant="secondary"
-            @click="showAttachContractModal = false"
-          />
-          <BaseButton
-            label="Attach Contract"
-            variant="primary"
-            :disabled="attachingContract"
-            @click="handleConfirmAttachContract"
-          />
-        </div>
-      </div>
-    </BaseModal>
   </div>
 </template>
 

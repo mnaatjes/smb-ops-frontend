@@ -83,4 +83,40 @@ describe('FSD Layer Boundary Enforcement', () => {
       ).toBe(false)
     }
   })
+
+  it('Anti-Inception Rule: no modal may import or nest another modal component', () => {
+    const allFiles = getAllFiles(srcDir)
+    const modalFiles = allFiles.filter(
+      (f) => f.endsWith('Modal.vue') && !f.endsWith('BaseModal.vue')
+    )
+
+    // Matches importing any other *Modal.vue (except BaseModal)
+    const modalImportPattern = /import\s+.*\b([A-Z][a-zA-Z0-9]*Modal)\b(?!\s*from\s*['"].*BaseModal)/g
+
+    for (const file of modalFiles) {
+      const content = fs.readFileSync(file, 'utf-8')
+      const matches = Array.from(content.matchAll(modalImportPattern))
+      const illegalImports = matches.filter((m) => m[1] !== 'BaseModal')
+
+      expect(
+        illegalImports.length,
+        `Anti-Inception Violation in ${path.relative(srcDir, file)}: Modal cannot import child modal(s): ${illegalImports.map((m) => m[1]).join(', ')}`
+      ).toBe(0)
+    }
+  })
+
+  it('Anti-Canvas-Bleed Rule: no modal component may contain full-canvas width styles', () => {
+    const allFiles = getAllFiles(srcDir)
+    const modalFiles = allFiles.filter((f) => f.endsWith('Modal.vue'))
+
+    const fullCanvasPattern = /calc\(100vw\s*-\s*260px\)/
+
+    for (const file of modalFiles) {
+      const content = fs.readFileSync(file, 'utf-8')
+      expect(
+        fullCanvasPattern.test(content),
+        `Anti-Canvas-Bleed Violation in ${path.relative(srcDir, file)}: Modals must be bounded (<= 640px) and cannot use full-canvas drawer layout width`
+      ).toBe(false)
+    }
+  })
 })

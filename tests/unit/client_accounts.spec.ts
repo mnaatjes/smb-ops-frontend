@@ -16,6 +16,7 @@ describe('Client Accounts Workspace & Onboarding Pipeline', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
     vi.restoreAllMocks()
+    document.body.innerHTML = ''
   })
 
   it('MaintenanceGauge displays green normal state under 25 minutes', () => {
@@ -63,7 +64,7 @@ describe('Client Accounts Workspace & Onboarding Pipeline', () => {
     expect(wrapper.text()).toContain('Out-of-Scope (Additional SOW Required)')
   })
 
-  it('ClientOnboardingModal advances through 4 steps and emits payload', async () => {
+  it('ClientOnboardingModal advances through 3 steps and emits payload', async () => {
     const mockLead: RankedLead = {
       prospect: {
         id: 'lead-test-123',
@@ -97,45 +98,39 @@ describe('Client Accounts Workspace & Onboarding Pipeline', () => {
         show: true,
         lead: mockLead,
         services: mockServices
-      }
+      },
+      attachTo: document.body
     })
 
     // Step 1: Contact
-    expect(wrapper.text()).toContain('1. Contact & Owner Verification')
-    const emailInput = wrapper.findAll('input')[1]
-    await emailInput.setValue('owner@harborbakery.com')
+    expect(document.body.textContent).toContain('Primary Account Representative')
+    const emailInput = document.body.querySelector('#onboard-contact-email') as HTMLInputElement
+    emailInput.value = 'owner@harborbakery.com'
+    emailInput.dispatchEvent(new Event('input'))
 
-    const continueBtn = wrapper.findAll('button').find((b) => b.text() === 'Continue')
-    await continueBtn?.trigger('click')
+    const getButtons = () => Array.from(document.body.querySelectorAll('button'))
+    getButtons().find((b) => b.textContent?.trim() === 'Continue')?.click()
+    await wrapper.vm.$nextTick()
 
     // Step 2: Services
-    expect(wrapper.text()).toContain('2. Select Contracted Services')
-    // The service is already pre-selected by default. Trigger continue.
-    await continueBtn?.trigger('click')
+    expect(document.body.textContent).toContain('Select Contracted Offerings')
+    getButtons().find((b) => b.textContent?.trim() === 'Continue')?.click()
+    await wrapper.vm.$nextTick()
 
-    // Step 3: Scope & Terms
-    expect(wrapper.text()).toContain('3. Work Scope & Operating Terms')
-    await continueBtn?.trigger('click')
+    // Step 3: Vault & Launch
+    expect(document.body.textContent).toContain('Initial Vault Infrastructure Secret')
+    const userInput = document.body.querySelector('#onboard-vault-user') as HTMLInputElement
+    const passInput = document.body.querySelector('#onboard-vault-pass') as HTMLInputElement
+    userInput.value = 'admin_user'
+    userInput.dispatchEvent(new Event('input'))
+    passInput.value = 'dynamically_generated_mock_pass_123'
+    passInput.dispatchEvent(new Event('input'))
+    await wrapper.vm.$nextTick()
 
-    // Step 4: Access & Infrastructure Credentials
-    expect(wrapper.text()).toContain('4. Access & Infrastructure Credentials')
-    const addCredBtn = wrapper.findAll('button').find((b) => b.text() === '+ Add Credential')
-    await addCredBtn?.trigger('click')
-
-    // Populate credentials
-    const usernameInput = wrapper.findAll('input').find((i) => i.attributes('placeholder') === 'admin@example.com')
-    const passwordInput = wrapper.findAll('input').find((i) => i.attributes('type') === 'password')
-    await usernameInput?.setValue('admin_user')
-    await passwordInput?.setValue('dynamically_generated_mock_pass_123')
-
-    const step4ContinueBtn = wrapper.findAll('button').find((b) => b.text() === 'Continue')
-    await step4ContinueBtn?.trigger('click')
-
-    // Step 5: Summary & Dispatch
-    expect(wrapper.text()).toContain('5. Contract Dispatch & Provisioning')
-    const dispatchBtn = wrapper.findAll('button').find((b) => b.text() === 'Dispatch & Onboard')
+    const dispatchBtn = getButtons().find((b) => b.textContent?.trim() === 'Dispatch & Onboard')
     expect(dispatchBtn).toBeDefined()
-    await dispatchBtn?.trigger('click')
+    dispatchBtn?.click()
+    await wrapper.vm.$nextTick()
 
     expect(wrapper.emitted('onboard')).toHaveLength(1)
     const emittedPayload = wrapper.emitted('onboard')?.[0]?.[0] as OnboardClientPayload
