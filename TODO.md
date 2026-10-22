@@ -1,145 +1,104 @@
-# SMB Ops Business Alignment & Action Plan
+# SMB Ops Frontend Reconstruction & Implementation Plan
 
-## IMMEDIATE Priority Architecture Tasks (Contracts & Historical Work Ledger)
-
-- [ ] **1. Historical Timecards & Lifetime Work Ledger Port**
-  - **Context:** Current as-built system keys `Timecard` by `(client_id, month, year)` and only returns the current calendar month. Rollover to a new month hides prior month entries.
-  - **Scope:**
-    - **Backend:** Add `list_timecards_for_client(client_id: str) -> list[Timecard]` and expose `GET /clients/{client_id}/timecards` (or `GET /clients/{client_id}/work-logs`).
-    - **Frontend:** Add a billing cycle / month selector (or unified lifetime ledger tab) in `ClientDossierDrawer.vue` so operators can audit past work and invoice milestones across months.
-  - **Invariants:** Preserve immutable historical records; never overwrite or purge prior billing cycles.
-
-- [ ] **2. Contract Lifecycle State Machine & Cancellation Port**
-  - **Context:** Backend supports `draft`, `active`, `cancelled`, `completed`, but API lacks update routes and UI only displays active contracts with no termination workflow.
-  - **Scope:**
-    - **Backend:** Expose `PATCH /clients/{client_id}/contracts/{contract_id}` to transition status (`active` -> `cancelled` | `completed`) and record `end_date`.
-    - **Frontend:** Add "Terminate / Cancel Contract" action in the contract card/accordion, split active contracts from historical/cancelled contracts, and dynamically recalculate retainer gauge based only on active plans.
-
-- [ ] **3. Service Catalog & Offerings Refactor**
-  - **Scope:** Single price input (remove min-max), recurring vs. one-time offering toggle, and dedicated discrete deliverables data table.
+This roadmap tracks the step-by-step execution of **ADR-0027** (BaseModal & Workbench Governance), **ADR-0028** (Scaffold-Retained Bottom-Up UI Reconstruction), and their governing design documents (**SDD-0010**, **SDD-0011**).
 
 ---
 
-## Active Priority Tasks (Immediate Follow-ups & Remediations)
+## Phase 0: Test Reset & Sunsetting Deprecated Presentation Artifacts
 
-- [x] **1. Clean Onboarding Pipeline Add-on Terminology** (Completed in PR #38)
-  - Remove legacy language regarding "30 minute add-on" across `ClientOnboardingModal.vue` and service catalog selection steps to reflect decoupled care plans.
-
-- [x] **2. Client Dossier Add-on Attachment & Contract Triggering** (Completed in PR #39)
-  - Enable attaching/adding an Add-on Care Plan package directly within the Client Account Dashboard/dossier/workspace (`ClientDossierDrawer.vue`).
-  - Action should trigger a new Contract creation via backend client contract endpoints.
-
-- [x] **3. Guard Retainer Option in Work Logging Modal** (Completed in PR #38)
-  - In `LogMaintenanceModal.vue` ("+ Log Work"), disable the "Monthly Care Plan (Retainer)" option if the client account does not have an active Add-on Care Plan registered.
-
-- [x] **4. Active Service Contracts Discrete Actions Checklist** (Completed in PR #40)
-  - In `ClientDossierDrawer.vue` > Active Service Contracts, clicking a Service Item triggers an accordion element or popover displaying the list of discrete service deliverables/actions.
-  - Include an interactive checkbox indicating completion status per service action (designed for future git commit UUID linkage).
-
-- [x] **5. Pursued Pipeline Workspace Stepper Bar Header Span** (Completed in PR #38)
-  - Resolve horizontal overflow of `stage-stepper-bar` inside the column layout.
-  - Migrate `stage-stepper-bar` to the top of the workspace (as part of or directly beneath `workspace-header`), spanning across both `workspace-col` columns.
-
-- [x] **6. Bespoke Minimal Scrollbar on Workspace Columns** (Completed in PR #38)
-  - Replace default Google Chrome scrollbars on `workspace-col col-left` with a sleek, minimalist custom scrollbar or styled overflow utility.
+- [ ] **0.1 Reset Deprecated Testing Artifacts**
+  - Clear transient manual checklist in `architecture/uat/0001_release_uat_checklist.md`.
+  - Clear deprecated Gherkin workflow scenarios in `tests/e2e/specs/` that test broken legacy presentation flows.
+- [ ] **0.2 Apply Deprecation Renaming Protocol (`.legacy.vue`)**
+  - Rename `ClientOnboardingModal.vue` $\rightarrow$ `ClientOnboardingModal.legacy.vue` with deprecation banner.
+  - Rename `LogMaintenanceModal.vue` $\rightarrow$ `LogMaintenanceModal.legacy.vue` with deprecation banner.
+  - Rename `CreateServiceModal.vue` $\rightarrow$ `CreateServiceModal.legacy.vue` with deprecation banner.
+  - Update intermediate imports in `HomeView.vue` to maintain green build.
 
 ---
 
-## Active Priority Tasks (Item Evaluation & ROI Breakdown)
+## Phase 1: Workbench Route & Atomic Primitives (Wave 1)
 
-- [x] **1. Small Quality of Life Improvements to Dashboard** (Completed in PR #35 & #36)
-  - Full-canvas dual-column Client Account workspace (`calc(100vw - 260px)`).
-  - Decoupled Care Plan retainers with dynamic cap calculation and neutral 0-plan gauge.
-
-- [ ] **2. Finalize Timecard System in Dashboard**
-  - **ROI:** Medium (Direct tracking of billable extra hours vs. monthly retainer)
-  - **Scope:**
-    - Add 3-way entry categorization (`retainer_maintenance`, `billable_extra`, `internal_non_billable`).
-    - Enforce only retainer maintenance consuming monthly plan cap.
-    - Add entry category dropdown in `LogMaintenanceModal.vue`.
-    - Display entry type badges in `ClientDossierDrawer.vue` maintenance history.
-  - **Restrictions:** Hard stop after category tagging; no complex analytics or PDF invoice generators on this pass.
-
-- [ ] **3. Client Contract PDF Storage Port**
-  - **ROI:** Low-Medium
-  - **Scope:** Minimal mechanism to associate/store a signed PDF contract link/file to a client account record.
-  - **Restrictions:** Do not build a custom PDF generator or in-app signature tool. Use external PDF signing (e.g. DocuSign/HelloSign/PandaDoc/manual scan) and store the reference.
-
-- [ ] **4. Hard Feature Freeze on Dashboard**
-  - **ROI:** High (stops time waste)
-  - **Scope:** Halt all feature additions, styling updates, and new views on frontend/backend.
-  - **Restrictions:** Code edits strictly limited to bug fixes and LXC deployment configuration.
-
-- [ ] **5. Deploy Dashboard & Stack to Provisioned LXC Host**
-  - **ROI:** High (stability, persistent live data)
-  - **Scope:**
-    - Deploy container stack to provisioned LXC host.
-    - Validate persistent volume mounts for SQLite data and runtime secrets.
-    - Perform end-to-end beta test of core lead discovery -> audit -> opportunity workflow.
-  - **Restrictions:** Keep deployment simple; use existing Docker Compose patterns.
-
-- [ ] **6. Core Business Infrastructure Setup**
-  - **ROI:** Critical (Required to legally transact and collect revenue)
-  - **Scope:**
-    - Establish payment collection method (Stripe payment link / business merchant).
-    - Establish e-sign workflow (DocuSign / PandaDoc / HelloSign template).
-    - Setup business bank account and bookkeeping separation.
-    - Review basic tax liability handling and legal liability disclaimers.
-    - Setup simple invoicing workflow.
-  - **Restrictions:** Pure operational setup; zero custom software development.
+- [ ] **1.1 Establish Developer Workbench Route (`/dev/components`)**
+  - Register `/dev/components` route in `src/app/router/index.ts`.
+  - Create interactive staging canvas `src/pages/DevComponentsView.vue`.
+  - Verify routing on development Docker stack (`http://localhost:8090/dev/components`).
+- [ ] **1.2 Re-articulate `BaseButton.vue`**
+  - Verify explicit `buttonType: 'button' | 'submit' | 'reset'`.
+  - Support variants (`primary`, `secondary`, `danger`), loading spinner state, and disabled state.
+  - Add visual test section in `/dev/components`.
+  - Unit test: `tests/unit/BaseButton.spec.ts`.
+- [ ] **1.3 Re-articulate `BaseBadge.vue`**
+  - Implement tokenized color variants (`emerald`, `amber`, `rose`, `indigo`, `slate`), border tokens, and pill sizing.
+  - Add visual test section in `/dev/components`.
+  - Unit test: `tests/unit/BaseBadge.spec.ts`.
+- [ ] **1.4 Re-articulate `BaseInput.vue`**
+  - Support text, number, email, and password types with focus borders and error states.
+  - Add visual test section in `/dev/components`.
+  - Unit test: `tests/unit/BaseInput.spec.ts`.
 
 ---
 
-## Future Feature Improvements (Archived Backlog)
+## Phase 2: Dumb Structural Shell & Boundary Enforcement (Wave 2)
 
-### 1. Mobile & Responsive Viewport Adaptation (Frontend UX)
-- [ ] **1.1 Collapsible Sidebar Navigation:**
-  - Implement a hamburger menu trigger button for mobile / narrow viewports (< 768px).
-  - Add collapsible / minimized navigation mode that collapses text labels and displays icon-only rail.
-- [ ] **1.2 Dossier Drawer Mobile Fit:**
-  - Make `dossier-drawer` responsive to narrow screen viewports (full-width overlay or slide-over drawer on mobile, with touch dismissal and scrolling body isolation).
-- [ ] **1.3 Dashboard Grid & Table Responsiveness:**
-  - Adapt client list grids, service catalog cards, and doctrine viewers for responsive mobile wrapping and horizontal scroll minimization.
+- [ ] **2.1 Re-articulate `BaseModal.vue`**
+  - Implement pure dumb frame with Vue `<Teleport to="body">`.
+  - Enforce max-width $\le 640$px (`max-w-xl` / `500px`), centered flexbox layout, and dark backdrop (`rgba(0,0,0,0.65)`).
+  - Implement ergonomic dismissals: backdrop click, `✕` close button, and `Escape` key listener.
+  - Implement body scroll locking when active.
+  - Mount and verify interactive modal demo on `/dev/components`.
+- [ ] **2.2 Implement Automated Modal Invariant Tests**
+  - Author `tests/unit/BaseModal.spec.ts` (8-point ergonomic and geometric assertion matrix).
+  - Author architectural boundary rules in `tests/architecture/test_boundaries.spec.ts`:
+    - Anti-Inception Rule (no modal may import/render another modal).
+    - Anti-Canvas-Bleed Rule (no modal may contain `calc(100vw - 260px)`).
 
-### 2. Continuity & SLA Health Probes Architecture (Backend / Observability)
-- [ ] **2.1 Health Probe Architecture Discovery & Mechanisms:**
-  - Document probe mechanisms for:
-    - SSL Certificate Validity / Expiry (remote TLS handshake).
-    - Endpoint Uptime / Latency (remote HTTP/HTTPS probing).
-    - DNS / Domain Propagation (remote DNS queries).
-  - Determine remote polling vs. guest agent requirements.
-- [ ] **2.2 Account-Level Relevance:**
-  - Define if Continuity & SLA Health applies universally or per contracted service tier.
+---
 
-### 3. SLA & Deliverables Governance Per Service (Catalog / Domain)
-- [ ] **3.1 Service-Specific SLA & Deliverable Matrix:**
-  - Audit catalog services and define specific SLA terms, response windows, and caps per tier.
-- [ ] **3.2 Dynamic Contract SLA Generator:**
-  - Dynamic population of SLA terms from selected catalog service deliverables.
+## Phase 3: Compound Telemetry & Selection Controls (Wave 3)
 
-### 4. Secure Client Website Credential & Secret Management (Security / Ingestion)
-- [x] **4.1 Zero-Knowledge / At-Rest Secret Encryption** (Completed)
-- [x] **4.2 Onboarding Credential Vault Interface** (Completed)
+- [ ] **3.1 Re-articulate `MaintenanceGauge.vue`**
+  - Implement dynamic progress track with threshold colors ($\le 75\%$ emerald, $76-100\%$ amber, $>100\%$ rose).
+  - Implement neutral state for 0-minute cap clients.
+  - Add live interactive sliders on `/dev/components` to test all 4 gauge states.
+  - Unit test: `tests/unit/MaintenanceGauge.spec.ts`.
+- [ ] **3.2 Re-articulate `ServiceFilterDropdown.vue`**
+  - Support multi-select service focus with clear `{{ count }} active` counter badge.
+  - Provide reset triggers and empty-state guidance in table integration.
+  - Add interactive filter harness on `/dev/components`.
 
-### 5. Contract Agreement PDF Generation & Email Dispatch (Workflow / Billing)
-- [ ] **5.1 PDF Contract Document Generator:**
-  - Server-side PDF document rendering from signed or pending contract metadata.
-- [ ] **5.2 Automated Client Email Dispatch:**
-  - Automated transactional email dispatch delivering contract agreement PDF.
+---
 
-### 6. Fixed-Fee Invoicing & Time Tracking ROI Metrics (Finance / Timecards)
-- [ ] **6.1 Internal Time Logging vs. Client Invoicing Separation:**
-  - Decoupled internal task hours tracking from fixed-fee billing.
-- [ ] **6.2 Fixed-Fee Invoicing Workflows:**
-  - Structure client-facing invoice generation for fixed milestone / retainer fees.
-- [ ] **6.3 Profitability & ROI Reporting:**
-  - Metrics dashboard correlating logged hours against fixed contract revenue.
+## Phase 4: Atomic Domain Feature Modals (Wave 4)
 
-### 7. Administration KPI & Business Metrics Dashboard (Analytics / Reporting)
-- [ ] **7.1 KPI Executive Cards:**
-  - Total active client count, monthly recurring revenue (MRR) gauge, and total billed vs. retainer hours.
-- [ ] **7.2 Aggregate Timecard Table & Visual Breakdown:**
-  - Cross-client table of all logged maintenance entries for the active billing cycle.
-  - Category breakdown chart (Retainer Maintenance vs. Billable Extra vs. Internal Pro-Bono).
+- [ ] **4.1 Implement `ContractAgreementModal.vue`**
+  - Design unified dual-mode modal (Onboarding staging vs. Client Account direct mutation).
+  - Support single agreed rate input (remove min-max) and recurring vs. one-time toggle.
+  - Implement discrete deliverables checklist preview.
+  - Exercise and verify on `/dev/components`.
+  - Unit test: `tests/unit/ContractAgreementModal.spec.ts`.
+- [ ] **4.2 Implement `LogWorkModal.vue`**
+  - Re-articulate timecard logging with minutes input and 3-way work category dropdown (`retainer`, `billable_extra`, `internal`).
+  - Exercise and verify on `/dev/components`.
+  - Unit test: `tests/unit/LogWorkModal.spec.ts`.
+- [ ] **4.3 Implement `VaultSecretModal.vue`**
+  - Re-articulate credential creation with label, secret type, username, and password fields.
+  - Exercise on `/dev/components`.
+- [ ] **4.4 Re-articulate `ClientOnboardingModal.vue`**
+  - Streamline into a clean 3-step wizard composing the verified `ContractAgreementModal` and `VaultSecretModal`.
+  - Exercise on `/dev/components`.
 
+---
 
+## Phase 5: Workspace Integration, Sunsetting Purge & Fresh Testing Suites
+
+- [ ] **5.1 Integrate Reconstructed Modals into Production Views**
+  - Wire `ContractAgreementModal.vue` and `LogWorkModal.vue` into `ClientDossierDrawer.vue`.
+  - Wire `ClientOnboardingModal.vue` into `HomeView.vue`.
+- [ ] **5.2 Execute Sunset Purge**
+  - Delete all `.legacy.vue` components from the filesystem via `git rm`.
+- [ ] **5.3 Author Fresh Gherkin Specifications**
+  - Author clean Gherkin feature files in `tests/e2e/specs/` covering the unified workflows.
+  - Validate syntax with `pnpm run lint:gherkin`.
+- [ ] **5.4 Author Clean Release UAT Checklist**
+  - Author `architecture/uat/0001_release_uat_checklist.md` reflecting the verified, clean user journeys.
