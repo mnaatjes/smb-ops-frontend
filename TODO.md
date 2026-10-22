@@ -1,5 +1,25 @@
 # SMB Ops Business Alignment & Action Plan
 
+## IMMEDIATE Priority Architecture Tasks (Contracts & Historical Work Ledger)
+
+- [ ] **1. Historical Timecards & Lifetime Work Ledger Port**
+  - **Context:** Current as-built system keys `Timecard` by `(client_id, month, year)` and only returns the current calendar month. Rollover to a new month hides prior month entries.
+  - **Scope:**
+    - **Backend:** Add `list_timecards_for_client(client_id: str) -> list[Timecard]` and expose `GET /clients/{client_id}/timecards` (or `GET /clients/{client_id}/work-logs`).
+    - **Frontend:** Add a billing cycle / month selector (or unified lifetime ledger tab) in `ClientDossierDrawer.vue` so operators can audit past work and invoice milestones across months.
+  - **Invariants:** Preserve immutable historical records; never overwrite or purge prior billing cycles.
+
+- [ ] **2. Contract Lifecycle State Machine & Cancellation Port**
+  - **Context:** Backend supports `draft`, `active`, `cancelled`, `completed`, but API lacks update routes and UI only displays active contracts with no termination workflow.
+  - **Scope:**
+    - **Backend:** Expose `PATCH /clients/{client_id}/contracts/{contract_id}` to transition status (`active` -> `cancelled` | `completed`) and record `end_date`.
+    - **Frontend:** Add "Terminate / Cancel Contract" action in the contract card/accordion, split active contracts from historical/cancelled contracts, and dynamically recalculate retainer gauge based only on active plans.
+
+- [ ] **3. Service Catalog & Offerings Refactor**
+  - **Scope:** Single price input (remove min-max), recurring vs. one-time offering toggle, and dedicated discrete deliverables data table.
+
+---
+
 ## Active Priority Tasks (Immediate Follow-ups & Remediations)
 
 - [x] **1. Clean Onboarding Pipeline Add-on Terminology** (Completed in PR #38)
