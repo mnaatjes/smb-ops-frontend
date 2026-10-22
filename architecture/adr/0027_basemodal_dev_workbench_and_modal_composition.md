@@ -43,9 +43,18 @@ A **Modal** in SMB Operations is formally defined as:
   - View: `src/pages/DevComponentsView.vue`
 * Provides an isolated interactive workbench to exercise `BaseModal`, `BaseButton`, `BaseBadge`, `BaseInput`, and `MaintenanceGauge` across all supported states (default, active, loading, error, disabled) without database dependencies.
 
-### 4. Testing & Verification Governance
-* `BaseModal.vue`: Tested via **Vitest unit tests** (`tests/unit/BaseModal.spec.ts`) validating structural props, slots, and ergonomic events. It is strictly exempt from Gherkin feature definitions.
-* Feature Modals: Tested via Vitest for form schemas and validated via **Gherkin E2E feature specifications** (`tests/e2e/specs/`) for complete business flows.
+### 4. Testing & Automated Definition Enforcement
+To prevent architectural drift and uphold the formal definition of a modal, enforcement is automated across three pipeline layers:
+* **Layer 1: Structural & Ergonomic Unit Tests (`tests/unit/BaseModal.spec.ts`):**
+  - **Ergonomics:** Asserts `@close` emits on Escape key, backdrop click, and close button click.
+  - **Geometry & Tokens:** Asserts modal card styling enforces `max-width <= 640px` and the backdrop uses tokenized semi-transparent overlay (`rgba(0, 0, 0, 0.65)`).
+* **Layer 2: Architectural Boundary Tests (`tests/architecture/test_boundaries.spec.ts`):**
+  - **No Nested Modals (Anti-Inception Rule):** Scans all `src/**/*Modal.vue` components to verify no modal imports or renders another modal component (only `BaseModal` is permissible).
+  - **No Canvas Bleed:** Asserts that no component named `*Modal.vue` contains full-canvas viewport sizing (`calc(100vw - 260px)`).
+* **Layer 3: Pre-Commit & CI Pipelines:**
+  - Enforced automatically via `pnpm run test` on every local commit and PR check.
+* **Human Intent Boundary:**
+  - Business purpose (*"Is this modal focused on a single transactional task?"*) is validated via PR code review and documented against governing feature ADRs.
 
 ## Consequences
 - **Positive:** Eradicates UI drift across modals; eliminates duplicated form logic; provides a zero-friction sandbox route (`/dev/components`) for visual regression testing; preserves strict Feature-Sliced Design boundary decoupling.

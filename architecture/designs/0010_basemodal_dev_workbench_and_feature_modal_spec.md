@@ -141,8 +141,17 @@ interface ContractAgreementModalEmits {
 * **Test 4:** Emits `@close` event on backdrop click.
 * **Test 5:** Emits `@close` event when `Escape` key is triggered on `window`.
 * **Test 6:** Does NOT emit `@close` when inner modal card is clicked (event propagation stopped).
+* **Test 7 (Geometry Invariant):** Validates modal card CSS rules enforce `max-width: 500px` ($\le 640$px) and flexbox viewport centering.
+* **Test 8 (Token Invariant):** Validates backdrop renders tokenized semi-transparent background (`rgba(0, 0, 0, 0.65)`).
 
-### 5.2 Feature Modal Gherkin Specification Template
+### 5.2 Architectural Boundary Enforcement (`tests/architecture/test_boundaries.spec.ts`)
+Automated regex and AST scanning in Vitest boundary checks to enforce modal definitions:
+1. **No Nested Modals (Anti-Inception):**
+   - Asserts that no `*Modal.vue` file in `src/features/` imports another component ending in `Modal.vue` (except `BaseModal.vue`).
+2. **No Full-Canvas Layout Bleed:**
+   - Asserts that no `*Modal.vue` contains full-canvas viewport widths (`calc(100vw - 260px)`).
+
+### 5.3 Feature Modal Gherkin Specification Template
 When authoring business workflows for feature modals, specify Gherkin scenarios in `tests/e2e/specs/` following this template:
 
 ```gherkin
