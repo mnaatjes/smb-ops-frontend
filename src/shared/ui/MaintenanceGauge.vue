@@ -23,7 +23,7 @@ const percentage = computed(() => {
 const gaugeStatus = computed<'normal' | 'warning' | 'danger' | 'none'>(() => {
   if (!hasPlan.value) return 'none'
   if (props.outOfScope || props.totalMinutes > props.capMinutes!) return 'danger'
-  if (props.totalMinutes >= props.capMinutes! * 0.8) return 'warning'
+  if (props.totalMinutes >= props.capMinutes! * 0.76) return 'warning'
   return 'normal'
 })
 </script>

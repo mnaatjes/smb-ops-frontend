@@ -1,95 +1,68 @@
 ---
-title: "UAT Plan: End-to-End Release Acceptance Checklist"
-tags: ["uat", "release-gate", "testing", "smb-ops-frontend"]
-created_at: "2026-10-20"
-last_updated_at: "2026-10-20"
-author: "Antigravity Automated Test Engineering"
-target_environment: "http://localhost:8090"
-status: "draft"
+title: "Release UAT Checklist: Reconstructed Presentation & Workflow Layer"
+tags: ["uat", "verification", "ui-reconstruction", "presentation"]
+created_at: "2026-10-22"
+last_updated_at: "2026-10-22"
 ---
 
-# UAT Plan: End-to-End Release Acceptance Checklist
+# Release UAT Checklist: Reconstructed Presentation & Workflow Layer
 
-## 1. Test Environment & Pre-Conditions
-- **Base URL:** `http://localhost:8090`
-- **Stack Refresh:** Execute `bash scripts/refresh_stack.sh` on `smb-ops-stack` to confirm all containers (`smb-ops-frontend`, `smb-ops-backend`) are healthy.
-- **Prerequisites:** Seed test data active in memory / SQLite backend.
+This document serves as the formal User Acceptance Testing (UAT) checklist for validating the scaffold-retained bottom-up UI reconstruction completed under **ADR-0027**, **ADR-0028**, **SDD-0010**, and **SDD-0011**.
+
+All tests may be executed directly against local dev server (`pnpm dev`) or against staging environment builds.
 
 ---
 
-## 2. Test Execution Checklists
+## 1. Living Workbench Verification (`/dev/components`)
 
-### Section A: Lead Discovery & Pool Triage (`/`)
-- [x] **A.1 Discovery Input & Trigger**
-  - **Action:** In Discovery Bar, enter location `Kalamazoo, MI` (or city, state, or zip) and limit `10`. Click `Discover & Audit Leads`.
-  - **Expected:** Scan spinner animates; upon completion, discovery notification banner displays and new lead rows populate the triage table.
-- [ ] **A.2 Service Filter Dropdown**
-  - **Action:** Click Service Filter dropdown; select a service (e.g. `WEB_HOSTING`).
-  - **Expected:** Table rows dynamically filter to show only leads matching that target service code.
-- [x] **A.3 Lead Qualification (Move to Pipeline)**
-  - **Action:** Click `Qualify` button on any unreviewed lead row.
-  - **Expected:** Lead row immediately transitions out of Pool table.
-- [x] **A.4 Lead Disqualification Modal**
-  - **Action:** Click `Disqualify` button on lead `Fuji Japanese Restaurant`.
-  - **Result Verified:** `DisqualifyModal` opened; selected reason `No website needed`, entered notes `Testing disqualification flow`, confirmed. Row removed from active pool.
+Verify that the atomic design primitives, telemetry widgets, and domain modals render deterministically in isolation without console errors or bleed.
 
----
-
-### Section B: Pursued Opportunity Dossier & Contacts (`/` -> Pipeline)
-- [x] **B.1 Pipeline Navigation & Drawer Open**
-  - **Action:** Click `Pipeline` tab in the navigation rail. Click on a pursued opportunity row.
-  - **Result Verified:** `OpportunityDossierDrawer` full canvas confirmed (`calc(100vw - 260px)`). All 9 subpanels verified (name, stage, map, rubric, playbook, services, contacts, touchpoint, timeline).
-- [ ] **B.2 Contact Management**
-  - **Action:** In Decision-Maker Roster, click `+ Add Contact`. Enter Name `John Smith`, Title `Owner`, Email `john@test.com`, Phone `515-555-0123`. Click `Save Contact`.
-  - **Expected:** Contact card immediately appears in the roster grid.
-- [ ] **B.3 Activity Ledger Logging**
-  - **Action:** In Activity Ledger, enter note `Initial discovery phone call`, select `CALL`, click `Log Activity`.
-  - **Expected:** New activity entry appends to top of timeline with current timestamp.
+- [ ] **1.1 BaseButton Harness**
+  - Navigate to `/dev/components`.
+  - Verify primary, secondary, danger, and ghost button variants render with standard padding and typography.
+  - Verify the loading spinner toggles cleanly on button click and disables mouse interactions.
+- [ ] **1.2 BaseBadge & BaseInput Harness**
+  - Verify emerald, amber, rose, indigo, and slate badge tokens render in both `sm` and `md` sizes.
+  - Verify `BaseInput` focus ring responds correctly and error states display the red border and error caption.
+- [ ] **1.3 BaseModal Structural Shell**
+  - Click "Open Standard Modal" and verify modal teleports to `body`, centers within max width 640px, and prevents background scrolling.
+  - Press `Escape` key and verify modal dismisses cleanly.
+  - Click backdrop area outside modal card and verify modal dismisses.
+- [ ] **1.4 MaintenanceGauge Threshold Telemetry**
+  - Adjust the interactive capacity slider.
+  - Verify gauge bar and percentage indicator dynamically shift colors: $\le 75\%$ Emerald, $76-100\%$ Amber, $>100\%$ Rose.
+  - Verify 0-capacity allocations render the neutral slate baseline rather than `NaN%`.
+- [ ] **1.5 Feature Modal Launchers & Payloads**
+  - Launch `ContractAgreementModal`, toggle agreement type, modify agreed rate, and verify output JSON payload updates in the live payload preview.
+  - Launch `LogWorkModal`, enter minutes, select work category, and verify payload.
+  - Launch `VaultSecretModal`, input test secret credentials, and verify sanitized emission payload.
+  - Launch `ClientOnboardingModal`, step through all 3 wizard screens, and verify final composite payload.
 
 ---
 
-### Section C: Client Accounts Workspace & Secret Vault (`/` -> Clients)
-- [x] **C.1 Client Accounts Grid & Onboarding Modal**
-  - **Action:** In Pursued Pipeline, clicked `Convert to Client` on `The Blue Dolphin Restaurant`.
-  - **Result Verified:** 4-step onboarding pipeline modal traversed (contact pre-population, service tier selection, terms verification, credential vault provisioning). Client account created and card renders in Client Accounts grid.
-- [x] **C.2 Full-Canvas Client Workspace Drawer**
-  - **Action:** Click on `The Blue Dolphin Restaurant` card in Client Accounts grid.
-  - **Result Verified:** Full-canvas workspace (`calc(100vw - 260px)`) confirmed. Left column (Account Profile, Continuity & SLA Health, Active Service Contracts) and right column (Retainer Timecard & History, Credentials Vault) confirmed.
-- [x] **C.3 Add-on Care Plan Attachment**
-  - **Action:** In Active Service Contracts, clicked `+ Attach Care Plan`. Selected tier `CARE_PLAN_30` ($150/mo), clicked `Attach Contract`.
-  - **Result Verified:** `CARE_PLAN_30` appears in contracts list; Maintenance Retainer gauge displays 30m monthly allocation. (Note: Contract lifecycle/pipeline re-work queued for subsequent design milestone).
-- [x] **C.4 Discrete Deliverables Accordion & Commit UUID**
-  - **Action:** Clicked `CARE_PLAN_30` accordion header card on `The Blue Dolphin Restaurant`.
-  - **Result Verified:** Deliverables checklist expands; tagged commit UUID and checked item marked completed with persistent state. (Feature Request noted: extend discrete deliverable accordions to all Service Catalog offerings).
-- [x] **C.5 Client Secret Vault (Add & Reveal)**
-  - **Action:** Under Credentials & Access Vault, clicked `+ Add Secret`. Entered credentials, clicked `Encrypt & Store`.
-  - **Result Verified:** Encrypted credential card created with masked secret. Clicking `Reveal` accurately displays plaintext secret with countdown timer.
+## 2. Integrated Production Workflow UAT
 
----
+Verify integrated operational flows in `HomeView.vue` and `ClientDossierDrawer.vue`.
 
-### Section D: Service Catalog & Business Doctrine
-- [x] **D.1 Service Catalog Workspace**
-  - **Action:** In Service Catalog, clicked `+ Add Service Offering`. Selected Rank 1B, entered inputs, submitted.
-  - **Result Verified:** Modal closed and new Service Card rendered in catalog. (Design Notes recorded for contract/service pipeline milestone: single price input instead of min-max, recurring vs. once toggle, and dedicated discrete deliverables data table).
-- [x] **D.2 Business Doctrine Workspace**
-  - **Action:** Clicked `Doctrine` tab in navigation rail; navigated doctrine documents.
-  - **Result Verified:** Documentation dashboard rendered Markdown typography, tables, and Mermaid architecture diagrams correctly.
-
----
-
-## 3. Defect & Regression Ledger
-| # | Section / Step | Observed Issue | Expected Visual / Behavior | Severity | Resolution Status |
-|---|---|---|---|---|---|
-| 1 | Section A.1 | Overpass discovery timeout raises unhandled `Request failed with status code 504` in UI dialog. Searches append to previous findings instead of scoped replacement unless cleared manually. | Nginx proxy timeout increased (>=120s) and UI displays user-friendly retry banner instead of raw 504 error modal. | Medium | Resolved (ADR-0026) |
-| 2 | Section A.2 | Dropdown blue badge displays number of *selected filters* rather than *matching leads*, misleading operators to expect table results. Selecting services yields empty table without indicating score/parameter qualification criteria. | Clarify badge labeling (or show matching results count per service), and display helpful empty state explaining why 0 leads match the selected service thresholds. | Medium | Resolved (ADR-0026) |
-| 3 | Section B.2 | Add Contact Modal "Save Contact" button does not submit. `BaseButton` defaults to `type="button"` and lacks `@click` binding on the button or `type="submit"` support, causing modal click to be a no-op. | Add `type?: 'button' | 'submit'` prop to `BaseButton.vue` or attach `@click="handleSaveContact"` to the modal action button. | High | Resolved (ADR-0026) |
-| 4 | Section B.3 | Record Touchpoint / Schedule Appointment button ("Schedule & Record") does not submit. `BaseButton` lacks form submit behavior and has no `@click="handleLogActivity"`. | Add `type?: 'button' | 'submit'` prop to `BaseButton.vue` or attach `@click="handleLogActivity"` to the form action button. | High | Resolved (ADR-0026) |
-| 5 | Section C.2 | Section header "Monthly Retainer Timecard" in `ClientDossierDrawer.vue` is overly narrow and misleading, as the panel houses all client timecard entries (billable projects, non-billable, and retainer work) in addition to the monthly gauge. | Rename section header to "Timecards & Retainer Maintenance" or "Work Ledger & Retainer Tracking" for semantic clarity. | Low | Resolved (ADR-0026) |
-
----
-
-## 4. Final Sign-off
-- **Verification Environment:** [Staging / Local Docker]
-- **Target Commit UUID:** [Git Commit Hash]
-- **Sign-off Date:** [YYYY-MM-DD]
-- **Sign-off By:** [Operator Signature]
+- [ ] **2.1 Multi-Step Client Onboarding Journey**
+  - On the main dashboard, click `+ Onboard Client`.
+  - **Step 1 (Contact & Identity):** Fill in business name, contact person, email, and website. Click `Next: Select Services`.
+  - **Step 2 (Service Offerings):** Select one or more service cards, set the agreed recurring rate, and verify deliverables preview checklist. Click `Next: Vault & Dispatch`.
+  - **Step 3 (Vault & Dispatch):** Fill in initial server or portal credentials (label, type, username, password). Click `Complete Onboarding`.
+  - Verify modal dismisses and the new client appears in the active client table.
+- [ ] **2.2 Client Dossier Contract Attachment**
+  - Click any client row in the table to slide open the `ClientDossierDrawer`.
+  - In the Contracts section, click `Attach Contract`.
+  - Select a catalog service, toggle billing cycle (Monthly Retainer vs One-Time), configure agreed rate, and click `Attach Contract Agreement`.
+  - Verify the new contract displays immediately under the client's active contracts.
+- [ ] **2.3 Vault Secret Provisioning & Masked Reveal**
+  - In the open client dossier, navigate to the `Infrastructure Secrets` tab.
+  - Click `+ Add Secret`.
+  - Enter secret label, select credential type (`SERVER_SSH`, `DATABASE_CREDENTIALS`, etc.), and input password.
+  - Click `Save Secret` and confirm secret appears in the secrets list with masked preview (`••••••••`).
+  - Click `Reveal` and confirm 30-second countdown timer initiates before auto-masking.
+- [ ] **2.4 Retainer Maintenance Work Logging**
+  - In the open client dossier with an active care plan, click `Log Maintenance Work`.
+  - Enter minutes spent (e.g., `90`), select `Care Plan Retainer`, and type a brief description.
+  - Click `Save Timecard Entry`.
+  - Verify entry appends to the maintenance activity list and `MaintenanceGauge` updates retained vs used hours dynamically.

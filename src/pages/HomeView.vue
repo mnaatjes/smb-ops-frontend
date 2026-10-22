@@ -13,7 +13,9 @@ import ServiceDetailsModal from '@/features/service-catalog/ServiceDetailsModal.
 import ClientOnboardingModal from '@/features/client-onboarding/ClientOnboardingModal.vue'
 import ClientDossierDrawer from '@/features/client-dossier/ClientDossierDrawer.vue'
 import OpportunityDossierDrawer from '@/features/opportunity-dossier/OpportunityDossierDrawer.vue'
-import LogMaintenanceModal from '@/features/client-maintenance/LogMaintenanceModal.vue'
+import LogWorkModal from '@/features/client-maintenance/LogWorkModal.vue'
+import ContractAgreementModal from '@/features/client-contracts/ContractAgreementModal.vue'
+import VaultSecretModal from '@/features/client-vault/VaultSecretModal.vue'
 import AsideNavRail from '@/features/navigation/AsideNavRail.vue'
 import DoctrineWorkspace from '@/features/business-doctrine/DoctrineWorkspace.vue'
 import BaseButton from '@/shared/ui/BaseButton.vue'
@@ -23,7 +25,9 @@ import type {
   ServiceCatalogItem,
   ClientAccount,
   OnboardClientPayload,
-  LogTimecardPayload
+  LogTimecardPayload,
+  AttachContractPayload,
+  ClientSecretPayload
 } from '@/entities/lead/model'
 
 const leadStore = useLeadStore()
@@ -39,6 +43,8 @@ const showOnboardingModal = ref(false)
 const showDossierDrawer = ref(false)
 const showOpportunityDrawer = ref(false)
 const showLogMaintenanceModal = ref(false)
+const showDossierContractModal = ref(false)
+const showDossierSecretModal = ref(false)
 const selectedLead = ref<RankedLead | null>(null)
 const inspectingLead = ref<RankedLead | null>(null)
 const activeOpportunityLead = ref<RankedLead | null>(null)
@@ -46,6 +52,29 @@ const inspectingService = ref<ServiceCatalogItem | null>(null)
 const activeDossierClient = ref<ClientAccount | null>(null)
 const activeLogClient = ref<ClientAccount | null>(null)
 const activeLogClientHasCarePlan = ref(true)
+
+function handleOpenAttachContract(client: ClientAccount): void {
+  activeDossierClient.value = client
+  showDossierContractModal.value = true
+}
+
+function handleOpenAddSecret(client: ClientAccount): void {
+  activeDossierClient.value = client
+  showDossierSecretModal.value = true
+}
+
+async function handleConfirmAttachContract(payload: AttachContractPayload): Promise<void> {
+  if (!activeDossierClient.value) return
+  await leadStore.attachContract(activeDossierClient.value.id, payload)
+  await leadStore.loadClients()
+  showDossierContractModal.value = false
+}
+
+async function handleConfirmAddSecret(payload: ClientSecretPayload): Promise<void> {
+  if (!activeDossierClient.value) return
+  await leadStore.storeSecret(activeDossierClient.value.id, payload)
+  showDossierSecretModal.value = false
+}
 
 onMounted(async () => {
   await Promise.all([
@@ -514,6 +543,8 @@ async function handleCreateService(payload: CreateServicePayload): Promise<void>
       :client="activeDossierClient"
       @close="showDossierDrawer = false; activeDossierClient = null"
       @log-work="handleOpenLogWork"
+      @attach-contract="handleOpenAttachContract"
+      @add-secret="handleOpenAddSecret"
     />
     <OpportunityDossierDrawer
       :show="showOpportunityDrawer"
@@ -523,13 +554,26 @@ async function handleCreateService(payload: CreateServicePayload): Promise<void>
       @convert="handleConvertFromOpportunityDrawer"
       @disqualify="handleDisqualifyFromOpportunityDrawer"
     />
-    <LogMaintenanceModal
+    <LogWorkModal
       :show="showLogMaintenanceModal"
-      :client-id="activeLogClient?.id ?? ''"
       :client-name="activeLogClient?.business_name ?? ''"
       :has-active-care-plan="activeLogClientHasCarePlan"
       @close="showLogMaintenanceModal = false; activeLogClient = null"
-      @submit="handleConfirmLogWork"
+      @save="handleConfirmLogWork"
+    />
+    <ContractAgreementModal
+      :show="showDossierContractModal"
+      :services="leadStore.services"
+      :client-name="activeDossierClient?.business_name"
+      :client-id="activeDossierClient?.id"
+      @close="showDossierContractModal = false"
+      @save="handleConfirmAttachContract"
+    />
+    <VaultSecretModal
+      :show="showDossierSecretModal"
+      :client-name="activeDossierClient?.business_name"
+      @close="showDossierSecretModal = false"
+      @save="handleConfirmAddSecret"
     />
     </main>
   </div>

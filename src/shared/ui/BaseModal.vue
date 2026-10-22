@@ -1,29 +1,68 @@
 <script setup lang="ts">
-defineProps<{
+import { watch, onMounted, onBeforeUnmount } from 'vue'
+
+const props = defineProps<{
   show: boolean
   title?: string
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   (e: 'close'): void
 }>()
+
+function handleKeyDown(event: KeyboardEvent): void {
+  if (event.key === 'Escape' && props.show) {
+    emit('close')
+  }
+}
+
+watch(
+  () => props.show,
+  (isActive) => {
+    if (typeof document !== 'undefined') {
+      if (isActive) {
+        document.body.style.overflow = 'hidden'
+      } else {
+        document.body.style.overflow = ''
+      }
+    }
+  },
+  { immediate: true }
+)
+
+onMounted(() => {
+  if (typeof window !== 'undefined') {
+    window.addEventListener('keydown', handleKeyDown)
+  }
+})
+
+onBeforeUnmount(() => {
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('keydown', handleKeyDown)
+  }
+  if (typeof document !== 'undefined') {
+    document.body.style.overflow = ''
+  }
+})
 </script>
 
 <template>
-  <div v-if="show" class="modal-backdrop" @click.self="$emit('close')">
-    <div class="modal-card" role="dialog" aria-modal="true">
-      <header class="modal-header">
-        <h3 class="modal-title">{{ title }}</h3>
-        <button type="button" class="close-btn" @click="$emit('close')">&times;</button>
-      </header>
-      <div class="modal-body">
-        <slot />
+  <Teleport to="body">
+    <div v-if="show" class="modal-backdrop" @click.self="$emit('close')">
+      <div class="modal-card" role="dialog" aria-modal="true">
+        <header class="modal-header">
+          <h3 class="modal-title">{{ title }}</h3>
+          <button type="button" class="close-btn" aria-label="Close modal" @click="$emit('close')">&times;</button>
+        </header>
+        <div class="modal-body">
+          <slot />
+        </div>
+        <footer v-if="$slots.footer" class="modal-footer">
+          <slot name="footer" />
+        </footer>
       </div>
-      <footer v-if="$slots.footer" class="modal-footer">
-        <slot name="footer" />
-      </footer>
     </div>
-  </div>
+  </Teleport>
 </template>
 
 <style scoped>

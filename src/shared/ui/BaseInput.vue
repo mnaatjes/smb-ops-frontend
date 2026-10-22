@@ -7,13 +7,15 @@ withDefaults(
     type?: string
     disabled?: boolean
     id?: string
+    error?: string | boolean
   }>(),
   {
     type: 'text',
     disabled: false,
     label: '',
     placeholder: '',
-    id: ''
+    id: '',
+    error: false
   }
 )
 
@@ -31,9 +33,12 @@ defineEmits<{
       :value="modelValue"
       :placeholder="placeholder"
       :disabled="disabled"
-      class="base-input"
+      :class="['base-input', { 'input-error': Boolean(error) }]"
       @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
     />
+    <span v-if="typeof error === 'string' && error" class="input-error-msg">
+      {{ error }}
+    </span>
   </div>
 </template>
 
@@ -64,6 +69,21 @@ defineEmits<{
 .base-input:focus {
   border-color: var(--accent-primary);
   box-shadow: 0 0 0 2px var(--focus-ring);
+}
+
+.base-input.input-error {
+  border-color: #ef4444;
+}
+
+.base-input.input-error:focus {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.25);
+}
+
+.input-error-msg {
+  font-size: 0.75rem;
+  color: #ef4444;
+  margin-top: 0.15rem;
 }
 
 .base-input:disabled {

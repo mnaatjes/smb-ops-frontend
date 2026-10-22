@@ -53,6 +53,26 @@
   --badge-danger-bg: #fee2e2;
   --badge-danger-border: #fecaca;
   --badge-danger-text: #991b1b;
+
+  --badge-emerald-bg: #d1fae5;
+  --badge-emerald-border: #a7f3d0;
+  --badge-emerald-text: #065f46;
+
+  --badge-amber-bg: #fef3c7;
+  --badge-amber-border: #fde68a;
+  --badge-amber-text: #92400e;
+
+  --badge-rose-bg: #ffe4e6;
+  --badge-rose-border: #fecdd3;
+  --badge-rose-text: #9f1239;
+
+  --badge-indigo-bg: #e0e7ff;
+  --badge-indigo-border: #c7d2fe;
+  --badge-indigo-text: #3730a3;
+
+  --badge-slate-bg: #f1f5f9;
+  --badge-slate-border: #e2e8f0;
+  --badge-slate-text: #334155;
 }
 
 :root.dark {
@@ -110,6 +130,26 @@
   --badge-danger-bg: #7f1d1d;
   --badge-danger-border: #b91c1c;
   --badge-danger-text: #fecaca;
+
+  --badge-emerald-bg: #064e3b;
+  --badge-emerald-border: #047857;
+  --badge-emerald-text: #a7f3d0;
+
+  --badge-amber-bg: #78350f;
+  --badge-amber-border: #b45309;
+  --badge-amber-text: #fde68a;
+
+  --badge-rose-bg: #881337;
+  --badge-rose-border: #be123c;
+  --badge-rose-text: #fecdd3;
+
+  --badge-indigo-bg: #312e81;
+  --badge-indigo-border: #4338ca;
+  --badge-indigo-text: #c7d2fe;
+
+  --badge-slate-bg: #1e293b;
+  --badge-slate-border: #334155;
+  --badge-slate-text: #cbd5e1;
 }
 
 /* ==============================================================================
