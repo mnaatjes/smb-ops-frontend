@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import ClientOnboardingModal from '@/features/client-onboarding/ClientOnboardingModal.vue'
-import type { RankedLead, ServiceCatalogItem } from '@/shared/types/lead'
+import type { RankedLead, ServiceCatalogItem, OnboardClientPayload } from '@/shared/types/lead'
 
 describe('ClientOnboardingModal Component Matrix', () => {
   beforeEach(() => {
@@ -158,7 +158,7 @@ describe('ClientOnboardingModal Component Matrix', () => {
 
     const emits = wrapper.emitted('onboard')
     expect(emits).toHaveLength(1)
-    const payload = emits?.[0][0] as any
+    const payload = emits?.[0][0] as OnboardClientPayload
     expect(payload.lead_id).toBe('lead-test-01')
     expect(payload.contact_name).toBe('Primary Contact')
   })
