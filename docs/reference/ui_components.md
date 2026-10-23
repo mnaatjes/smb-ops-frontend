@@ -95,6 +95,22 @@ A quick-scan visual cheat sheet of core UI components in `smb-ops-frontend`, spe
 
 ---
 
+### BaseList (`BaseList.vue`)
+- **Role:** Baseline structured list primitive standardizing deliverables, audits, and instructional progressions.
+- **Visuals & Tokens:**
+  - `bullet`: Rounded bullet token `•` colored with `var(--accent-primary)`.
+  - `checkmark`: High-contrast green checkmark `✓` (`#10b981`) for verification and deliverables scopes.
+  - `numbered`: Monospace numbered index badge using tabular numerals (`font-feature-settings: 'tnum'`).
+  - Density: Standard (`gap: 0.6rem`) or dense (`gap: 0.35rem`, font-size `0.8125rem`).
+- **State Matrix:**
+  | Variant | Tag | Icon / Badge | Usage Context |
+  |---|---|---|---|
+  | `bullet` (Default) | `<ul>` | `•` in `var(--accent-primary)` | General feature highlights and notes |
+  | `checkmark` | `<ul>` | `✓` in `#10b981` | Signed deliverables, task completions |
+  | `numbered` | `<ol>` | `N.` in `var(--text-secondary)` | Sequential setup guides, audit stages |
+
+---
+
 ## 2. Wave 2: Structural Shells (`src/shared/ui/`)
 
 ### BaseModal (`BaseModal.vue`)

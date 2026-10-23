@@ -10,7 +10,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- **BaseWizard and ModalWizard Architecture (ADR-0027, ADR-0028):**
+- **BaseList Primitive (`src/shared/ui/BaseList.vue`):**
+  - Created standardized list primitive supporting `bullet`, `checkmark`, and `numbered` variants with standard and dense geometries.
+  - Implemented headless assertion matrix `tests/unit/BaseList.spec.ts` (100% pass).
+  - Documented `BaseList` in `docs/reference/ui_components.md`.
+  - Added interactive exhibition card under Wave 1 in `/dev/components`.
+  - Refactored `ContractAgreementModal.vue` to compose `BaseList` (`variant="checkmark"`) for deliverables scope.
+  - Verified and executed on conversation UUID: `52c10e21-b3db-439e-8f7c-c73cd78c0e55`.
+- **Workbench Light & Dark Mode Support (`/dev/components`):**
+  - Integrated `ThemeToggle` into sticky navigation header for instant theme toggling.
+  - Refactored all staging surfaces, cards, and feedback text in `DevComponentsView.vue` to use semantic theme tokens (`--bg-surface`, `--bg-surface-subtle`, `--text-primary`, `--border-color`).
+  - Verified and executed on conversation UUID: `52c10e21-b3db-439e-8f7c-c73cd78c0e55`.
+
+### Fixed
+- **ProgressionIndicator & BaseWizard Font Contrast:**
+  - Resolved low-contrast and invisible active step text on light surfaces by tokenizing active labels to `var(--accent-primary, #2563eb)` with font weight 700.
+  - Resolved BaseWizard step 3 empty state in `/dev/components` by dynamically reflecting cluster identifier, environment selection, and pre-flight check list.
+  - Verified and executed on conversation UUID: `52c10e21-b3db-439e-8f7c-c73cd78c0e55`.
+- **VaultSecretModal Payload Preview Masking:**
+  - Masked plain-text `password` values (`***MASKED***`) in the emitted payload inspection box within `/dev/components` to prevent sensitive credentials from appearing in operator logs.
+  - Verified and executed on conversation UUID: `52c10e21-b3db-439e-8f7c-c73cd78c0e55`.
   - Created `src/shared/ui/BaseWizard.vue` headless/canvas sequential workflow engine supporting dynamic step slots, validation gates, and backward/forward navigation.
   - Created `src/shared/ui/ModalWizard.vue` dialog composition shell wrapping `BaseWizard` inside `BaseModal` with guarded exit confirmation on `Escape` or backdrop click.
   - Implemented headless assertion matrices `tests/unit/BaseWizard.spec.ts` and `tests/unit/ModalWizard.spec.ts` (100% pass).
