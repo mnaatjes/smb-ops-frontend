@@ -2,15 +2,19 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import LogWorkModal from '@/features/client-maintenance/LogWorkModal.vue'
 
-describe('LogWorkModal Component', () => {
+describe('LogWorkModal Component Matrix', () => {
   beforeEach(() => {
     document.body.innerHTML = ''
+    document.body.style.overflow = ''
   })
 
   afterEach(() => {
     document.body.innerHTML = ''
+    document.body.style.overflow = ''
   })
-  it('renders modal with client title and input fields', () => {
+
+  // Tier 1 & 2: DOM Lifecycle & Prop Reflection
+  it('Invariant 1: Renders modal with target client title and nominal fields', () => {
     mount(LogWorkModal, {
       props: {
         show: true,
@@ -24,7 +28,8 @@ describe('LogWorkModal Component', () => {
     expect(document.body.textContent).toContain('Minutes Spent *')
   })
 
-  it('disables retainer option and shows notice when client has no active care plan', () => {
+  // Tier 5: Boundary & Option Disablement
+  it('Invariant 2: Disables retainer category option when client has no active care plan', () => {
     mount(LogWorkModal, {
       props: {
         show: true,
@@ -40,7 +45,8 @@ describe('LogWorkModal Component', () => {
     expect(retainerOption.disabled).toBe(true)
   })
 
-  it('emits save event with populated timecard payload', async () => {
+  // Tier 3: Event Emission & Payload Integrity
+  it('Invariant 3: Emits @save event with typed timecard payload on form submission', async () => {
     const wrapper = mount(LogWorkModal, {
       props: {
         show: true,

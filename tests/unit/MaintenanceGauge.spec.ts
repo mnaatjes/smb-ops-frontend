@@ -2,8 +2,9 @@ import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import MaintenanceGauge from '@/shared/ui/MaintenanceGauge.vue'
 
-describe('MaintenanceGauge Component', () => {
-  it('renders normal emerald state under 76% of cap (<= 22m for 30m cap)', () => {
+describe('MaintenanceGauge Component Matrix', () => {
+  // Tier 2: Mathematical Threshold Calculation & Semantic Class Invariants
+  it('Invariant 1: Renders normal emerald state under 76% of retainer cap', () => {
     const wrapper = mount(MaintenanceGauge, {
       props: {
         totalMinutes: 15,
@@ -18,7 +19,7 @@ describe('MaintenanceGauge Component', () => {
     expect(wrapper.find('.out-of-scope-badge').exists()).toBe(false)
   })
 
-  it('renders amber warning state between 76% and 100% of cap (23m - 30m for 30m cap)', () => {
+  it('Invariant 2: Renders amber warning state between 76% and 100% of cap', () => {
     const wrapper = mount(MaintenanceGauge, {
       props: {
         totalMinutes: 28,
@@ -32,7 +33,7 @@ describe('MaintenanceGauge Component', () => {
     expect(wrapper.text()).toContain('2 mins remaining')
   })
 
-  it('renders rose danger state when exceeding cap (> 30m) or outOfScope prop is true', () => {
+  it('Invariant 3: Renders rose danger state when exceeding cap (> 100%) or outOfScope flag is set', () => {
     const wrapperExceeding = mount(MaintenanceGauge, {
       props: {
         totalMinutes: 35,
@@ -55,7 +56,8 @@ describe('MaintenanceGauge Component', () => {
     expect(wrapperFlagged.find('.progress-fill').classes()).toContain('danger')
   })
 
-  it('renders neutral state for client with no active care plan (0 cap)', () => {
+  // Tier 5: Boundary State Invariants
+  it('Invariant 4: Renders neutral state for client with no active care plan (0m cap)', () => {
     const wrapper = mount(MaintenanceGauge, {
       props: {
         totalMinutes: 0,
@@ -67,7 +69,7 @@ describe('MaintenanceGauge Component', () => {
     expect(wrapper.find('.progress-bar-container').exists()).toBe(false)
   })
 
-  it('renders ad-hoc badge when minutes are logged without active care plan', () => {
+  it('Invariant 5: Renders ad-hoc out-of-scope badge when minutes are logged without active care plan', () => {
     const wrapper = mount(MaintenanceGauge, {
       props: {
         totalMinutes: 45,
