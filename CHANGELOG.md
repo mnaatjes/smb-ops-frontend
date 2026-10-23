@@ -10,10 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- **ADHD-Friendly Continuous Component Living Workbench (ADR-0027, ADR-0028):**
-  - Refactored `/dev/components` (`DevComponentsView.vue`) into a unified, continuous single-page review dashboard.
-  - Eliminated multi-page tab friction in favor of a sticky quick-jump navigation header (`#primitives`, `#structural-shell`, `#telemetry`, `#domain-modals`).
-  - Encapsulated each component in a crisp, isolated white card (`bg-white` inside `border-slate-200`) with discrete controls, explicit state readouts, and collapsible emission payload trays.
+- **ADHD-Friendly Component Living Workbench Visual Ergonomics (ADR-0027, ADR-0028):**
+  - Refactored `/dev/components` (`DevComponentsView.vue`) into a spacious, single-column vertical staging stream, removing cramped multi-column grids to reduce cognitive load and horizontal eye tracking.
+  - Enhanced visual delineation with large component headers (`text-xl font-bold`), categorical ribbons, explicit filepath tags, and generous card padding (`p-8 md:p-10`).
+  - Implemented high-contrast exhibition staging surfaces (`bg-slate-50/80` with dashed borders) that visually isolate each component under review.
+  - Maintained sticky jump navigation (`Wave 1: Primitives`, `Wave 2: Shell`, `Wave 3: Telemetry`, `Wave 4: Modals`).
   - Verified and executed on conversation UUID: `97669aa6-40bb-40b4-8ff4-1cecf813f5e0`.
 - **Bottom-Up Presentation Layer Reconstruction (PR #46, ADR-0027, ADR-0028, SDD-0010, SDD-0011):**
   - Scaffold-retained complete bottom-up rebuild of presentation layers across Wave 1 primitives (`BaseButton`, `BaseBadge`, `BaseInput`), Wave 2 structural shells (`BaseModal`), Wave 3 telemetry controls (`MaintenanceGauge`, `ServiceFilterDropdown`), and Wave 4 domain feature modals (`ContractAgreementModal`, `LogWorkModal`, `VaultSecretModal`, `ClientOnboardingModal`).
