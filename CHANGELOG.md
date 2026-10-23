@@ -10,6 +10,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Structural Shell & Navigation Primitives (GLOSSARY Section 5):**
+  - Updated `architecture/GLOSSARY.md` formalizing definitions for Viewport, App Shell, Aside Navigation, Dashboard/Stage Canvas, and Flyout Workspace Drawer.
+  - Created `src/shared/ui/BaseCard.vue` tokenized card surface primitive with slots and padding variants; verified with `tests/unit/BaseCard.spec.ts`.
+  - Created `src/shared/ui/BaseTable.vue` standardized data table primitive with loading spinners, column formatting, and row click events; verified with `tests/unit/BaseTable.spec.ts`.
+  - Created `src/shared/ui/BaseAside.vue` controlled navigation rail supporting expanded (240px) and collapsed (64px) modes; verified with `tests/unit/BaseAside.spec.ts`.
+  - Created `src/shared/ui/BasePageContainer.vue` Stage layout wrapper standardizing page title hierarchies, toolbars, and scroll boundaries; verified with `tests/unit/BasePageContainer.spec.ts`.
+  - Created `src/shared/ui/BaseDrawer.vue` flyout workspace overlay translating from right screen edge with aside boundary sizing; verified with `tests/unit/BaseDrawer.spec.ts`.
+  - Exhibited all 5 components in `/dev/components` living workbench with interactive simulation controls.
+  - Documented specifications in `docs/reference/ui_components.md`.
+  - Verified and executed on conversation UUID: `52c10e21-b3db-439e-8f7c-c73cd78c0e55`.
 - **Form Sub-Tree Extraction Procedure (ADR-0030, SDD-0013):**
   - Authored ADR-0030 and SDD-0013 establishing deterministic 5-step lifecycle for decoupling form sub-trees from modal shells into reusable presentation primitives.
   - Published operator runbook `docs/reference/form_subtree_extraction_procedure.md`.

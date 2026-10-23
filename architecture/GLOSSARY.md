@@ -2,7 +2,7 @@
 title: "Architecture & Product Glossary"
 tags: ["architecture", "glossary", "terminology", "mental-model"]
 created_at: "2026-10-17"
-last_updated_at: "2026-10-17"
+last_updated_at: "2026-10-23"
 ---
 
 # Architecture & Product Glossary
@@ -87,3 +87,26 @@ The explicit operational decision confirming that a prospect satisfies both tech
 
 ### Disqualification
 The terminal operational decision rejecting a prospect from the active sales funnel accompanied by a mandatory reason code (`Out of Business`, `No Website Needed`, `Enterprise / Non-SMB`, `Invalid Phone / Address`, `Other`).
+
+---
+
+## 5. Layout & Structural Hierarchy Terms
+
+### The Viewport (`100vw` $\times$ `100vh`)
+The physical outer browser frame. Teleported modal dialogs (`BaseModal`) attach directly to `document.body` at this tier, covering both the Aside Navigation and the Dashboard Stage with an isolated, fixed backdrop (`z-index: 50`).
+
+### The App Shell (`App.vue`)
+The top-level flex or grid container holding global layout elements. Establishes the CSS custom property theme root (`:root.dark`), handles root toast/teleport outlets, and enforces global layout bounds: `display: flex; height: 100vh; overflow: hidden;`.
+
+### The Aside Navigation (`BaseAside` / `AppNavigation`)
+The anchored left-hand vertical control rail governing primary application routing and system actions:
+* **Expanded Mode (`width: 240px`):** Full brand logo, section labels, icon + text navigation links, theme toggle, and version tag.
+* **Collapsed / Hamburger Mode (`width: 64px`):** Icon-only vertical rail with tooltip popovers, maximizing screen real estate for wide data tables.
+
+### The Dashboard / Stage (Static Main Display, e.g. `.page-container`)
+The primary viewport canvas selected from the Aside Menu (e.g. Lead Operations, Service Catalog, Client Accounts). It represents the static main display that remains fixed during overlay workflows, scrolls vertically within its bounding box (`overflow-y: auto`), and never translates horizontally.
+
+### The Workspace / Flyout Drawer (Swipe/Overlay Canvas)
+A contextual, focused full-screen editing layer (e.g. `OpportunityDossierDrawer`, `DoctrineWorkspace`, `ClientWorkspace`):
+* Translates smoothly (`transform: translateX(...)`) into the viewport from the right screen edge.
+* **Crucial Boundary:** It completely covers the Dashboard Stage, but stops flush against the Aside Navigation (occupying `calc(100vw - [aside_width])`), ensuring the operator remains oriented within the primary navigation spine while working in deep contextual flows.
