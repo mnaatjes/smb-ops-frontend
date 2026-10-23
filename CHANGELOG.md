@@ -10,6 +10,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **BaseMetricCard & BaseAlert Primitives (`src/shared/ui/`):**
+  - Created `src/shared/ui/BaseMetricCard.vue` executive KPI ribbon card supporting nominal, alert, success, and warning tokens with clickable delegation; unit tested in `tests/unit/BaseMetricCard.spec.ts`.
+  - Created `src/shared/ui/BaseAlert.vue` feedback notification banner with info, success, warning, and danger palettes and dismiss emission; unit tested in `tests/unit/BaseAlert.spec.ts`.
+- **Form Sub-Tree Extraction Expansion (FEP / ADR-0030 / SDD-0013):**
+  - Created `src/shared/ui/ManualLeadForm.vue` decoupled from `CreateLeadModal.vue`; unit tested in `tests/unit/ManualLeadForm.spec.ts`.
+  - Created `src/shared/ui/DisqualifyLeadForm.vue` decoupled from `DisqualifyModal.vue`; unit tested in `tests/unit/DisqualifyLeadForm.spec.ts`.
+- **Workbench Triage Atoms Exhibition (`/dev/components`):**
+  - Exhibited `ScoreBadge.vue` across danger, warning, success, and unaudited tiers under Wave 3.
+  - Exhibited `IssueChips.vue` with critical findings profiles under Wave 3.
+  - Verified and executed on conversation UUID: `52c10e21-b3db-439e-8f7c-c73cd78c0e55`.
+
+### Added
 - **Interactive Clickable Cards (`src/shared/ui/BaseCard.vue`):**
   - Added `clickable?: boolean` prop supporting full-card click delegation, active depression (`scale(0.99)`), hover elevation (`translateY(-2px)`), and keyboard navigation (`Enter` and `Space` dispatching `@click`).
   - Added unit test coverage in `tests/unit/BaseCard.spec.ts`.

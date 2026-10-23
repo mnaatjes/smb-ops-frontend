@@ -140,6 +140,36 @@ A quick-scan visual cheat sheet of core UI components in `smb-ops-frontend`, spe
 
 ---
 
+### ManualLeadForm (`ManualLeadForm.vue`)
+- **Role:** Form sub-tree primitive for manual prospect intake.
+- **Visuals & Behavior:** Standardizes business name, website URL, phone, and address validation. Composable inside standalone pages and `CreateLeadModal`. Emits `update:modelValue`, `valid-change`, and `submit`.
+
+---
+
+### DisqualifyLeadForm (`DisqualifyLeadForm.vue`)
+- **Role:** Form sub-tree primitive for lead disqualification archiving.
+- **Visuals & Behavior:** Manages reason selection, triage context notes, and future discovery suppression flags. Composable inside standalone pages and `DisqualifyModal`. Emits `update:modelValue`, `valid-change`, and `submit`.
+
+---
+
+### BaseAlert (`BaseAlert.vue`)
+- **Role:** Feedback notification and operational status banner primitive.
+- **Visuals & Tokens:**
+  - Variants: `info` (blue), `success` (green), `warning` (amber), `danger` (rose).
+  - Slots: `#icon`, `#title`, and `#default` (message body).
+  - Interactions: Optional dismiss button emitting `@dismiss`.
+
+---
+
+### BaseMetricCard (`BaseMetricCard.vue`)
+- **Role:** Executive KPI metric ribbon card primitive with token-aware surface.
+- **Visuals & Tokens:**
+  - Variants: `nominal`, `alert` (danger border and text for SLA/score breaches), `success`, `warning`.
+  - Content: Metric label, large tabular numeric value, subtext caption, `#badge` slot, and `#delta` slot.
+  - Interactions: Optional `clickable: true` mode with hover translation, active depression, and keyboard trigger (Enter/Space) dispatching `@click`.
+
+---
+
 ### BaseTable (`BaseTable.vue`)
 - **Role:** Standardized data table shell with column formatting, loading spinners, and row-click delegation.
 - **Visuals & Tokens:**
@@ -249,6 +279,27 @@ A quick-scan visual cheat sheet of core UI components in `smb-ops-frontend`, spe
   - Completed Step: Accent fill with checkmark `✓` icon and connected progress track.
   - Upcoming Step: Subtle background (`var(--bg-surface-subtle)`) with muted border and number.
   - Connector Track: Horizontal progress lines transitioning from `--border-color` to `--accent-primary`.
+
+---
+
+### ScoreBadge (`src/features/lead-triage/ScoreBadge.vue`)
+- **Role:** High-contrast opportunity score badge with automatic tier color transitions.
+- **Visuals & Thresholds:**
+  - `score >= 70`: Danger red pill (`var(--accent-danger)`).
+  - `40 <= score < 70`: Warning amber pill (`#f59e0b`).
+  - `score < 40`: Success emerald pill (`#10b981`).
+  - `score == null`: Neutral slate pill labeled `UNAUDITED`.
+
+---
+
+### IssueChips (`src/features/lead-triage/IssueChips.vue`)
+- **Role:** Technical audit issue tag cluster visualizing key domain findings.
+- **Visuals & Badges:**
+  - SSL Badge: Emerald `SSL Active` or Danger `No SSL`.
+  - PDF Menus: Warning `${count} PDF Menu(s)`.
+  - Viewport: Danger `No Mobile Viewport`.
+  - CMS: Neutral chip showing detected CMS engine.
+  - POS Integrations: Primary chips showing detected POS platforms (Square, Toast).
 
 ---
 
