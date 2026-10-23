@@ -3,7 +3,10 @@ import { ref } from 'vue'
 import BaseButton from '@/shared/ui/BaseButton.vue'
 import BaseBadge from '@/shared/ui/BaseBadge.vue'
 import BaseInput from '@/shared/ui/BaseInput.vue'
+import BaseSelect from '@/shared/ui/BaseSelect.vue'
+import BaseTextarea from '@/shared/ui/BaseTextarea.vue'
 import BaseModal from '@/shared/ui/BaseModal.vue'
+import ProgressionIndicator from '@/shared/ui/ProgressionIndicator.vue'
 import MaintenanceGauge from '@/shared/ui/MaintenanceGauge.vue'
 import ServiceFilterDropdown from '@/features/service-catalog/ServiceFilterDropdown.vue'
 import ContractAgreementModal from '@/features/client-contracts/ContractAgreementModal.vue'
@@ -29,6 +32,15 @@ const emailInput = ref('operator@smbops.internal')
 const errorInput = ref('')
 const inputError = ref('This field is required and cannot be empty')
 
+const selectChoice = ref('retainer')
+const selectOptions = [
+  { value: 'retainer', label: 'Monthly Retainer Maintenance' },
+  { value: 'fixed_fee', label: 'One-Time Remediation Project' },
+  { value: 'audit_only', label: 'Diagnostic Audit Only' }
+]
+
+const textareaValue = ref('Proactive database indexing and weekly snapshot verification completed.')
+
 // ==========================================
 // 2. Structural Shell (Wave 2) State
 // ==========================================
@@ -46,6 +58,13 @@ function setGaugePreset(mins: number, cap: number, oos = false) {
   testGaugeCap.value = cap
   testGaugeOutOfScope.value = oos
 }
+
+const demoStepperSteps = [
+  { number: 1, label: 'Identity & Legal' },
+  { number: 2, label: 'Service Packaging' },
+  { number: 3, label: 'Console Vault & Dispatch' }
+]
+const demoStepperCurrent = ref(2)
 
 const testSelectedServices = ref<string[]>(['SVC-SEO'])
 const workbenchCatalogServices: ServiceCatalogItem[] = [
@@ -149,7 +168,7 @@ const workbenchMockLead: RankedLead = {
               <p class="section-subtext">Presentation primitives with explicit state contracts and zero business logic dependencies.</p>
             </div>
           </div>
-          <span class="count-tag">3 Components</span>
+          <span class="count-tag">5 Components</span>
         </div>
 
         <!-- 1.1 BaseButton -->
@@ -265,6 +284,100 @@ const workbenchMockLead: RankedLead = {
             Emits standard <code>update:modelValue</code>. Automatically renders red borders when <code>error</code> prop is present.
           </footer>
         </article>
+
+        <!-- 1.4 BaseSelect -->
+        <article class="component-card">
+          <header class="card-header">
+            <div>
+              <h3 class="component-name">BaseSelect</h3>
+              <p class="component-desc">Standardized dropdown menu with custom SVG chevron and theme token support.</p>
+            </div>
+            <span class="filepath-tag">src/shared/ui/BaseSelect.vue</span>
+          </header>
+
+          <div class="staging-surface grid-3">
+            <div class="input-cell">
+              <label class="cell-label">Standard Dropdown</label>
+              <BaseSelect
+                id="wb-base-select"
+                v-model="selectChoice"
+                label="Agreement Type"
+                :options="selectOptions"
+              />
+              <span class="cell-feedback font-mono">Value: {{ selectChoice }}</span>
+            </div>
+
+            <div class="input-cell">
+              <label class="cell-label">Disabled State</label>
+              <BaseSelect
+                id="wb-base-select-disabled"
+                model-value="audit_only"
+                label="Locked Selection"
+                :options="selectOptions"
+                disabled
+              />
+              <span class="cell-feedback">Selection prevented</span>
+            </div>
+
+            <div class="input-cell">
+              <label class="cell-label">Error State</label>
+              <BaseSelect
+                id="wb-base-select-error"
+                model-value=""
+                label="Required Selection"
+                error="Please choose an agreement type"
+                :options="selectOptions"
+              />
+              <span class="cell-feedback error-feedback">Prominent error styling</span>
+            </div>
+          </div>
+
+          <footer class="card-footer-note">
+            Standardizes native <code>&lt;select&gt;</code> styling across modals with <code>appearance: none</code> and custom chevron.
+          </footer>
+        </article>
+
+        <!-- 1.5 BaseTextarea -->
+        <article class="component-card">
+          <header class="card-header">
+            <div>
+              <h3 class="component-name">BaseTextarea</h3>
+              <p class="component-desc">Multi-line text input with strict non-resizable geometry and uniform focus rings.</p>
+            </div>
+            <span class="filepath-tag">src/shared/ui/BaseTextarea.vue</span>
+          </header>
+
+          <div class="staging-surface grid-2">
+            <div class="input-cell">
+              <label class="cell-label">Standard Work Notes</label>
+              <BaseTextarea
+                id="wb-base-textarea"
+                v-model="textareaValue"
+                label="Work Description"
+                :rows="3"
+                placeholder="Log activity details..."
+              />
+              <span class="cell-feedback font-mono">Length: {{ textareaValue.length }} chars</span>
+            </div>
+
+            <div class="input-cell">
+              <label class="cell-label">Error &amp; Required State</label>
+              <BaseTextarea
+                id="wb-base-textarea-error"
+                model-value=""
+                label="Mandatory Resolution Log"
+                error="Description cannot be empty"
+                placeholder="Enter details..."
+                required
+              />
+              <span class="cell-feedback error-feedback">Displays red border &amp; caption</span>
+            </div>
+          </div>
+
+          <footer class="card-footer-note">
+            Enforces <code>resize: none</code> to prevent modal layout distortions.
+          </footer>
+        </article>
       </section>
 
       <!-- ================================================================= -->
@@ -348,7 +461,7 @@ const workbenchMockLead: RankedLead = {
               <p class="section-subtext">Care plan capacity threshold gauges and multi-select service catalog filters.</p>
             </div>
           </div>
-          <span class="count-tag">2 Components</span>
+          <span class="count-tag">3 Components</span>
         </div>
 
         <!-- 3.1 MaintenanceGauge -->
@@ -433,6 +546,34 @@ const workbenchMockLead: RankedLead = {
 
           <footer class="card-footer-note">
             Renders pill badges for active filters and supports individual dismiss tags.
+          </footer>
+        </article>
+
+        <!-- 3.3 ProgressionIndicator -->
+        <article class="component-card">
+          <header class="card-header">
+            <div>
+              <h3 class="component-name">ProgressionIndicator</h3>
+              <p class="component-desc">Multi-step wizard progress tracker with active, completed, and upcoming visual tokens.</p>
+            </div>
+            <span class="filepath-tag">src/shared/ui/ProgressionIndicator.vue</span>
+          </header>
+
+          <div class="staging-surface flex-col">
+            <div class="control-group">
+              <span class="group-label">Interactive Stepper Preview</span>
+              <ProgressionIndicator :steps="demoStepperSteps" :current-step="demoStepperCurrent" />
+            </div>
+
+            <div class="stepper-controls" style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+              <BaseButton label="Step 1" variant="secondary" @click="demoStepperCurrent = 1" />
+              <BaseButton label="Step 2" variant="secondary" @click="demoStepperCurrent = 2" />
+              <BaseButton label="Step 3" variant="secondary" @click="demoStepperCurrent = 3" />
+            </div>
+          </div>
+
+          <footer class="card-footer-note">
+            Replaces hardcoded modal stepper text with a theme-tokenized accessible progress bar.
           </footer>
         </article>
       </section>

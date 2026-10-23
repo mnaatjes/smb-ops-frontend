@@ -91,4 +91,12 @@ defineEmits<{
   color: var(--text-muted);
   cursor: not-allowed;
 }
+
+/* Number input spinbutton standardization */
+.base-input[type="number"]::-webkit-inner-spin-button,
+.base-input[type="number"]::-webkit-outer-spin-button {
+  opacity: 0.6;
+  cursor: pointer;
+  height: 1.5rem;
+}
 </style>

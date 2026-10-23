@@ -78,13 +78,6 @@ onUnmounted(() => {
         @click="toggleDropdown"
       >
         <span class="trigger-text">{{ labelText }}</span>
-        <span
-          v-if="!isAllSelected"
-          class="selection-badge"
-          :title="`${modelValue.length} active service filter(s) applied`"
-        >
-          {{ modelValue.length }} active
-        </span>
         <svg
           class="chevron"
           :class="{ open: isOpen }"
@@ -180,8 +173,7 @@ onUnmounted(() => {
   font-weight: 500;
   cursor: pointer;
   transition: all 0.15s ease;
-  min-width: 200px;
-  max-width: 320px;
+  width: 260px;
   justify-content: space-between;
 }
 
@@ -194,15 +186,6 @@ onUnmounted(() => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.selection-badge {
-  background-color: var(--accent-primary);
-  color: #ffffff;
-  font-size: 0.7rem;
-  font-weight: 700;
-  padding: 0.1rem 0.4rem;
-  border-radius: 9999px;
 }
 
 .chevron {
