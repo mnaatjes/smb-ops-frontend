@@ -55,4 +55,19 @@ describe('BaseAside.vue Headless Assertion Matrix', () => {
     expect(wrapper.find('.test-nav-link').exists()).toBe(true)
     expect(wrapper.find('.test-footer-profile').exists()).toBe(true)
   })
+
+  it('renders slotted navigation item with data-tooltip in collapsed mode', () => {
+    const wrapper = mount(BaseAside, {
+      props: {
+        collapsed: true
+      },
+      slots: {
+        default: '<button type="button" data-tooltip="Triage Dashboard">⚡</button>'
+      }
+    })
+
+    const buttonWithTooltip = wrapper.find('[data-tooltip="Triage Dashboard"]')
+    expect(buttonWithTooltip.exists()).toBe(true)
+    expect(wrapper.classes()).toContain('is-collapsed')
+  })
 })

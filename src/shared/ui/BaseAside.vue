@@ -216,12 +216,21 @@ function toggle(): void {
   position: relative;
 }
 
-/* Tooltip hints for collapsed rail buttons */
-.is-collapsed [data-tooltip] {
+/* Allow tooltips to fly out freely over the adjacent stage canvas in collapsed mode */
+.base-aside.is-collapsed {
+  overflow: visible;
+}
+
+.base-aside.is-collapsed .aside-nav-body {
+  overflow: visible;
+}
+
+/* Tooltip hints for collapsed rail buttons penetrating slotted items */
+.is-collapsed :deep([data-tooltip]) {
   position: relative;
 }
 
-.is-collapsed [data-tooltip]::after {
+.is-collapsed :deep([data-tooltip])::after {
   content: attr(data-tooltip);
   position: absolute;
   left: calc(100% + 0.65rem);
@@ -238,13 +247,33 @@ function toggle(): void {
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.15s ease, transform 0.15s ease;
-  z-index: 100;
+  z-index: 1000;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
 
-.is-collapsed [data-tooltip]:hover::after {
+.is-collapsed :deep([data-tooltip])::before {
+  content: '';
+  position: absolute;
+  left: calc(100% + 0.35rem);
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 4px 5px 4px 0;
+  border-style: solid;
+  border-color: transparent var(--text-primary) transparent transparent;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease;
+  z-index: 1000;
+}
+
+.is-collapsed :deep([data-tooltip]:hover)::after,
+.is-collapsed :deep([data-tooltip]:hover)::before {
   opacity: 1;
   visibility: visible;
+}
+
+.is-collapsed :deep([data-tooltip]:hover)::after {
   transform: translateY(-50%) translateX(2px);
 }
 

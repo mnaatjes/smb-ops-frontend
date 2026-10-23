@@ -847,7 +847,7 @@ const workbenchMockLead: RankedLead = {
           </header>
 
           <div class="staging-surface flex-col" style="align-items: center;">
-            <div style="height: 280px; width: 100%; max-width: 380px; border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; display: flex;">
+            <div style="height: 280px; width: 100%; max-width: 440px; border: 1px solid var(--border-color); border-radius: 8px; position: relative; display: flex;">
               <BaseAside
                 :collapsed="isAsideCollapsed"
                 brand-title="Demo Rail"
@@ -857,6 +857,7 @@ const workbenchMockLead: RankedLead = {
                 <div style="display: flex; flex-direction: column; gap: 0.35rem;">
                   <button
                     type="button"
+                    title="Triage Dashboard"
                     data-tooltip="Triage Dashboard"
                     style="text-align: left; padding: 0.5rem; background: var(--bg-surface-hover); border: none; border-radius: 6px; color: var(--text-primary); font-size: 0.8rem; cursor: pointer;"
                   >
@@ -864,6 +865,7 @@ const workbenchMockLead: RankedLead = {
                   </button>
                   <button
                     type="button"
+                    title="Client Accounts"
                     data-tooltip="Client Accounts"
                     style="text-align: left; padding: 0.5rem; background: transparent; border: none; border-radius: 6px; color: var(--text-secondary); font-size: 0.8rem; cursor: pointer;"
                   >

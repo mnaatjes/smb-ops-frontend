@@ -27,7 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - **BaseAside Collapsed State Ergonomics (`src/shared/ui/BaseAside.vue`):**
   - Separated expand button from the brand logo in collapsed mode into a dedicated `.collapsed-expand-bar`, eliminating visual overlap.
-  - Added floating popover tooltips on hover for icon buttons in collapsed rail mode via `[data-tooltip]` attributes and CSS pseudo-elements.
+  - Enabled floating popover tooltips with pointer callout triangles on hover for icon buttons in collapsed rail mode via `[data-tooltip]` attributes, CSS pseudo-elements, `:deep()` penetration into slotted items, and unclipped `overflow: visible` rendering.
   - Verified and executed on conversation UUID: `52c10e21-b3db-439e-8f7c-c73cd78c0e55`.
 
 ### Added
