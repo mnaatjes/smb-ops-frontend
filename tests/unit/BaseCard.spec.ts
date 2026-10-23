@@ -52,4 +52,25 @@ describe('BaseCard.vue Headless Assertion Matrix', () => {
     expect(wrapper.classes()).toContain('is-elevated')
     expect(wrapper.classes()).toContain('padding-lg')
   })
+
+  it('handles clickable interactions with role button and emits click', async () => {
+    const wrapper = mount(BaseCard, {
+      props: {
+        clickable: true
+      }
+    })
+
+    expect(wrapper.classes()).toContain('is-clickable')
+    expect(wrapper.attributes('tabindex')).toBe('0')
+    expect(wrapper.attributes('role')).toBe('button')
+
+    await wrapper.trigger('click')
+    expect(wrapper.emitted('click')).toHaveLength(1)
+
+    await wrapper.trigger('keydown', { key: 'Enter' })
+    expect(wrapper.emitted('click')).toHaveLength(2)
+
+    await wrapper.trigger('keydown', { key: ' ' })
+    expect(wrapper.emitted('click')).toHaveLength(3)
+  })
 })

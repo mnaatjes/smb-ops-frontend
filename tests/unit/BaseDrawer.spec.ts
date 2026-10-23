@@ -78,4 +78,27 @@ describe('BaseDrawer.vue Headless Assertion Matrix', () => {
 
     expect(wrapper.emitted('close')).toHaveLength(1)
   })
+
+  it('applies custom size classes correctly', () => {
+    mount(BaseDrawer, {
+      props: {
+        show: true,
+        size: 'sm'
+      }
+    })
+
+    const canvasSm = document.body.querySelector('.drawer-canvas')
+    expect(canvasSm?.classList.contains('size-sm')).toBe(true)
+
+    document.body.innerHTML = ''
+    mount(BaseDrawer, {
+      props: {
+        show: true,
+        size: 'full'
+      }
+    })
+
+    const canvasFull = document.body.querySelector('.drawer-canvas')
+    expect(canvasFull?.classList.contains('size-full')).toBe(true)
+  })
 })

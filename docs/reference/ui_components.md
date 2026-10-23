@@ -112,12 +112,31 @@ A quick-scan visual cheat sheet of core UI components in `smb-ops-frontend`, spe
 ---
 
 ### BaseCard (`BaseCard.vue`)
-- **Role:** Unified content card surface with token-aware background, borders, and elevation.
+- **Role:** Unified content card surface with token-aware background, borders, elevation, and optional whole-card click delegation.
 - **Visuals & Tokens:**
   - Background `var(--bg-surface)`, border `1px solid var(--border-color)`, border-radius `12px`.
   - Elevation: Optional drop-shadow (`is-elevated`).
+  - Interactive Clickable Variant: When `clickable: true`, adds `cursor: pointer`, hover translation `translateY(-2px)`, active depression `scale(0.99)`, focus ring, and keyboard trigger (Enter/Space) dispatching `@click`.
   - Padding Variants: `none`, `sm` (`0.75rem`), `md` (`1.25rem`), `lg` (`2rem`).
 - **Slots:** `#header` (titles & badges), `#default` (body content), `#footer` (actions).
+
+---
+
+### VaultSecretForm (`VaultSecretForm.vue`)
+- **Role:** Form sub-tree primitive managing credential category schemas, reactive validation, and payload binding.
+- **Visuals & Behavior:** Composable inside standalone pages, `VaultSecretModal`, and `ClientOnboardingModal`. Emits `update:modelValue`, `valid-change`, and `submit`.
+
+---
+
+### ContractAgreementForm (`ContractAgreementForm.vue`)
+- **Role:** Form sub-tree primitive managing service catalog selection, contract type options, deliverables scope, and agreed billing rate.
+- **Visuals & Behavior:** Composable inside standalone pages and `ContractAgreementModal`. Emits `update:modelValue`, `valid-change`, and `submit`.
+
+---
+
+### LogWorkForm (`LogWorkForm.vue`)
+- **Role:** Form sub-tree primitive managing maintenance work timecard entries, category allocations, care-plan capacity notice, and work descriptions.
+- **Visuals & Behavior:** Composable inside standalone pages and `LogWorkModal`. Emits `update:modelValue`, `valid-change`, and `submit`.
 
 ---
 
@@ -172,7 +191,7 @@ A quick-scan visual cheat sheet of core UI components in `smb-ops-frontend`, spe
 - **Role:** Primary left-hand vertical navigation rail governing route selection and app-level actions.
 - **Visuals & Layout:**
   - Expanded Mode (`width: 240px`): Full brand title, subtitle, and full label navigation links.
-  - Collapsed Mode (`width: 64px`): Icon-only compact rail maximizing dashboard table real estate.
+  - Collapsed Mode (`width: 64px`): Icon-only compact rail with non-overlapping dedicated expand strip and floating popover tooltips on icon hover.
   - Background `var(--bg-surface)`, border-right `1px solid var(--border-color)`.
 - **Contracts:** Accepts `collapsed: boolean` prop, emits `@toggle-collapse` on toggle click.
 
@@ -192,6 +211,7 @@ A quick-scan visual cheat sheet of core UI components in `smb-ops-frontend`, spe
 - **Role:** Contextual flyout workspace overlay translating from the right browser edge.
 - **Visuals & Boundaries:**
   - Anchored Margin: Occupies `calc(100vw - [aside_width])`, stopping flush against `BaseAside` to preserve navigational context.
+  - Size Variants: `sm` (`max-width: 420px` for quick inspect/dossier previews), `md` (`max-width: 680px` for forms), `lg` (`max-width: 960px` for deep multi-column forms), `full` (`100%` of Stage width for immersive canvas workspaces).
   - Animation: Slide-in cubic-bezier from right screen edge.
   - Invariants: Escape listener dispatches `@close`; backdrop dimmer over dashboard stage dispatches `@close`.
 
