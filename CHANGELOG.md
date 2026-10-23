@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **AI Agent Response Protocols (GEMINI.md):**
+  - Created root-level `GEMINI.md` defining strict dialogue output protocols: ADHD-friendly presentation, plain-English language without jargon, extreme brevity with scannable bullet points, and clean visual delineation.
+  - Verified and executed on conversation UUID: `97669aa6-40bb-40b4-8ff4-1cecf813f5e0`.
 - **Agent Session Handoff & Governance Context (ADR-0027, ADR-0028):**
   - Authored `architecture/notes/session_handoff_governance_context.md` consolidating PR lifecycles, FSD architecture standards, vanilla CSS styling requirements, and current presentation state for incoming Antigravity CLI sessions.
   - Verified and executed on conversation UUID: `97669aa6-40bb-40b4-8ff4-1cecf813f5e0`.
