@@ -2,71 +2,153 @@
 title: "UI Component Catalog & Visual Truth Reference"
 tags: ["diataxis", "reference", "components", "design-system", "cheat-sheet"]
 created_at: "2026-10-20"
-last_updated_at: "2026-10-20"
+last_updated_at: "2026-10-23"
 ---
 
 # UI Component Catalog & Visual Truth Reference
 
-A quick-scan visual cheat sheet of core UI components in `smb-ops-frontend`, specifying visual appearance, design tokens, interactive behaviors, and state matrices.
+A quick-scan visual cheat sheet of core UI components in `smb-ops-frontend`, specifying visual appearance, scoped CSS design tokens, interactive behaviors, and state matrices as verified in the living workbench (`/dev/components`).
 
 ---
 
-## 1. Base Components (`src/shared/ui/`)
+## 1. Wave 1: Core Primitives (`src/shared/ui/`)
 
 ### BaseButton (`BaseButton.vue`)
-- **Role:** Primary and secondary interactive trigger for actions, submissions, and modal controls.
-- **Visuals:**
-  - `primary`: Solid emerald surface (`bg-emerald-600`), hover `bg-emerald-500`, white text, rounded corners (`rounded-lg`).
-  - `secondary`: Dark slate surface (`bg-slate-700`), hover `bg-slate-600`, slate text (`text-slate-200`).
-  - `danger`: Red surface (`bg-rose-600`), hover `bg-rose-500`, white text.
+- **Role:** Interactive trigger for actions, submissions, and modal controls.
+- **Visuals & Tokens:**
+  - `primary`: Background `var(--accent-primary, #10b981)`, hover `var(--accent-primary-hover, #059669)`, text `#ffffff`.
+  - `secondary`: Background `var(--bg-surface-subtle, #334155)`, hover `var(--border-strong, #475569)`, text `var(--text-secondary, #cbd5e1)`.
+  - `danger`: Background `var(--accent-danger, #ef4444)`, hover `var(--accent-danger-hover, #dc2626)`, text `#ffffff`.
+  - Typography: `font-family: inherit`, font-weight `500`, border-radius `6px`.
 - **State Matrix:**
   | State | Visual Treatment | Interaction |
   |---|---|---|
-  | Default | Solid color, standard contrast | Emits `click` |
-  | Hover | 10% brightness increase, slight shadow | Pointer cursor |
-  | Active / Focus | Inset ring / focus border | Emits `click` |
-  | Disabled | `opacity-50`, cursor `not-allowed` | Clicks prevented |
-  | Loading | Spinner icon visible, label muted | Double clicks debounced |
+  | Nominal / Default | Solid color, standard contrast | Emits `click` (native `type="button" \| "submit" \| "reset"`) |
+  | Hover | Background shift to token hover variant | Pointer cursor |
+  | Active / Focus | Outline `2px solid var(--focus-ring, rgba(16, 185, 129, 0.4))` | Emits `click` |
+  | Disabled | `opacity: 0.5`, background `var(--bg-surface-subtle)`, cursor `not-allowed` | Clicks and submissions prevented |
+  | Loading | Spinner SVG visible, label muted | Double clicks suppressed |
 
 ---
 
 ### BaseBadge (`BaseBadge.vue`)
-- **Role:** Compact visual pill for statuses, scores, work categories, and tiers.
-- **Visuals:**
-  - `emerald`: `bg-emerald-500/15 text-emerald-400 border-emerald-500/30` (Contract active, healthy status).
-  - `amber`: `bg-amber-500/15 text-amber-400 border-amber-500/30` (Retainer cap approaching, warning).
-  - `rose`: `bg-rose-500/15 text-rose-400 border-rose-500/30` (Disqualified, secret mask, SLA breached).
-  - `indigo`: `bg-indigo-500/15 text-indigo-400 border-indigo-500/30` (Billable extra project badge).
-  - `slate`: `bg-slate-700 text-slate-300 border-slate-600` (Internal / non-billable, neutral).
+- **Role:** Compact visual pill for statuses, scores, work categories, and contract tiers.
+- **Visuals & Tokens:**
+  - `emerald`: Background `rgba(16, 185, 129, 0.15)`, text `var(--accent-primary, #10b981)`, border `rgba(16, 185, 129, 0.3)`.
+  - `amber`: Background `rgba(245, 158, 11, 0.15)`, text `var(--accent-warning, #f59e0b)`, border `rgba(245, 158, 11, 0.3)`.
+  - `rose`: Background `rgba(239, 68, 68, 0.15)`, text `var(--accent-danger, #ef4444)`, border `rgba(239, 68, 68, 0.3)`.
+  - `indigo`: Background `rgba(99, 102, 241, 0.15)`, text `#818cf8`, border `rgba(99, 102, 241, 0.3)`.
+  - `slate`: Background `var(--bg-surface-subtle, #334155)`, text `var(--text-secondary, #94a3b8)`, border `var(--border-color, #475569)`.
+- **Typography:** `font-family: inherit`, font-weight `600`, font-size `0.75rem`, border-radius `9999px` (pill).
 
 ---
 
-### MaintenanceGauge (`MaintenanceGauge.vue`)
-- **Role:** Visual progress meter and numeric indicator for monthly retainer time consumption.
-- **Visuals:**
-  - Horizontal progress track (`bg-slate-800 border border-slate-700`).
-  - Fill bar dynamic color:
-    - `<= 75%`: Emerald bar (`bg-emerald-500`).
-    - `76% - 100%`: Amber bar (`bg-amber-500`).
-    - `> 100%`: Rose bar (`bg-rose-500`) with overage indicator.
-    - `0m cap (No Care Plan)`: Neutral slate indicator displaying `No Active Retainer Plan`.
+### BaseInput (`BaseInput.vue`)
+- **Role:** Controlled text and numeric data ingress field with label and error slots.
+- **Visuals & Tokens:**
+  - Background `var(--bg-surface)`, border `1px solid var(--border-color)`, text `var(--text-primary)`, border-radius `6px`.
+  - Focus Ring: `border-color: var(--accent-primary)`, `box-shadow: 0 0 0 2px var(--focus-ring)`.
+  - Error State: Border `#ef4444`, `box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.25)`, error label text `#ef4444` (`0.75rem`).
+  - Disabled State: Background `var(--bg-surface-subtle)`, text `var(--text-muted)`, cursor `not-allowed`.
+- **State Matrix:**
+  | State | Visual Treatment | Interaction |
+  |---|---|---|
+  | Default | Border `var(--border-color)`, placeholder `var(--text-muted)` | Emits `update:modelValue` on `@input` |
+  | Focused | Accent ring highlight | Active text cursor |
+  | Error | Red border and helper message text | Retains input focus |
+  | Disabled | Dimmed surface, muted text | Typing prevented |
 
 ---
+
+## 2. Wave 2: Structural Shells (`src/shared/ui/`)
 
 ### BaseModal (`BaseModal.vue`)
 - **Role:** Accessible modal dialog backdrop and card container.
-- **Visuals:** Dark semi-transparent overlay (`bg-slate-950/70 backdrop-blur-sm`), centered card (`bg-slate-900 border border-slate-800 rounded-xl shadow-2xl`).
-- **Behavior:** Escape key and backdrop click close modal; focus locked inside dialog.
+- **Visuals & Layout:**
+  - Backdrop: `position: fixed; inset: 0`, background `rgba(0, 0, 0, 0.65)`, `backdrop-filter: blur(4px)`.
+  - Modal Shell: Centered flexbox, background `var(--bg-surface)`, border `1px solid var(--border-color)`, border-radius `12px`, max-width `640px`.
+  - Typography: Enforces `font-family: var(--font-sans, inherit)` on `.modal-card` to guarantee global typography inheritance across teleported DOM roots.
+- **Ergonomic Invariants:**
+  - Teleports to `<body>` when `show: true`; completely removed from DOM when `show: false`.
+  - Keyboard: `Escape` key trigger dispatches `@close`.
+  - Event Propagation: Clicking the outer backdrop dispatches `@close`; clicks inside the modal card are isolated (`@click.stop`).
+  - Scroll Lock: Locks `document.body.style.overflow = 'hidden'` while mounted.
 
 ---
 
 ### ThemeToggle (`ThemeToggle.vue`)
-- **Role:** Switch between dark and light themes.
-- **Visuals:** Sun/Moon SVG toggle button. Persists choice in `localStorage`.
+- **Role:** Switch between dark and light themes across dashboard workspaces.
+- **Visuals:** SVG icon toggle button with token-aware surface. Persists preference in `localStorage`.
 
 ---
 
-## 2. Feature Workspaces & Specialized Panels
+## 3. Wave 3: Telemetry & Selection Controls
+
+### MaintenanceGauge (`src/shared/ui/MaintenanceGauge.vue`)
+- **Role:** Visual progress meter and numeric indicator for monthly retainer time consumption.
+- **Visuals & Layout:**
+  - Track: Background `var(--bg-surface-subtle)`, border `1px solid var(--border-color)`, height `10px`, border-radius `5px`.
+  - Dynamic Fill:
+    - `<= 75%`: Emerald bar (`var(--accent-primary, #10b981)`).
+    - `76% - 100%`: Amber bar (`var(--accent-warning, #f59e0b)`).
+    - `> 100%`: Rose bar (`var(--accent-danger, #ef4444)`) with overage indicator.
+    - `0m cap (No Care Plan)`: Neutral slate indicator displaying `No Active Retainer Plan`.
+
+---
+
+### ServiceFilterDropdown (`src/features/service-catalog/ServiceFilterDropdown.vue`)
+- **Role:** Multi-select popover filter for lead triage boards and service catalog filtering.
+- **Visuals & Behavior:**
+  - Trigger Button: Dynamic label displaying "All Services", selected service name, or "N Services Selected".
+  - Active Filter Badge: Pill badge displaying count of filtered services.
+  - Menu Popover: Absolute positioned surface (`background: var(--bg-surface)`, `border: 1px solid var(--border-color)`, `box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1)`).
+  - Outside Click: Native `document.addEventListener('click')` handler closes dropdown when interacting with outer canvas.
+
+---
+
+## 4. Wave 4: Domain Feature Modals
+
+### ContractAgreementModal (`src/features/client-contracts/ContractAgreementModal.vue`)
+- **Role:** Transactional dialog for provisioning new client service contracts and retainers.
+- **Visuals & Form Inputs:**
+  - Client context header displaying target client name and ID.
+  - Service Catalog selection dropdown.
+  - Monthly Retainer Time Cap input (in minutes) with out-of-scope billing checkbox.
+  - Effective Date and Scope of Work description fields.
+- **Behavior & Events:** Emits `@save` with `AttachContractPayload` or `@close`.
+
+---
+
+### LogWorkModal (`src/features/client-maintenance/LogWorkModal.vue`)
+- **Role:** Modal dialog for recording billable or retainer time against client contracts.
+- **Visuals & Form Inputs:**
+  - Associated active contract selector.
+  - Minutes spent input, activity category selector (Emergency, Routine, Deployment, Maintenance).
+  - Work log summary, resolution notes, and optional Git commit hash field.
+- **Behavior & Events:** Emits `@save` with timecard payload or `@close`.
+
+---
+
+### VaultSecretModal (`src/features/client-vault/VaultSecretModal.vue`)
+- **Role:** Secure entry dialog for storing client environment secrets, SSH keys, or API tokens.
+- **Visuals & Form Inputs:**
+  - Secret Key name input, Environment tag selector (`Production`, `Staging`, `Development`).
+  - Secret Value masked textarea with visibility toggle.
+  - Security warning banner regarding immutable auditing.
+- **Behavior & Events:** Emits `@save` with vault item payload or `@close`.
+
+---
+
+### ClientOnboardingModal (`src/features/client-onboarding/ClientOnboardingModal.vue`)
+- **Role:** Wizard modal for converting qualified prospects into active retainer clients.
+- **Visuals & Form Inputs:**
+  - Company Legal Name, Primary Contact Email, Phone, and Physical Address.
+  - Initial Service Package tier and billing cadence.
+- **Behavior & Events:** Emits `@save` with onboarding payload or `@close`.
+
+---
+
+## 5. Feature Workspaces & Specialized Panels
 
 ### ClientDossierDrawer (`src/features/client-dossier/ClientDossierDrawer.vue`)
 - **Role:** Full-canvas dual-column workspace (`calc(100vw - 260px)`) displaying accounts, continuity telemetry, contracts, timecard logs, and secret vaults.
@@ -75,6 +157,8 @@ A quick-scan visual cheat sheet of core UI components in `smb-ops-frontend`, spe
   - Column 1 (44%): Account profile metadata, SLA health probes, Active Service Contracts accordion list.
   - Column 2 (56%): Monthly Retainer Gauge, Categorized Maintenance History, Credentials & Secret Vault.
 - **Accordion Behaviors:** Clicking contract card expands/collapses discrete deliverables checklist and Git commit UUID tagger.
+
+---
 
 ### OpportunityDossierDrawer (`src/features/opportunity-dossier/OpportunityDossierDrawer.vue`)
 - **Role:** Full-canvas workspace displaying sales playbook, interactive OpenStreetMap container, decision-maker contacts roster, and chronological activity ledger.

@@ -10,6 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Component Catalog & Visual Truth Update (ADR-0027, ADR-0028):**
+  - Updated `docs/reference/ui_components.md` to document Wave 1 primitives (`BaseButton`, `BaseBadge`, `BaseInput`), Wave 2 shells (`BaseModal`), Wave 3 controls (`MaintenanceGauge`, `ServiceFilterDropdown`), and Wave 4 feature modals (`ContractAgreementModal`, `LogWorkModal`, `VaultSecretModal`, `ClientOnboardingModal`) with scoped vanilla CSS and design tokens.
+  - Verified and executed on conversation UUID: `52c10e21-b3db-439e-8f7c-c73cd78c0e55`.
+- **Headless Assertion Matrix Governance (ADR-0029, SDD-0012):**
+  - Authored `architecture/adr/0029_headless_assertion_matrix_vitest_procedure.md` adopting Vitest unit matrices for component invariant testing decoupled from visual CSS inspection.
+  - Authored `architecture/designs/0012_headless_assertion_matrix_specification.md` specifying archetype requirements, invariant taxonomies, and CI quality gates.
+  - Verified and executed on conversation UUID: `52c10e21-b3db-439e-8f7c-c73cd78c0e55`.
+
 - **AI Agent Response Protocols (GEMINI.md):**
   - Created root-level `GEMINI.md` defining strict dialogue output protocols: ADHD-friendly presentation, plain-English language without jargon, extreme brevity with scannable bullet points, and clean visual delineation.
   - Verified and executed on conversation UUID: `97669aa6-40bb-40b4-8ff4-1cecf813f5e0`.
