@@ -10,6 +10,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Form Sub-Tree Extraction Procedure (ADR-0030, SDD-0013):**
+  - Authored ADR-0030 and SDD-0013 establishing deterministic 5-step lifecycle for decoupling form sub-trees from modal shells into reusable presentation primitives.
+  - Published operator runbook `docs/reference/form_subtree_extraction_procedure.md`.
+  - Created `src/features/client-vault/VaultSecretForm.vue` pure form primitive with `v-model` binding and reactive validation signaling.
+  - Implemented headless assertion matrix `tests/unit/VaultSecretForm.spec.ts` (100% pass).
+  - Recomposed `VaultSecretModal.vue` to delegate to `VaultSecretForm.vue`.
+  - Integrated `VaultSecretForm.vue` into Step 3 of `ClientOnboardingModal.vue`, eliminating input duplication.
+  - Added interactive exhibition card in `/dev/components` under Wave 1 Primitives.
+  - Sanitized nested secret passwords (`***MASKED***`) in `lastSavedOnboardPayload` in `/dev/components`.
+  - Verified and executed on conversation UUID: `52c10e21-b3db-439e-8f7c-c73cd78c0e55`.
 - **BaseList Primitive (`src/shared/ui/BaseList.vue`):**
   - Created standardized list primitive supporting `bullet`, `checkmark`, and `numbered` variants with standard and dense geometries.
   - Implemented headless assertion matrix `tests/unit/BaseList.spec.ts` (100% pass).

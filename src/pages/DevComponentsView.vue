@@ -16,8 +16,9 @@ import ServiceFilterDropdown from '@/features/service-catalog/ServiceFilterDropd
 import ContractAgreementModal from '@/features/client-contracts/ContractAgreementModal.vue'
 import LogWorkModal from '@/features/client-maintenance/LogWorkModal.vue'
 import VaultSecretModal from '@/features/client-vault/VaultSecretModal.vue'
+import VaultSecretForm from '@/shared/ui/VaultSecretForm.vue'
 import ClientOnboardingModal from '@/features/client-onboarding/ClientOnboardingModal.vue'
-import type { ServiceCatalogItem, RankedLead } from '@/shared/types/lead'
+import type { ServiceCatalogItem, RankedLead, ClientSecretPayload } from '@/shared/types/lead'
 
 // ==========================================
 // 1. Primitives (Wave 1) State
@@ -50,6 +51,12 @@ const listDemoItems = [
   'Automated Continuous Integration Gates',
   '24/7 SLA Telemetry & Incident Dispatch'
 ]
+
+const formDemoSecret = ref<Partial<ClientSecretPayload>>({
+  secret_type: 'wordpress_admin',
+  label: 'WordPress Admin'
+})
+const isFormDemoValid = ref(false)
 
 // ==========================================
 // 2. Structural Shell (Wave 2) State
@@ -190,7 +197,7 @@ const workbenchMockLead: RankedLead = {
               <p class="section-subtext">Presentation primitives with explicit state contracts and zero business logic dependencies.</p>
             </div>
           </div>
-          <span class="count-tag">6 Components</span>
+          <span class="count-tag">7 Components</span>
         </div>
 
         <!-- 1.1 BaseButton -->
@@ -430,6 +437,32 @@ const workbenchMockLead: RankedLead = {
 
           <footer class="card-footer-note">
             Standardizes deliverables lists, feature audits, and instructional progressions across all modal surfaces.
+          </footer>
+        </article>
+
+        <!-- 1.7 VaultSecretForm -->
+        <article class="component-card">
+          <header class="card-header">
+            <div>
+              <h3 class="component-name">VaultSecretForm</h3>
+              <p class="component-desc">Extracted form sub-tree primitive managing credential category schemas, reactive validation, and payload binding.</p>
+            </div>
+            <span class="filepath-tag">src/shared/ui/VaultSecretForm.vue</span>
+          </header>
+
+          <div class="staging-surface flex-col">
+            <VaultSecretForm
+              v-model="formDemoSecret"
+              id-prefix="wb-vault-form"
+              @valid-change="(valid) => isFormDemoValid = valid"
+            />
+          </div>
+
+          <footer class="card-footer">
+            <span class="counter-label">Form Validation Status:</span>
+            <span :class="['counter-badge', isFormDemoValid ? 'text-emerald' : 'text-amber']">
+              {{ isFormDemoValid ? 'Valid (Ready for Dispatch)' : 'Incomplete (Required Fields Missing)' }}
+            </span>
           </footer>
         </article>
       </section>
@@ -907,7 +940,14 @@ const workbenchMockLead: RankedLead = {
         :services="workbenchCatalogServices"
         :lead="workbenchMockLead"
         @close="showOnboardingModal = false"
-        @onboard="(payload) => { lastSavedOnboardPayload = JSON.stringify(payload, null, 2); showOnboardingModal = false; }"
+        @onboard="(payload) => {
+          const sanitized = {
+            ...payload,
+            secrets: payload.secrets?.map(s => ({ ...s, password: '***MASKED***' }))
+          }
+          lastSavedOnboardPayload = JSON.stringify(sanitized, null, 2)
+          showOnboardingModal = false
+        }"
       />
     </main>
   </div>

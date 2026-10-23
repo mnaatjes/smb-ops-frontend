@@ -119,8 +119,8 @@ describe('Client Accounts Workspace & Onboarding Pipeline', () => {
 
     // Step 3: Vault & Launch
     expect(document.body.textContent).toContain('Initial Vault Infrastructure Secret')
-    const userInput = document.body.querySelector('#onboard-vault-user') as HTMLInputElement
-    const passInput = document.body.querySelector('#onboard-vault-pass') as HTMLInputElement
+    const userInput = document.body.querySelector('#onboard-vault-secret-username') as HTMLInputElement
+    const passInput = document.body.querySelector('#onboard-vault-secret-password') as HTMLInputElement
     userInput.value = 'admin_user'
     userInput.dispatchEvent(new Event('input'))
     passInput.value = 'dynamically_generated_mock_pass_123'
