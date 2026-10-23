@@ -111,6 +111,27 @@ A quick-scan visual cheat sheet of core UI components in `smb-ops-frontend`, spe
 
 ---
 
+### BaseWizard (`BaseWizard.vue`)
+- **Role:** Headless sequential workflow engine managing validation gates and multi-step state transitions.
+- **Visuals & Layout:**
+  - Header: Embeds `ProgressionIndicator` with active, completed, and upcoming visual tokens.
+  - Step Body: Dynamic template slot injection for discrete step screens (`#step-1`, `#step-2`).
+  - Navigation Footer: Standardized back/continue/submit cluster with step-gated validation (`canAdvance`).
+- **State & Invariants:**
+  - `Back` button hidden on step 1; appears on step > 1.
+  - Replaces `Continue` with `Submit` on the final step.
+  - Emits typed `step-change` and `submit` events.
+
+---
+
+### ModalWizard (`ModalWizard.vue`)
+- **Role:** Dialog composition shell embedding `BaseWizard` inside `BaseModal` with guarded dismissal.
+- **Visuals & Behavior:**
+  - Combines `BaseModal` backdrop blur and teleporting with full `BaseWizard` stepper machinery.
+  - Guarded Exit: Prompts confirmation on Escape or backdrop click when `currentStep > 1` to prevent accidental data loss.
+
+---
+
 ### ThemeToggle (`ThemeToggle.vue`)
 - **Role:** Switch between dark and light themes across dashboard workspaces.
 - **Visuals:** SVG icon toggle button with token-aware surface. Persists preference in `localStorage`.

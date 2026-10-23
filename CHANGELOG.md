@@ -9,7 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-- **ProgressionIndicator Component (ADR-0027, ADR-0028):**
+### Added
+- **BaseWizard and ModalWizard Architecture (ADR-0027, ADR-0028):**
+  - Created `src/shared/ui/BaseWizard.vue` headless/canvas sequential workflow engine supporting dynamic step slots, validation gates, and backward/forward navigation.
+  - Created `src/shared/ui/ModalWizard.vue` dialog composition shell wrapping `BaseWizard` inside `BaseModal` with guarded exit confirmation on `Escape` or backdrop click.
+  - Implemented headless assertion matrices `tests/unit/BaseWizard.spec.ts` and `tests/unit/ModalWizard.spec.ts` (100% pass).
+  - Refactored `ClientOnboardingModal.vue` to compose `ModalWizard.vue` directly.
+  - Added interactive exhibition cards in `/dev/components` under Wave 2 Structural Shells.
+  - Verified and executed on conversation UUID: `52c10e21-b3db-439e-8f7c-c73cd78c0e55`.
   - Created `src/shared/ui/ProgressionIndicator.vue` reusable wizard and stepper progression bar with active, completed, and upcoming visual tokens.
   - Implemented headless assertion matrix `tests/unit/ProgressionIndicator.spec.ts` (100% pass).
   - Added interactive exhibition card in `/dev/components` under Wave 3 Telemetry & Selection.
