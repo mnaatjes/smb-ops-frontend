@@ -15,6 +15,12 @@ import ModalWizard from '@/shared/ui/ModalWizard.vue'
 import BaseAside from '@/shared/ui/BaseAside.vue'
 import BasePageContainer from '@/shared/ui/BasePageContainer.vue'
 import BaseDrawer from '@/shared/ui/BaseDrawer.vue'
+import BaseMetricCard from '@/shared/ui/BaseMetricCard.vue'
+import BaseAlert from '@/shared/ui/BaseAlert.vue'
+import ManualLeadForm from '@/shared/ui/ManualLeadForm.vue'
+import DisqualifyLeadForm, { type DisqualifyLeadPayload } from '@/shared/ui/DisqualifyLeadForm.vue'
+import ScoreBadge from '@/features/lead-triage/ScoreBadge.vue'
+import IssueChips from '@/features/lead-triage/IssueChips.vue'
 import ProgressionIndicator from '@/shared/ui/ProgressionIndicator.vue'
 import MaintenanceGauge from '@/shared/ui/MaintenanceGauge.vue'
 import ServiceFilterDropdown from '@/features/service-catalog/ServiceFilterDropdown.vue'
@@ -25,7 +31,7 @@ import VaultSecretForm from '@/shared/ui/VaultSecretForm.vue'
 import ContractAgreementForm from '@/shared/ui/ContractAgreementForm.vue'
 import LogWorkForm from '@/shared/ui/LogWorkForm.vue'
 import ClientOnboardingModal from '@/features/client-onboarding/ClientOnboardingModal.vue'
-import type { ServiceCatalogItem, RankedLead, ClientSecretPayload, AttachContractPayload, LogTimecardPayload } from '@/shared/types/lead'
+import type { ServiceCatalogItem, RankedLead, ClientSecretPayload, AttachContractPayload, LogTimecardPayload, CreateProspectPayload, AuditResult } from '@/shared/types/lead'
 
 // ==========================================
 // 1. Primitives (Wave 1) State
@@ -78,6 +84,41 @@ const formDemoLogWork = ref<Partial<LogTimecardPayload>>({
   description: 'Proactive SSL renewal and nginx config check'
 })
 const isLogWorkFormValid = ref(true)
+
+const formDemoManualLead = ref<Partial<CreateProspectPayload>>({
+  business_name: 'Pacific Heritage Bakery',
+  website_url: 'https://pacificbakery.example.com',
+  phone: '(555) 342-9102'
+})
+const isManualLeadFormValid = ref(true)
+
+const formDemoDisqualify = ref<Partial<DisqualifyLeadPayload>>({
+  reason: 'Out of Business',
+  notes: 'Domain expired and location permanently closed.',
+  suppress: true
+})
+const isDisqualifyFormValid = ref(true)
+
+const alertDismissed = ref(false)
+const metricCardClicks = ref(0)
+
+const sampleAuditHighPriority: AuditResult = {
+  id: 'audit-sample-1',
+  prospect_id: 'lead-sample-1',
+  target_url: 'https://samplebakery.example.com',
+  audited_at: '2026-10-23T20:00:00Z',
+  opportunity_score: 85,
+  ssl_active: false,
+  mobile_viewport_present: false,
+  response_time_ms: 1850,
+  status_code: 200,
+  cms_detected: 'WordPress 5.4 (Outdated)',
+  pos_integrations: ['Square', 'Toast'],
+  menu_format: 'PDF',
+  pdf_menu_count: 2,
+  tel_link_present: false,
+  critical_issues: ['SSL Missing', 'No Viewport Tag']
+}
 
 interface DemoTableOperator extends Record<string, unknown> {
   id: string
@@ -248,7 +289,7 @@ const workbenchMockLead: RankedLead = {
               <p class="section-subtext">Presentation primitives with explicit state contracts and zero business logic dependencies.</p>
             </div>
           </div>
-          <span class="count-tag">11 Components</span>
+          <span class="count-tag">15 Components</span>
         </div>
 
         <!-- 1.1 BaseButton -->
@@ -575,7 +616,59 @@ const workbenchMockLead: RankedLead = {
           </footer>
         </article>
 
-        <!-- 1.10 BaseCard -->
+        <!-- 1.10 ManualLeadForm -->
+        <article class="component-card">
+          <header class="card-header">
+            <div>
+              <h3 class="component-name">ManualLeadForm</h3>
+              <p class="component-desc">Extracted manual prospect intake sub-tree standardizing business identity, URL, and phone contact validation.</p>
+            </div>
+            <span class="filepath-tag">src/shared/ui/ManualLeadForm.vue</span>
+          </header>
+
+          <div class="staging-surface flex-col">
+            <ManualLeadForm
+              id-prefix="wb-manual-lead-form"
+              v-model="formDemoManualLead"
+              @valid-change="(valid) => isManualLeadFormValid = valid"
+            />
+          </div>
+
+          <footer class="card-footer">
+            <span class="counter-label">Manual Lead Form Status:</span>
+            <span :class="['counter-badge', isManualLeadFormValid ? 'text-emerald' : 'text-amber']">
+              {{ isManualLeadFormValid ? 'Valid Intake Payload' : 'Business Name Required' }}
+            </span>
+          </footer>
+        </article>
+
+        <!-- 1.11 DisqualifyLeadForm -->
+        <article class="component-card">
+          <header class="card-header">
+            <div>
+              <h3 class="component-name">DisqualifyLeadForm</h3>
+              <p class="component-desc">Extracted prospect disqualification sub-tree capturing categorized reason, triage notes, and suppression flags.</p>
+            </div>
+            <span class="filepath-tag">src/shared/ui/DisqualifyLeadForm.vue</span>
+          </header>
+
+          <div class="staging-surface flex-col">
+            <DisqualifyLeadForm
+              id-prefix="wb-disqualify-form"
+              v-model="formDemoDisqualify"
+              @valid-change="(valid) => isDisqualifyFormValid = valid"
+            />
+          </div>
+
+          <footer class="card-footer">
+            <span class="counter-label">Disqualification Form Status:</span>
+            <span :class="['counter-badge', isDisqualifyFormValid ? 'text-emerald' : 'text-amber']">
+              {{ isDisqualifyFormValid ? 'Valid Archive Record' : 'Reason Required' }}
+            </span>
+          </footer>
+        </article>
+
+        <!-- 1.12 BaseCard -->
         <article class="component-card">
           <header class="card-header">
             <div>
@@ -647,6 +740,95 @@ const workbenchMockLead: RankedLead = {
           <footer class="card-footer">
             <span class="counter-label">Last Row Clicked:</span>
             <span class="counter-badge">{{ selectedTableRow }}</span>
+          </footer>
+        </article>
+
+        <!-- 1.14 BaseAlert -->
+        <article class="component-card">
+          <header class="card-header">
+            <div>
+              <h3 class="component-name">BaseAlert</h3>
+              <p class="component-desc">Notification and operational feedback banner with info, success, warning, and danger tokens.</p>
+            </div>
+            <span class="filepath-tag">src/shared/ui/BaseAlert.vue</span>
+          </header>
+
+          <div class="staging-surface flex-col" style="gap: 0.75rem;">
+            <BaseAlert variant="info" title="System Operational Feedback">
+              Discovery service completed ingestion of 15 candidate businesses in Kalamazoo, MI.
+            </BaseAlert>
+
+            <BaseAlert variant="success" title="Retainer Synchronized">
+              Client agreement activated for WordPress Care Plan with zero overages.
+            </BaseAlert>
+
+            <BaseAlert variant="warning" title="Audit Threshold Exceeded">
+              Target domain response latency is 1,850ms, triggering technical SEO remediation score.
+            </BaseAlert>
+
+            <BaseAlert
+              v-if="!alertDismissed"
+              variant="danger"
+              title="Interactive Dismissible Alert"
+              :dismissible="true"
+              @dismiss="alertDismissed = true"
+            >
+              Click the dismiss ✕ button to test interactive notification dismissal.
+            </BaseAlert>
+            <BaseButton
+              v-else
+              label="Reset Dismissed Alert"
+              variant="secondary"
+              @click="alertDismissed = false"
+            />
+          </div>
+
+          <footer class="card-footer-note">
+            Replaces ad-hoc <code>.status-banner</code> and <code>.error-banner</code> across the application shell and dialog surfaces.
+          </footer>
+        </article>
+
+        <!-- 1.15 BaseMetricCard -->
+        <article class="component-card">
+          <header class="card-header">
+            <div>
+              <h3 class="component-name">BaseMetricCard</h3>
+              <p class="component-desc">Executive KPI metric card with nominal, alert, success, and warning tokens plus clickable delegation.</p>
+            </div>
+            <span class="filepath-tag">src/shared/ui/BaseMetricCard.vue</span>
+          </header>
+
+          <div class="staging-surface grid-3">
+            <BaseMetricCard
+              label="Discovery Pool"
+              value="128"
+              subtext="Unprocessed leads"
+            />
+
+            <BaseMetricCard
+              label="Active Retainers"
+              value="12"
+              variant="success"
+              subtext="100% capacity"
+            />
+
+            <BaseMetricCard
+              label="High Priority"
+              value="14"
+              variant="alert"
+              :clickable="true"
+              subtext="Click to filter (Score >= 70)"
+              @click="metricCardClicks++"
+            >
+              <template #badge>
+                <BaseBadge variant="danger" size="sm">Urgent</BaseBadge>
+              </template>
+            </BaseMetricCard>
+          </div>
+
+          <footer class="card-footer">
+            <span class="counter-label">High Priority Card Clicks:</span>
+            <span class="counter-badge">{{ metricCardClicks }} Clicks</span>
           </footer>
         </article>
       </section>
@@ -1017,7 +1199,7 @@ const workbenchMockLead: RankedLead = {
               <p class="section-subtext">Care plan capacity threshold gauges and multi-select service catalog filters.</p>
             </div>
           </div>
-          <span class="count-tag">3 Components</span>
+          <span class="count-tag">5 Components</span>
         </div>
 
         <!-- 3.1 MaintenanceGauge -->
@@ -1130,6 +1312,70 @@ const workbenchMockLead: RankedLead = {
 
           <footer class="card-footer-note">
             Replaces hardcoded modal stepper text with a theme-tokenized accessible progress bar.
+          </footer>
+        </article>
+
+        <!-- 3.4 ScoreBadge -->
+        <article class="component-card">
+          <header class="card-header">
+            <div>
+              <h3 class="component-name">ScoreBadge</h3>
+              <p class="component-desc">Triage opportunity score badge with dynamic thresholds: green (&lt;40), amber (&ge;40), and danger (&ge;70).</p>
+            </div>
+            <span class="filepath-tag">src/features/lead-triage/ScoreBadge.vue</span>
+          </header>
+
+          <div class="staging-surface flex-row items-center" style="gap: 1rem;">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 0.25rem;">
+              <ScoreBadge :score="85" />
+              <span style="font-size: 0.7rem; color: var(--text-muted);">&ge; 70 (High Priority)</span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 0.25rem;">
+              <ScoreBadge :score="55" />
+              <span style="font-size: 0.7rem; color: var(--text-muted);">&ge; 40 (Moderate)</span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 0.25rem;">
+              <ScoreBadge :score="25" />
+              <span style="font-size: 0.7rem; color: var(--text-muted);">&lt; 40 (Low / Healthy)</span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 0.25rem;">
+              <ScoreBadge :score="null" />
+              <span style="font-size: 0.7rem; color: var(--text-muted);">Null (Unaudited)</span>
+            </div>
+          </div>
+
+          <footer class="card-footer-note">
+            Standardizes lead qualification badges across table rows, Kanban cards, and dossier headers.
+          </footer>
+        </article>
+
+        <!-- 3.5 IssueChips -->
+        <article class="component-card">
+          <header class="card-header">
+            <div>
+              <h3 class="component-name">IssueChips</h3>
+              <p class="component-desc">Technical audit issue tags showing SSL status, PDF menus, viewport compliance, and CMS detections.</p>
+            </div>
+            <span class="filepath-tag">src/features/lead-triage/IssueChips.vue</span>
+          </header>
+
+          <div class="staging-surface flex-col" style="gap: 1rem;">
+            <div>
+              <label class="cell-label">Critical Findings Profile (Score: 85)</label>
+              <IssueChips :audit="sampleAuditHighPriority" />
+            </div>
+
+            <div>
+              <label class="cell-label">Empty / Unaudited Profile</label>
+              <IssueChips :audit="null" />
+            </div>
+          </div>
+
+          <footer class="card-footer-note">
+            Provides instant visual indicators for key technical pain points driving sales outreach playbooks.
           </footer>
         </article>
       </section>
