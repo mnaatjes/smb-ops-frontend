@@ -3,7 +3,7 @@ import { mount } from '@vue/test-utils'
 import ServiceFilterDropdown from '@/features/service-catalog/ServiceFilterDropdown.vue'
 import type { ServiceCatalogItem } from '@/entities/lead/model'
 
-describe('ServiceFilterDropdown Component', () => {
+describe('ServiceFilterDropdown Component Matrix', () => {
   const mockServices: ServiceCatalogItem[] = [
     {
       id: 'svc-1',
@@ -27,7 +27,8 @@ describe('ServiceFilterDropdown Component', () => {
     }
   ]
 
-  it('renders "All Services" label when no filters are selected', () => {
+  // Tier 1 & 2: Prop Reflection & Inactive Label
+  it('Invariant 1: Renders "All Services" label when no filters are selected', () => {
     const wrapper = mount(ServiceFilterDropdown, {
       props: {
         services: mockServices,
@@ -39,7 +40,8 @@ describe('ServiceFilterDropdown Component', () => {
     expect(wrapper.find('.selection-badge').exists()).toBe(false)
   })
 
-  it('renders active filter badge and count when services are selected', () => {
+  // Tier 2: Prop Reflection with Active Selection
+  it('Invariant 2: Renders active filter badge and count when services are selected', () => {
     const wrapper = mount(ServiceFilterDropdown, {
       props: {
         services: mockServices,
@@ -51,7 +53,8 @@ describe('ServiceFilterDropdown Component', () => {
     expect(wrapper.find('.trigger-text').text()).toBe('2 Services Selected')
   })
 
-  it('emits updated selection when toggling a service checkbox', async () => {
+  // Tier 3: Event Emission & Immutability
+  it('Invariant 3: Emits updated selection array when toggling a service checkbox', async () => {
     const wrapper = mount(ServiceFilterDropdown, {
       props: {
         services: mockServices,
@@ -69,7 +72,8 @@ describe('ServiceFilterDropdown Component', () => {
     expect(wrapper.emitted('update:modelValue')?.[0]).toEqual([['SVC-SPEED']])
   })
 
-  it('resets selection to empty array on Reset click', async () => {
+  // Tier 5: Boundary & Reset State
+  it('Invariant 4: Resets selection to empty array on Reset link click', async () => {
     const wrapper = mount(ServiceFilterDropdown, {
       props: {
         services: mockServices,

@@ -3,14 +3,17 @@ import { mount } from '@vue/test-utils'
 import ContractAgreementModal from '@/features/client-contracts/ContractAgreementModal.vue'
 import type { ServiceCatalogItem } from '@/shared/types/lead'
 
-describe('ContractAgreementModal Component', () => {
+describe('ContractAgreementModal Component Matrix', () => {
   beforeEach(() => {
     document.body.innerHTML = ''
+    document.body.style.overflow = ''
   })
 
   afterEach(() => {
     document.body.innerHTML = ''
+    document.body.style.overflow = ''
   })
+
   const mockServices: ServiceCatalogItem[] = [
     {
       id: 'svc-1',
@@ -32,7 +35,8 @@ describe('ContractAgreementModal Component', () => {
     }
   ]
 
-  it('renders modal with default service selection and rate', () => {
+  // Tier 1 & 2: DOM Lifecycle & Prop Reflection
+  it('Invariant 1: Renders modal with default service selection, rate, and client context', () => {
     mount(ContractAgreementModal, {
       props: {
         show: true,
@@ -46,7 +50,8 @@ describe('ContractAgreementModal Component', () => {
     expect(document.body.textContent).toContain('Contracted Deliverables Scope')
   })
 
-  it('emits save event with contract payload on form submit', async () => {
+  // Tier 3: Event Emission & Payload Integrity
+  it('Invariant 2: Emits @save event with typed contract payload on form submission', async () => {
     const wrapper = mount(ContractAgreementModal, {
       props: {
         show: true,
@@ -67,7 +72,8 @@ describe('ContractAgreementModal Component', () => {
     })
   })
 
-  it('emits close event when Cancel is clicked', async () => {
+  // Tier 4: Cancel Dismissal
+  it('Invariant 3: Emits @close event when Cancel button is clicked', async () => {
     const wrapper = mount(ContractAgreementModal, {
       props: {
         show: true,

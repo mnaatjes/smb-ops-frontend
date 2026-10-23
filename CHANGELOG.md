@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Headless Assertion Matrix Implementation & Reference Guide (ADR-0029, SDD-0012):**
+  - Authored Diataxis reference manual `docs/reference/headless_assertion_matrix_procedure.md` establishing the 5-tier invariant taxonomy, archetype testing patterns, and containerized pre-commit enforcement.
+  - Implemented missing headless assertion matrix for `ClientOnboardingModal.vue` (`tests/unit/ClientOnboardingModal.spec.ts`) asserting wizard step progression, DOM lifecycle, and dispatch payloads.
+  - Refactored existing unit test suites for all `/dev/components` workbench items (`BaseButton`, `BaseBadge`, `BaseInput`, `BaseModal`, `MaintenanceGauge`, `ServiceFilterDropdown`, `ContractAgreementModal`, `LogWorkModal`, `VaultSecretModal`) to conform to SDD-0012 Invariant Taxonomy.
+  - Verified and executed on conversation UUID: `52c10e21-b3db-439e-8f7c-c73cd78c0e55`.
 - **Component Catalog & Visual Truth Update (ADR-0027, ADR-0028):**
   - Updated `docs/reference/ui_components.md` to document Wave 1 primitives (`BaseButton`, `BaseBadge`, `BaseInput`), Wave 2 shells (`BaseModal`), Wave 3 controls (`MaintenanceGauge`, `ServiceFilterDropdown`), and Wave 4 feature modals (`ContractAgreementModal`, `LogWorkModal`, `VaultSecretModal`, `ClientOnboardingModal`) with scoped vanilla CSS and design tokens.
   - Verified and executed on conversation UUID: `52c10e21-b3db-439e-8f7c-c73cd78c0e55`.
