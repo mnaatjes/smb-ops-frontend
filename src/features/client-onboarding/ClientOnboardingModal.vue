@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import BaseModal from '@/shared/ui/BaseModal.vue'
-import BaseButton from '@/shared/ui/BaseButton.vue'
+import ModalWizard from '@/shared/ui/ModalWizard.vue'
 import BaseInput from '@/shared/ui/BaseInput.vue'
 import BaseBadge from '@/shared/ui/BaseBadge.vue'
 import type {
@@ -24,8 +23,13 @@ const emit = defineEmits<{
   (e: 'onboard', payload: OnboardClientPayload): void
 }>()
 
-// Streamlined 3-step wizard (1: Contact, 2: Contracts/Services, 3: Vault Credentials & Dispatch)
-const step = ref<1 | 2 | 3>(1)
+const wizardSteps = [
+  { number: 1, label: 'Contact' },
+  { number: 2, label: 'Services' },
+  { number: 3, label: 'Vault & Launch' }
+]
+
+const currentStep = ref(1)
 
 // Step 1: Contact
 const contactName = ref('')
@@ -42,6 +46,7 @@ const vaultPassword = ref('')
 const vaultSecretType = ref<SecretType>('wordpress_admin')
 
 const businessName = computed(() => props.lead?.prospect.business_name || 'Prospect')
+const modalTitle = computed(() => `Onboard Client — ${businessName.value}`)
 
 function toggleService(code: string): void {
   const idx = selectedServiceCodes.value.indexOf(code)
@@ -49,18 +54,6 @@ function toggleService(code: string): void {
     selectedServiceCodes.value.splice(idx, 1)
   } else {
     selectedServiceCodes.value.push(code)
-  }
-}
-
-function handleNext(): void {
-  if (step.value < 3) {
-    step.value = (step.value + 1) as 1 | 2 | 3
-  }
-}
-
-function handleBack(): void {
-  if (step.value > 1) {
-    step.value = (step.value - 1) as 1 | 2 | 3
   }
 }
 
@@ -90,33 +83,21 @@ function handleDispatch(): void {
 </script>
 
 <template>
-  <BaseModal
+  <ModalWizard
     :show="show"
-    :title="`Onboard Client — ${businessName}`"
+    :title="modalTitle"
+    :steps="wizardSteps"
+    v-model:current-step="currentStep"
+    :is-submitting="isSubmitting"
+    submit-label="Dispatch & Onboard"
+    :require-confirm-on-dismiss="false"
     @close="emit('close')"
+    @submit="handleDispatch"
   >
-    <div class="space-y-5">
-      <!-- 3-Step Wizard Indicator -->
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <div class="flex items-center gap-2">
-          <span :class="['w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold', step === 1 ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400']">1</span>
-          <span class="text-xs font-medium" :class="step === 1 ? 'text-blue-400' : 'text-slate-400'">Contact</span>
-        </div>
-        <div class="w-8 h-px bg-slate-800" />
-        <div class="flex items-center gap-2">
-          <span :class="['w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold', step === 2 ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400']">2</span>
-          <span class="text-xs font-medium" :class="step === 2 ? 'text-blue-400' : 'text-slate-400'">Services</span>
-        </div>
-        <div class="w-8 h-px bg-slate-800" />
-        <div class="flex items-center gap-2">
-          <span :class="['w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold', step === 3 ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400']">3</span>
-          <span class="text-xs font-medium" :class="step === 3 ? 'text-blue-400' : 'text-slate-400'">Vault & Launch</span>
-        </div>
-      </div>
-
-      <!-- Step 1: Contact Details -->
-      <div v-if="step === 1" class="space-y-4">
-        <h4 class="text-xs font-semibold text-slate-300 uppercase tracking-wider">Primary Account Representative</h4>
+    <!-- Step 1: Contact Details -->
+    <template #step-1>
+      <div class="step-content">
+        <h4 class="step-subheading">Primary Account Representative</h4>
         <BaseInput
           id="onboard-contact-name"
           v-model="contactName"
@@ -139,26 +120,29 @@ function handleDispatch(): void {
           placeholder="555-0199"
         />
       </div>
+    </template>
 
-      <!-- Step 2: Contract Services Selection -->
-      <div v-else-if="step === 2" class="space-y-4">
-        <h4 class="text-xs font-semibold text-slate-300 uppercase tracking-wider">Select Contracted Offerings</h4>
-        <div class="space-y-2 max-h-48 overflow-y-auto">
+    <!-- Step 2: Contract Services Selection -->
+    <template #step-2>
+      <div class="step-content">
+        <h4 class="step-subheading">Select Contracted Offerings</h4>
+        <div class="services-scroll-panel">
           <div
             v-for="s in services"
             :key="s.code"
-            class="flex items-center justify-between p-3 rounded-lg border border-slate-800 hover:border-slate-700 bg-slate-900/60 cursor-pointer"
+            class="service-select-card"
+            :class="{ selected: selectedServiceCodes.includes(s.code) }"
             @click="toggleService(s.code)"
           >
-            <div class="flex items-center gap-3">
+            <div class="service-meta-cluster">
               <input
                 type="checkbox"
                 :checked="selectedServiceCodes.includes(s.code)"
-                class="rounded"
+                class="service-checkbox"
               />
               <div>
-                <div class="text-xs font-medium text-slate-100">{{ s.name }}</div>
-                <div class="text-[11px] text-slate-400">{{ s.code }}</div>
+                <div class="service-name">{{ s.name }}</div>
+                <div class="service-code">{{ s.code }}</div>
               </div>
             </div>
             <BaseBadge :variant="selectedServiceCodes.includes(s.code) ? 'emerald' : 'slate'" size="sm">
@@ -175,11 +159,13 @@ function handleDispatch(): void {
           placeholder="150"
         />
       </div>
+    </template>
 
-      <!-- Step 3: Vault Credentials & Provisioning -->
-      <div v-else-if="step === 3" class="space-y-4">
-        <h4 class="text-xs font-semibold text-slate-300 uppercase tracking-wider">Initial Vault Infrastructure Secret</h4>
-        <div class="grid grid-cols-2 gap-4">
+    <!-- Step 3: Vault Credentials & Provisioning -->
+    <template #step-3>
+      <div class="step-content">
+        <h4 class="step-subheading">Initial Vault Infrastructure Secret</h4>
+        <div class="form-row-2col">
           <BaseInput
             id="onboard-vault-user"
             v-model="vaultUsername"
@@ -195,40 +181,103 @@ function handleDispatch(): void {
           />
         </div>
 
-        <div class="rounded-lg border border-slate-800 bg-slate-950/40 p-3 space-y-1 text-xs text-slate-400">
-          <div>• Lead ID: <code class="text-slate-200">{{ lead?.prospect.id }}</code></div>
-          <div>• Contract Services: <span class="text-slate-200">{{ selectedServiceCodes.length }} selected</span></div>
+        <div class="summary-box">
+          <div>• Lead ID: <code class="mono-id">{{ lead?.prospect.id }}</code></div>
+          <div>• Contract Services: <span>{{ selectedServiceCodes.length }} selected</span></div>
           <div>• Account Status: <BaseBadge variant="emerald" size="sm">Active upon dispatch</BaseBadge></div>
         </div>
       </div>
-
-      <!-- Actions -->
-      <div class="flex items-center justify-between pt-4 border-t border-slate-800">
-        <div>
-          <BaseButton
-            v-if="step > 1"
-            label="Back"
-            variant="secondary"
-            @click="handleBack"
-          />
-        </div>
-        <div class="flex items-center gap-3">
-          <BaseButton label="Cancel" variant="secondary" @click="emit('close')" />
-          <BaseButton
-            v-if="step < 3"
-            label="Continue"
-            variant="primary"
-            @click="handleNext"
-          />
-          <BaseButton
-            v-else
-            label="Dispatch & Onboard"
-            variant="primary"
-            :loading="isSubmitting"
-            @click="handleDispatch"
-          />
-        </div>
-      </div>
-    </div>
-  </BaseModal>
+    </template>
+  </ModalWizard>
 </template>
+
+<style scoped>
+.step-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.step-subheading {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.form-row-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.services-scroll-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 12rem;
+  overflow-y: auto;
+  border-radius: 6px;
+}
+
+.service-select-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 0.85rem;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-surface-subtle);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.service-select-card:hover {
+  border-color: var(--accent-primary);
+}
+
+.service-select-card.selected {
+  border-color: var(--accent-primary);
+  background-color: var(--bg-surface);
+}
+
+.service-meta-cluster {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.service-checkbox {
+  cursor: pointer;
+}
+
+.service-name {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.service-code {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.summary-box {
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-surface-subtle);
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.mono-id {
+  font-family: var(--font-mono, monospace);
+  color: var(--text-primary);
+}
+</style>

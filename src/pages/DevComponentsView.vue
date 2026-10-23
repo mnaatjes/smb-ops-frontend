@@ -3,7 +3,12 @@ import { ref } from 'vue'
 import BaseButton from '@/shared/ui/BaseButton.vue'
 import BaseBadge from '@/shared/ui/BaseBadge.vue'
 import BaseInput from '@/shared/ui/BaseInput.vue'
+import BaseSelect from '@/shared/ui/BaseSelect.vue'
+import BaseTextarea from '@/shared/ui/BaseTextarea.vue'
 import BaseModal from '@/shared/ui/BaseModal.vue'
+import BaseWizard from '@/shared/ui/BaseWizard.vue'
+import ModalWizard from '@/shared/ui/ModalWizard.vue'
+import ProgressionIndicator from '@/shared/ui/ProgressionIndicator.vue'
 import MaintenanceGauge from '@/shared/ui/MaintenanceGauge.vue'
 import ServiceFilterDropdown from '@/features/service-catalog/ServiceFilterDropdown.vue'
 import ContractAgreementModal from '@/features/client-contracts/ContractAgreementModal.vue'
@@ -29,11 +34,29 @@ const emailInput = ref('operator@smbops.internal')
 const errorInput = ref('')
 const inputError = ref('This field is required and cannot be empty')
 
+const selectChoice = ref('retainer')
+const selectOptions = [
+  { value: 'retainer', label: 'Monthly Retainer Maintenance' },
+  { value: 'fixed_fee', label: 'One-Time Remediation Project' },
+  { value: 'audit_only', label: 'Diagnostic Audit Only' }
+]
+
+const textareaValue = ref('Proactive database indexing and weekly snapshot verification completed.')
+
 // ==========================================
 // 2. Structural Shell (Wave 2) State
 // ==========================================
 const isModalOpen = ref(false)
 const modalSampleInput = ref('')
+
+const isModalWizardOpen = ref(false)
+const wizardDemoStep = ref(1)
+const wizardDemoSteps = [
+  { number: 1, label: 'Identity' },
+  { number: 2, label: 'Configuration' },
+  { number: 3, label: 'Deployment' }
+]
+const wizardSubmissionCount = ref(0)
 
 // ==========================================
 // 3. Telemetry & Selection (Wave 3) State
@@ -46,6 +69,13 @@ function setGaugePreset(mins: number, cap: number, oos = false) {
   testGaugeCap.value = cap
   testGaugeOutOfScope.value = oos
 }
+
+const demoStepperSteps = [
+  { number: 1, label: 'Identity & Legal' },
+  { number: 2, label: 'Service Packaging' },
+  { number: 3, label: 'Console Vault & Dispatch' }
+]
+const demoStepperCurrent = ref(2)
 
 const testSelectedServices = ref<string[]>(['SVC-SEO'])
 const workbenchCatalogServices: ServiceCatalogItem[] = [
@@ -149,7 +179,7 @@ const workbenchMockLead: RankedLead = {
               <p class="section-subtext">Presentation primitives with explicit state contracts and zero business logic dependencies.</p>
             </div>
           </div>
-          <span class="count-tag">3 Components</span>
+          <span class="count-tag">5 Components</span>
         </div>
 
         <!-- 1.1 BaseButton -->
@@ -265,6 +295,100 @@ const workbenchMockLead: RankedLead = {
             Emits standard <code>update:modelValue</code>. Automatically renders red borders when <code>error</code> prop is present.
           </footer>
         </article>
+
+        <!-- 1.4 BaseSelect -->
+        <article class="component-card">
+          <header class="card-header">
+            <div>
+              <h3 class="component-name">BaseSelect</h3>
+              <p class="component-desc">Standardized dropdown menu with custom SVG chevron and theme token support.</p>
+            </div>
+            <span class="filepath-tag">src/shared/ui/BaseSelect.vue</span>
+          </header>
+
+          <div class="staging-surface grid-3">
+            <div class="input-cell">
+              <label class="cell-label">Standard Dropdown</label>
+              <BaseSelect
+                id="wb-base-select"
+                v-model="selectChoice"
+                label="Agreement Type"
+                :options="selectOptions"
+              />
+              <span class="cell-feedback font-mono">Value: {{ selectChoice }}</span>
+            </div>
+
+            <div class="input-cell">
+              <label class="cell-label">Disabled State</label>
+              <BaseSelect
+                id="wb-base-select-disabled"
+                model-value="audit_only"
+                label="Locked Selection"
+                :options="selectOptions"
+                disabled
+              />
+              <span class="cell-feedback">Selection prevented</span>
+            </div>
+
+            <div class="input-cell">
+              <label class="cell-label">Error State</label>
+              <BaseSelect
+                id="wb-base-select-error"
+                model-value=""
+                label="Required Selection"
+                error="Please choose an agreement type"
+                :options="selectOptions"
+              />
+              <span class="cell-feedback error-feedback">Prominent error styling</span>
+            </div>
+          </div>
+
+          <footer class="card-footer-note">
+            Standardizes native <code>&lt;select&gt;</code> styling across modals with <code>appearance: none</code> and custom chevron.
+          </footer>
+        </article>
+
+        <!-- 1.5 BaseTextarea -->
+        <article class="component-card">
+          <header class="card-header">
+            <div>
+              <h3 class="component-name">BaseTextarea</h3>
+              <p class="component-desc">Multi-line text input with strict non-resizable geometry and uniform focus rings.</p>
+            </div>
+            <span class="filepath-tag">src/shared/ui/BaseTextarea.vue</span>
+          </header>
+
+          <div class="staging-surface grid-2">
+            <div class="input-cell">
+              <label class="cell-label">Standard Work Notes</label>
+              <BaseTextarea
+                id="wb-base-textarea"
+                v-model="textareaValue"
+                label="Work Description"
+                :rows="3"
+                placeholder="Log activity details..."
+              />
+              <span class="cell-feedback font-mono">Length: {{ textareaValue.length }} chars</span>
+            </div>
+
+            <div class="input-cell">
+              <label class="cell-label">Error &amp; Required State</label>
+              <BaseTextarea
+                id="wb-base-textarea-error"
+                model-value=""
+                label="Mandatory Resolution Log"
+                error="Description cannot be empty"
+                placeholder="Enter details..."
+                required
+              />
+              <span class="cell-feedback error-feedback">Displays red border &amp; caption</span>
+            </div>
+          </div>
+
+          <footer class="card-footer-note">
+            Enforces <code>resize: none</code> to prevent modal layout distortions.
+          </footer>
+        </article>
       </section>
 
       <!-- ================================================================= -->
@@ -279,7 +403,7 @@ const workbenchMockLead: RankedLead = {
               <p class="section-subtext">Headless modal shell governing body scroll locking, teleporting, and dismissal.</p>
             </div>
           </div>
-          <span class="count-tag">1 Component</span>
+          <span class="count-tag">3 Components</span>
         </div>
 
         <article class="component-card">
@@ -334,6 +458,111 @@ const workbenchMockLead: RankedLead = {
             </template>
           </BaseModal>
         </article>
+
+        <!-- 2.2 BaseWizard -->
+        <article class="component-card">
+          <header class="card-header">
+            <div>
+              <h3 class="component-name">BaseWizard</h3>
+              <p class="component-desc">Headless canvas workflow engine with multi-step validation gating and back/forward navigation.</p>
+            </div>
+            <span class="filepath-tag">src/shared/ui/BaseWizard.vue</span>
+          </header>
+
+          <div class="staging-surface flex-col">
+            <BaseWizard
+              :steps="wizardDemoSteps"
+              v-model:current-step="wizardDemoStep"
+              submit-label="Complete Setup"
+              @submit="wizardSubmissionCount++"
+            >
+              <template #step-1>
+                <div style="padding: 0.5rem 0;">
+                  <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
+                    Step 1 Content: Define primary system identifier.
+                  </p>
+                  <BaseInput label="System Identifier" model-value="production-cluster-01" />
+                </div>
+              </template>
+
+              <template #step-2>
+                <div style="padding: 0.5rem 0;">
+                  <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
+                    Step 2 Content: Select operational profile.
+                  </p>
+                  <BaseSelect
+                    label="Environment Mode"
+                    model-value="staging"
+                    :options="[
+                      { value: 'staging', label: 'Staging Environment' },
+                      { value: 'production', label: 'Production High-Availability' }
+                    ]"
+                  />
+                </div>
+              </template>
+
+              <template #step-3>
+                <div style="padding: 0.5rem 0;">
+                  <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
+                    Step 3 Content: Review configuration and confirm deployment.
+                  </p>
+                  <div style="font-size: 0.8rem; background: var(--bg-surface-subtle); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.75rem;">
+                    <div>• Cluster: <strong>production-cluster-01</strong></div>
+                    <div>• Environment: <strong>Staging</strong></div>
+                  </div>
+                </div>
+              </template>
+            </BaseWizard>
+          </div>
+
+          <footer class="card-footer-note">
+            Submissions Triggered: <strong>{{ wizardSubmissionCount }}</strong>. Works cleanly standalone or inside modals.
+          </footer>
+        </article>
+
+        <!-- 2.3 ModalWizard -->
+        <article class="component-card">
+          <header class="card-header">
+            <div>
+              <h3 class="component-name">ModalWizard</h3>
+              <p class="component-desc">Composes BaseModal with BaseWizard to provide dialog overlays with guarded dismissal.</p>
+            </div>
+            <span class="filepath-tag">src/shared/ui/ModalWizard.vue</span>
+          </header>
+
+          <div class="staging-surface flex-row items-center">
+            <div class="modal-info">
+              <span class="modal-launch-title">Launch Modal Wizard Demo</span>
+              <p class="modal-launch-subtext">Multi-stage modal flow with built-in navigation and validation gating.</p>
+            </div>
+            <BaseButton label="Open Modal Wizard" variant="primary" @click="isModalWizardOpen = true" />
+          </div>
+
+          <ModalWizard
+            :show="isModalWizardOpen"
+            title="System Initialization Wizard"
+            :steps="wizardDemoSteps"
+            submit-label="Initialize Cluster"
+            @close="isModalWizardOpen = false"
+            @submit="isModalWizardOpen = false"
+          >
+            <template #step-1>
+              <div style="padding: 0.5rem 0;">
+                <BaseInput label="Cluster Name" model-value="alpha-node-01" />
+              </div>
+            </template>
+            <template #step-2>
+              <div style="padding: 0.5rem 0;">
+                <BaseInput label="Region" model-value="us-east-1" />
+              </div>
+            </template>
+            <template #step-3>
+              <div style="padding: 0.5rem 0;">
+                <p style="font-size: 0.85rem; color: var(--text-secondary);">Ready to provision cluster node.</p>
+              </div>
+            </template>
+          </ModalWizard>
+        </article>
       </section>
 
       <!-- ================================================================= -->
@@ -348,7 +577,7 @@ const workbenchMockLead: RankedLead = {
               <p class="section-subtext">Care plan capacity threshold gauges and multi-select service catalog filters.</p>
             </div>
           </div>
-          <span class="count-tag">2 Components</span>
+          <span class="count-tag">3 Components</span>
         </div>
 
         <!-- 3.1 MaintenanceGauge -->
@@ -433,6 +662,34 @@ const workbenchMockLead: RankedLead = {
 
           <footer class="card-footer-note">
             Renders pill badges for active filters and supports individual dismiss tags.
+          </footer>
+        </article>
+
+        <!-- 3.3 ProgressionIndicator -->
+        <article class="component-card">
+          <header class="card-header">
+            <div>
+              <h3 class="component-name">ProgressionIndicator</h3>
+              <p class="component-desc">Multi-step wizard progress tracker with active, completed, and upcoming visual tokens.</p>
+            </div>
+            <span class="filepath-tag">src/shared/ui/ProgressionIndicator.vue</span>
+          </header>
+
+          <div class="staging-surface flex-col">
+            <div class="control-group">
+              <span class="group-label">Interactive Stepper Preview</span>
+              <ProgressionIndicator :steps="demoStepperSteps" :current-step="demoStepperCurrent" />
+            </div>
+
+            <div class="stepper-controls" style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+              <BaseButton label="Step 1" variant="secondary" @click="demoStepperCurrent = 1" />
+              <BaseButton label="Step 2" variant="secondary" @click="demoStepperCurrent = 2" />
+              <BaseButton label="Step 3" variant="secondary" @click="demoStepperCurrent = 3" />
+            </div>
+          </div>
+
+          <footer class="card-footer-note">
+            Replaces hardcoded modal stepper text with a theme-tokenized accessible progress bar.
           </footer>
         </article>
       </section>

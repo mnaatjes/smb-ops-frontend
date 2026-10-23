@@ -3,6 +3,7 @@ import { ref, computed, watch } from 'vue'
 import BaseModal from '@/shared/ui/BaseModal.vue'
 import BaseButton from '@/shared/ui/BaseButton.vue'
 import BaseInput from '@/shared/ui/BaseInput.vue'
+import BaseSelect from '@/shared/ui/BaseSelect.vue'
 import type { ServiceCatalogItem, AttachContractPayload } from '@/shared/types/lead'
 
 const props = withDefaults(
@@ -28,35 +29,48 @@ const emit = defineEmits<{
 }>()
 
 const selectedServiceCode = ref(props.initialServiceCode || '')
-const billingRate = ref<number>(150)
 const contractType = ref<'retainer' | 'fixed_fee'>('retainer')
+const billingRate = ref<number>(150)
 
 watch(
   () => props.initialServiceCode,
-  (newCode) => {
-    if (newCode) {
-      selectedServiceCode.value = newCode
-    } else if (props.services.length > 0 && !selectedServiceCode.value) {
-      selectedServiceCode.value = props.services[0].code
+  (code) => {
+    if (code) {
+      selectedServiceCode.value = code
+    }
+  }
+)
+
+watch(
+  () => props.services,
+  (srvs) => {
+    if (!selectedServiceCode.value && srvs.length > 0) {
+      selectedServiceCode.value = srvs[0].code
     }
   },
   { immediate: true }
 )
 
 const modalTitle = computed(() => {
-  if (props.clientName) {
-    return `Attach Service Contract — ${props.clientName}`
-  }
-  return 'Service Contract Agreement'
+  return props.clientName
+    ? `Attach Service Contract — ${props.clientName}`
+    : 'Attach Service Contract'
 })
 
-const activeService = computed(() => {
-  return props.services.find((s) => s.code === selectedServiceCode.value)
+const serviceOptions = computed(() => {
+  return props.services.map((s) => ({
+    value: s.code,
+    label: `${s.name} (${s.code})`
+  }))
 })
 
-const deliverablesList = computed<string[]>(() => {
-  if (!activeService.value) return ['Standard deliverables per service catalog description.']
-  if (activeService.value.code.includes('RETAINER') || contractType.value === 'retainer') {
+const contractTypeOptions = [
+  { value: 'retainer', label: 'Monthly Retainer' },
+  { value: 'fixed_fee', label: 'One-Time Project' }
+]
+
+const deliverablesList = computed(() => {
+  if (contractType.value === 'retainer') {
     return [
       '30 minutes monthly proactive maintenance & triage',
       'Security patching and plugin vulnerability updates',
@@ -82,62 +96,113 @@ function handleSubmit(): void {
 
 <template>
   <BaseModal :show="show" :title="modalTitle" @close="$emit('close')">
-    <form class="space-y-4" @submit.prevent="handleSubmit">
-      <div class="space-y-1">
-        <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider" for="contract-service-select">
-          Service Offering <span class="text-rose-400">*</span>
-        </label>
-        <select
-          id="contract-service-select"
-          v-model="selectedServiceCode"
-          class="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-blue-500 focus:outline-none"
-          required
-        >
-          <option v-for="s in services" :key="s.code" :value="s.code">
-            {{ s.name }} ({{ s.code }})
-          </option>
-        </select>
-      </div>
+    <form id="contract-agreement-form" class="modal-form-layout" @submit.prevent="handleSubmit">
+      <BaseSelect
+        id="contract-service-select"
+        v-model="selectedServiceCode"
+        label="Service Offering *"
+        :options="serviceOptions"
+      />
 
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider" for="contract-type-select">
-            Agreement Type <span class="text-rose-400">*</span>
-          </label>
-          <select
-            id="contract-type-select"
-            v-model="contractType"
-            class="w-full mt-1 rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-blue-500 focus:outline-none"
-          >
-            <option value="retainer">Monthly Retainer</option>
-            <option value="fixed_fee">One-Time Project</option>
-          </select>
-        </div>
+      <div class="form-row-2col">
+        <BaseSelect
+          id="contract-type-select"
+          v-model="contractType"
+          label="Agreement Type *"
+          :options="contractTypeOptions"
+        />
 
         <BaseInput
           id="contract-billing-rate"
           v-model="billingRate"
           type="number"
-          label="Agreed Rate ($)"
+          label="Agreed Rate ($) *"
           placeholder="150"
           required
         />
       </div>
 
-      <div class="rounded-lg border border-slate-800 bg-slate-950/40 p-3 space-y-2">
-        <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-400">Contracted Deliverables Scope</h4>
-        <ul class="space-y-1 text-xs text-slate-300">
-          <li v-for="(item, idx) in deliverablesList" :key="idx" class="flex items-start gap-2">
-            <span class="text-emerald-400">✓</span>
-            <span>{{ item }}</span>
+      <div class="deliverables-panel">
+        <h4 class="deliverables-title">Contracted Deliverables Scope</h4>
+        <ul class="deliverables-list">
+          <li v-for="(item, idx) in deliverablesList" :key="idx" class="deliverable-item">
+            <span class="checkmark">✓</span>
+            <span class="deliverable-text">{{ item }}</span>
           </li>
         </ul>
       </div>
-
-      <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
-        <BaseButton label="Cancel" variant="secondary" @click="$emit('close')" />
-        <BaseButton label="Confirm Contract" button-type="submit" :loading="isSaving" />
-      </div>
     </form>
+
+    <template #footer>
+      <BaseButton label="Cancel" variant="secondary" @click="$emit('close')" />
+      <BaseButton
+        label="Confirm Contract"
+        button-type="submit"
+        form="contract-agreement-form"
+        :loading="isSaving"
+      />
+    </template>
   </BaseModal>
 </template>
+
+<style scoped>
+.modal-form-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.form-row-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.deliverables-panel {
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-surface-subtle);
+  padding: 0.85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.deliverables-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.deliverables-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.deliverable-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+
+.checkmark {
+  color: var(--accent-primary, #10b981);
+  font-weight: bold;
+  font-size: 0.85rem;
+  line-height: 1.2;
+}
+
+.deliverable-text {
+  flex: 1;
+}
+</style>

@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import BaseModal from '@/shared/ui/BaseModal.vue'
 import BaseButton from '@/shared/ui/BaseButton.vue'
 import BaseInput from '@/shared/ui/BaseInput.vue'
+import BaseSelect from '@/shared/ui/BaseSelect.vue'
 import type { ClientSecretPayload, SecretType } from '@/shared/types/lead'
 
 const props = withDefaults(
@@ -28,32 +29,34 @@ const username = ref('')
 const password = ref('')
 const loginUrl = ref('')
 
-const modalTitle = computed(() => {
-  if (props.clientName) {
-    return `Store Infrastructure Secret — ${props.clientName}`
-  }
-  return 'Store Infrastructure Secret'
-})
+const defaultLabels: Record<SecretType, string> = {
+  wordpress_admin: 'WordPress Admin',
+  hosting_cpanel: 'cPanel / Hosting Portal',
+  sftp_ssh: 'SFTP / SSH Access',
+  dns_registrar: 'DNS Registrar Access',
+  database_direct: 'MySQL / Database'
+}
 
-function handleTypeChange(): void {
-  switch (secretType.value) {
-    case 'wordpress_admin':
-      label.value = 'WordPress Admin'
-      break
-    case 'hosting_cpanel':
-      label.value = 'cPanel / Host Console'
-      break
-    case 'sftp_ssh':
-      label.value = 'SFTP / SSH Access'
-      break
-    case 'dns_registrar':
-      label.value = 'DNS / Domain Registrar'
-      break
-    case 'database_direct':
-      label.value = 'Database Direct (MySQL/Postgres)'
-      break
+const secretTypeOptions = [
+  { value: 'wordpress_admin', label: 'WordPress Admin' },
+  { value: 'hosting_cpanel', label: 'Hosting / cPanel' },
+  { value: 'sftp_ssh', label: 'SFTP / SSH' },
+  { value: 'dns_registrar', label: 'DNS Registrar' },
+  { value: 'database_direct', label: 'Direct Database' }
+]
+
+function handleTypeChange(val: string): void {
+  const typedVal = val as SecretType
+  if (defaultLabels[typedVal]) {
+    label.value = defaultLabels[typedVal]
   }
 }
+
+const modalTitle = computed(() => {
+  return props.clientName
+    ? `Store Infrastructure Secret — ${props.clientName}`
+    : 'Store Infrastructure Secret'
+})
 
 function handleSubmit(): void {
   if (!label.value.trim() || !username.value.trim() || !password.value.trim()) return
@@ -69,25 +72,15 @@ function handleSubmit(): void {
 
 <template>
   <BaseModal :show="show" :title="modalTitle" @close="$emit('close')">
-    <form class="space-y-4" @submit.prevent="handleSubmit">
-      <div class="grid grid-cols-2 gap-4">
-        <div class="space-y-1">
-          <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider" for="vault-secret-type">
-            Secret Category *
-          </label>
-          <select
-            id="vault-secret-type"
-            v-model="secretType"
-            class="w-full mt-1 rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-blue-500 focus:outline-none"
-            @change="handleTypeChange"
-          >
-            <option value="wordpress_admin">WordPress Admin</option>
-            <option value="hosting_cpanel">Hosting / cPanel</option>
-            <option value="sftp_ssh">SFTP / SSH</option>
-            <option value="dns_registrar">DNS Registrar</option>
-            <option value="database_direct">Direct Database</option>
-          </select>
-        </div>
+    <form id="vault-secret-form" class="modal-form-layout" @submit.prevent="handleSubmit">
+      <div class="form-row-2col">
+        <BaseSelect
+          id="vault-secret-type"
+          v-model="secretType"
+          label="Secret Category *"
+          :options="secretTypeOptions"
+          @change="handleTypeChange"
+        />
 
         <BaseInput
           id="vault-secret-label"
@@ -105,7 +98,7 @@ function handleSubmit(): void {
         placeholder="https://client.com/wp-admin"
       />
 
-      <div class="grid grid-cols-2 gap-4">
+      <div class="form-row-2col">
         <BaseInput
           id="vault-secret-username"
           v-model="username"
@@ -123,11 +116,30 @@ function handleSubmit(): void {
           required
         />
       </div>
-
-      <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
-        <BaseButton label="Cancel" variant="secondary" @click="$emit('close')" />
-        <BaseButton label="Store Credential" button-type="submit" :loading="isSaving" />
-      </div>
     </form>
+
+    <template #footer>
+      <BaseButton label="Cancel" variant="secondary" @click="$emit('close')" />
+      <BaseButton
+        label="Store Credential"
+        button-type="submit"
+        form="vault-secret-form"
+        :loading="isSaving"
+      />
+    </template>
   </BaseModal>
 </template>
+
+<style scoped>
+.modal-form-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.form-row-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+</style>

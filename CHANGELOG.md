@@ -10,6 +10,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **BaseWizard and ModalWizard Architecture (ADR-0027, ADR-0028):**
+  - Created `src/shared/ui/BaseWizard.vue` headless/canvas sequential workflow engine supporting dynamic step slots, validation gates, and backward/forward navigation.
+  - Created `src/shared/ui/ModalWizard.vue` dialog composition shell wrapping `BaseWizard` inside `BaseModal` with guarded exit confirmation on `Escape` or backdrop click.
+  - Implemented headless assertion matrices `tests/unit/BaseWizard.spec.ts` and `tests/unit/ModalWizard.spec.ts` (100% pass).
+  - Refactored `ClientOnboardingModal.vue` to compose `ModalWizard.vue` directly.
+  - Added interactive exhibition cards in `/dev/components` under Wave 2 Structural Shells.
+  - Verified and executed on conversation UUID: `52c10e21-b3db-439e-8f7c-c73cd78c0e55`.
+  - Created `src/shared/ui/ProgressionIndicator.vue` reusable wizard and stepper progression bar with active, completed, and upcoming visual tokens.
+  - Implemented headless assertion matrix `tests/unit/ProgressionIndicator.spec.ts` (100% pass).
+  - Added interactive exhibition card in `/dev/components` under Wave 3 Telemetry & Selection.
+  - Replaced cramped inline text stepper in `ClientOnboardingModal.vue` with `<ProgressionIndicator>`.
+  - Verified and executed on conversation UUID: `52c10e21-b3db-439e-8f7c-c73cd78c0e55`.
+- **BaseSelect and BaseTextarea Primitives (ADR-0027, ADR-0028):**
+  - Created `src/shared/ui/BaseSelect.vue` with custom SVG chevron and theme token bindings to eliminate inconsistent browser `<select>` styling.
+  - Created `src/shared/ui/BaseTextarea.vue` with strict non-resizable geometry (`resize: none`) to prevent modal and workspace distortions.
+  - Added headless assertion matrices `tests/unit/BaseSelect.spec.ts` and `tests/unit/BaseTextarea.spec.ts` (100% pass).
+  - Added exhibition cards in `/dev/components` under Wave 1 Primitives.
+  - Verified and executed on conversation UUID: `52c10e21-b3db-439e-8f7c-c73cd78c0e55`.
+
+### Changed
+- **Feature Modal Ergonomics & Button Alignment:**
+  - Standardized modal action buttons into `<template #footer>` across `ContractAgreementModal.vue`, `LogWorkModal.vue`, and `VaultSecretModal.vue` ensuring strict right-aligned layout via `BaseModal`.
+  - Replaced raw `<select>` and `<textarea>` elements with `<BaseSelect>` and `<BaseTextarea>`.
+  - Cleaned deliverables list in `ContractAgreementModal.vue` to eliminate duplicate bullet/checkmark clutter.
+  - Standardized number input incrementor spinbuttons in `BaseInput.vue`.
+  - Removed redundant `.selection-badge` and locked `ServiceFilterDropdown.vue` width to `260px` to prevent layout shift.
+  - Verified and executed on conversation UUID: `52c10e21-b3db-439e-8f7c-c73cd78c0e55`.
 - **Headless Assertion Matrix Implementation & Reference Guide (ADR-0029, SDD-0012):**
   - Authored Diataxis reference manual `docs/reference/headless_assertion_matrix_procedure.md` establishing the 5-tier invariant taxonomy, archetype testing patterns, and containerized pre-commit enforcement.
   - Implemented missing headless assertion matrix for `ClientOnboardingModal.vue` (`tests/unit/ClientOnboardingModal.spec.ts`) asserting wizard step progression, DOM lifecycle, and dispatch payloads.

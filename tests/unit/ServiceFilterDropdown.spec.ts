@@ -41,7 +41,7 @@ describe('ServiceFilterDropdown Component Matrix', () => {
   })
 
   // Tier 2: Prop Reflection with Active Selection
-  it('Invariant 2: Renders active filter badge and count when services are selected', () => {
+  it('Invariant 2: Renders dynamic service count label when services are selected', () => {
     const wrapper = mount(ServiceFilterDropdown, {
       props: {
         services: mockServices,
@@ -49,8 +49,8 @@ describe('ServiceFilterDropdown Component Matrix', () => {
       }
     })
 
-    expect(wrapper.find('.selection-badge').text()).toBe('2 active')
     expect(wrapper.find('.trigger-text').text()).toBe('2 Services Selected')
+    expect(wrapper.find('.selection-badge').exists()).toBe(false)
   })
 
   // Tier 3: Event Emission & Immutability

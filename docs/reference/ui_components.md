@@ -50,6 +50,7 @@ A quick-scan visual cheat sheet of core UI components in `smb-ops-frontend`, spe
   - Focus Ring: `border-color: var(--accent-primary)`, `box-shadow: 0 0 0 2px var(--focus-ring)`.
   - Error State: Border `#ef4444`, `box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.25)`, error label text `#ef4444` (`0.75rem`).
   - Disabled State: Background `var(--bg-surface-subtle)`, text `var(--text-muted)`, cursor `not-allowed`.
+  - Number Incrementor: Styled `::-webkit-inner-spin-button` with clean opacity and pointer cursor.
 - **State Matrix:**
   | State | Visual Treatment | Interaction |
   |---|---|---|
@@ -57,6 +58,40 @@ A quick-scan visual cheat sheet of core UI components in `smb-ops-frontend`, spe
   | Focused | Accent ring highlight | Active text cursor |
   | Error | Red border and helper message text | Retains input focus |
   | Disabled | Dimmed surface, muted text | Typing prevented |
+
+---
+
+### BaseSelect (`BaseSelect.vue`)
+- **Role:** Standardized dropdown selection primitive with custom SVG chevron and theme token support.
+- **Visuals & Tokens:**
+  - Background `var(--bg-surface)`, border `1px solid var(--border-color)`, text `var(--text-primary)`, border-radius `6px`.
+  - Custom Chevron: Absolute-positioned SVG chevron; OS default arrow suppressed via `appearance: none`.
+  - Focus Ring: `border-color: var(--accent-primary)`, `box-shadow: 0 0 0 2px var(--focus-ring)`.
+  - Error State: Border `#ef4444`, error label caption `#ef4444`.
+- **State Matrix:**
+  | State | Visual Treatment | Interaction |
+  |---|---|---|
+  | Default | Solid surface, subtle border, custom chevron | Emits `update:modelValue` and `change` |
+  | Focused | Accent border and focus ring glow | Native options list opens |
+  | Error | Red border and helper message text | Retains selection focus |
+  | Disabled | Dimmed surface, muted text | Selection prevented |
+
+---
+
+### BaseTextarea (`BaseTextarea.vue`)
+- **Role:** Controlled multi-line text input with strict non-resizable geometry and uniform focus rings.
+- **Visuals & Tokens:**
+  - Background `var(--bg-surface)`, border `1px solid var(--border-color)`, text `var(--text-primary)`, border-radius `6px`.
+  - Resizing Policy: Strictly non-resizable (`resize: none`) to prevent modal and workspace layout distortions.
+  - Focus Ring: `border-color: var(--accent-primary)`, `box-shadow: 0 0 0 2px var(--focus-ring)`.
+  - Error State: Border `#ef4444`, error label caption `#ef4444`.
+- **State Matrix:**
+  | State | Visual Treatment | Interaction |
+  |---|---|---|
+  | Default | Solid surface, subtle border, placeholder muted | Emits `update:modelValue` on `@input` |
+  | Focused | Accent border and focus ring glow | Active cursor |
+  | Error | Red border and helper message text | Retains input focus |
+  | Disabled | Dimmed surface, muted text | Editing prevented |
 
 ---
 
@@ -73,6 +108,27 @@ A quick-scan visual cheat sheet of core UI components in `smb-ops-frontend`, spe
   - Keyboard: `Escape` key trigger dispatches `@close`.
   - Event Propagation: Clicking the outer backdrop dispatches `@close`; clicks inside the modal card are isolated (`@click.stop`).
   - Scroll Lock: Locks `document.body.style.overflow = 'hidden'` while mounted.
+
+---
+
+### BaseWizard (`BaseWizard.vue`)
+- **Role:** Headless sequential workflow engine managing validation gates and multi-step state transitions.
+- **Visuals & Layout:**
+  - Header: Embeds `ProgressionIndicator` with active, completed, and upcoming visual tokens.
+  - Step Body: Dynamic template slot injection for discrete step screens (`#step-1`, `#step-2`).
+  - Navigation Footer: Standardized back/continue/submit cluster with step-gated validation (`canAdvance`).
+- **State & Invariants:**
+  - `Back` button hidden on step 1; appears on step > 1.
+  - Replaces `Continue` with `Submit` on the final step.
+  - Emits typed `step-change` and `submit` events.
+
+---
+
+### ModalWizard (`ModalWizard.vue`)
+- **Role:** Dialog composition shell embedding `BaseWizard` inside `BaseModal` with guarded dismissal.
+- **Visuals & Behavior:**
+  - Combines `BaseModal` backdrop blur and teleporting with full `BaseWizard` stepper machinery.
+  - Guarded Exit: Prompts confirmation on Escape or backdrop click when `currentStep > 1` to prevent accidental data loss.
 
 ---
 
@@ -99,10 +155,15 @@ A quick-scan visual cheat sheet of core UI components in `smb-ops-frontend`, spe
 ### ServiceFilterDropdown (`src/features/service-catalog/ServiceFilterDropdown.vue`)
 - **Role:** Multi-select popover filter for lead triage boards and service catalog filtering.
 - **Visuals & Behavior:**
-  - Trigger Button: Dynamic label displaying "All Services", selected service name, or "N Services Selected".
-  - Active Filter Badge: Pill badge displaying count of filtered services.
+  - Trigger Button: Fixed width (`260px`), dynamic label displaying "All Services", selected service name, or "N Services Selected" with ellipsis truncation.
   - Menu Popover: Absolute positioned surface (`background: var(--bg-surface)`, `border: 1px solid var(--border-color)`, `box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1)`).
-  - Outside Click: Native `document.addEventListener('click')` handler closes dropdown when interacting with outer canvas.
+### ProgressionIndicator (`src/shared/ui/ProgressionIndicator.vue`)
+- **Role:** Reusable multi-step wizard and onboarding progress tracker.
+- **Visuals & Behavior:**
+  - Active Step: Accent circle (`var(--accent-primary)`) with glowing focus ring and prominent label.
+  - Completed Step: Accent fill with checkmark `✓` icon and connected progress track.
+  - Upcoming Step: Subtle background (`var(--bg-surface-subtle)`) with muted border and number.
+  - Connector Track: Horizontal progress lines transitioning from `--border-color` to `--accent-primary`.
 
 ---
 

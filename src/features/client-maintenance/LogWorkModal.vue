@@ -3,6 +3,8 @@ import { ref, computed } from 'vue'
 import BaseModal from '@/shared/ui/BaseModal.vue'
 import BaseButton from '@/shared/ui/BaseButton.vue'
 import BaseInput from '@/shared/ui/BaseInput.vue'
+import BaseSelect from '@/shared/ui/BaseSelect.vue'
+import BaseTextarea from '@/shared/ui/BaseTextarea.vue'
 import type { LogTimecardPayload, TimecardEntryType } from '@/shared/types/lead'
 
 const props = withDefaults(
@@ -30,6 +32,22 @@ const author = ref('lead_operator')
 
 const modalTitle = computed(() => `Log Maintenance Work — ${props.clientName}`)
 
+const categoryOptions = computed(() => [
+  {
+    value: 'retainer_maintenance',
+    label: 'Monthly Retainer Maintenance',
+    disabled: props.hasActiveCarePlan === false
+  },
+  {
+    value: 'billable_extra',
+    label: 'Billable Extra Hours (Out-of-Scope)'
+  },
+  {
+    value: 'internal_overhead',
+    label: 'Internal Non-Billable Overhead'
+  }
+])
+
 function handleSubmit(): void {
   if (minutesSpent.value <= 0 || !description.value.trim()) return
   emit('save', {
@@ -43,8 +61,8 @@ function handleSubmit(): void {
 
 <template>
   <BaseModal :show="show" :title="modalTitle" @close="$emit('close')">
-    <form class="space-y-4" @submit.prevent="handleSubmit">
-      <div class="grid grid-cols-2 gap-4">
+    <form id="log-work-form" class="modal-form-layout" @submit.prevent="handleSubmit">
+      <div class="form-row-2col">
         <BaseInput
           id="log-work-minutes"
           v-model="minutesSpent"
@@ -54,50 +72,60 @@ function handleSubmit(): void {
           required
         />
 
-        <div class="space-y-1">
-          <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider" for="log-work-category">
-            Work Category *
-          </label>
-          <select
-            id="log-work-category"
-            v-model="entryType"
-            class="w-full mt-1 rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-blue-500 focus:outline-none"
-          >
-            <option value="retainer_maintenance" :disabled="hasActiveCarePlan === false">
-              Monthly Retainer Maintenance
-            </option>
-            <option value="billable_extra">
-              Billable Extra Hours (Out-of-Scope)
-            </option>
-            <option value="internal_overhead">
-              Internal Non-Billable Overhead
-            </option>
-          </select>
-        </div>
-      </div>
-
-      <div v-if="!hasActiveCarePlan" class="text-xs text-amber-400/90 bg-amber-400/10 border border-amber-400/30 rounded p-2.5">
-        ℹ️ Client has no active care plan retainer. Work is categorized as billable extra or internal overhead.
-      </div>
-
-      <div class="space-y-1">
-        <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider" for="log-work-description">
-          Work Description *
-        </label>
-        <textarea
-          id="log-work-description"
-          v-model="description"
-          rows="3"
-          placeholder="Details of triage, code adjustments, or patch deployment..."
-          class="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:border-blue-500 focus:outline-none"
-          required
+        <BaseSelect
+          id="log-work-category"
+          v-model="entryType"
+          label="Work Category *"
+          :options="categoryOptions"
         />
       </div>
 
-      <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
-        <BaseButton label="Cancel" variant="secondary" @click="$emit('close')" />
-        <BaseButton label="Save Entry" button-type="submit" :loading="isSaving" />
+      <div v-if="!hasActiveCarePlan" class="careplan-notice">
+        ℹ️ Client has no active care plan retainer. Work is categorized as billable extra or internal overhead.
       </div>
+
+      <BaseTextarea
+        id="log-work-description"
+        v-model="description"
+        label="Work Description"
+        placeholder="Details of triage, code adjustments, or patch deployment..."
+        :rows="3"
+        required
+      />
     </form>
+
+    <template #footer>
+      <BaseButton label="Cancel" variant="secondary" @click="$emit('close')" />
+      <BaseButton
+        label="Save Entry"
+        button-type="submit"
+        form="log-work-form"
+        :loading="isSaving"
+      />
+    </template>
   </BaseModal>
 </template>
+
+<style scoped>
+.modal-form-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.form-row-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.careplan-notice {
+  font-size: 0.75rem;
+  color: #d97706;
+  background-color: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 6px;
+  padding: 0.6rem 0.85rem;
+  line-height: 1.4;
+}
+</style>
