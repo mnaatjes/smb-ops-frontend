@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Global Typography Tokens & Modal Font Inheritance (ADR-0003, ADR-0027):**
+  - Defined baseline `--font-sans` and `--font-mono` design tokens in `:root` inside `theme.css`.
+  - Applied `font-family: var(--font-sans)` globally to `html, body`.
+  - Bound `font-family: var(--font-sans, inherit)` directly to `.modal-card` in `BaseModal.vue` ensuring teleported modal shells inherit the global dashboard typography contract without hardcoding font names in discrete components.
+  - Verified and executed on conversation UUID: `97669aa6-40bb-40b4-8ff4-1cecf813f5e0`.
 - **ADHD-Friendly Component Living Workbench Scoped Vanilla CSS Refactor (ADR-0027, ADR-0028):**
   - Replaced unsupported Tailwind utility class names in `/dev/components` (`DevComponentsView.vue`) with explicit, scoped vanilla CSS.
   - Implemented concrete, guaranteed layout spacing: `.component-card` with `padding: 2.5rem`, `border: 2px solid #cbd5e1`, `border-radius: 16px`, and `margin-bottom: 2.5rem`.

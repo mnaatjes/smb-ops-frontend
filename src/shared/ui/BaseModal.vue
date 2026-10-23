@@ -80,6 +80,7 @@ onBeforeUnmount(() => {
 }
 
 .modal-card {
+  font-family: var(--font-sans, inherit);
   background: var(--bg-surface);
   border-radius: 8px;
   width: 100%;
