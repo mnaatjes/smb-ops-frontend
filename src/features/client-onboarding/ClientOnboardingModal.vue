@@ -3,12 +3,12 @@ import { ref, computed } from 'vue'
 import ModalWizard from '@/shared/ui/ModalWizard.vue'
 import BaseInput from '@/shared/ui/BaseInput.vue'
 import BaseBadge from '@/shared/ui/BaseBadge.vue'
+import VaultSecretForm from '@/shared/ui/VaultSecretForm.vue'
 import type {
   RankedLead,
   ServiceCatalogItem,
   OnboardClientPayload,
-  ClientSecretPayload,
-  SecretType
+  ClientSecretPayload
 } from '@/shared/types/lead'
 
 const props = defineProps<{
@@ -40,10 +40,11 @@ const contactPhone = ref('')
 const selectedServiceCodes = ref<string[]>([])
 const agreedBillingRate = ref<number>(150)
 
-// Step 3: Vault Credentials
-const vaultUsername = ref('')
-const vaultPassword = ref('')
-const vaultSecretType = ref<SecretType>('wordpress_admin')
+// Step 3: Vault Credentials (composed via VaultSecretForm)
+const vaultSecretPayload = ref<Partial<ClientSecretPayload>>({
+  label: 'Primary Console Access'
+})
+const isVaultFormValid = ref(false)
 
 const businessName = computed(() => props.lead?.prospect.business_name || 'Prospect')
 const modalTitle = computed(() => `Onboard Client — ${businessName.value}`)
@@ -61,13 +62,13 @@ function handleDispatch(): void {
   if (!props.lead) return
 
   const secrets: ClientSecretPayload[] = []
-  if (vaultUsername.value.trim() && vaultPassword.value.trim()) {
+  if (isVaultFormValid.value && vaultSecretPayload.value.username && vaultSecretPayload.value.password) {
     secrets.push({
-      secret_type: vaultSecretType.value,
-      label: 'Primary Console Access',
-      username: vaultUsername.value.trim(),
-      password: vaultPassword.value.trim(),
-      login_url: props.lead.prospect.website_url || null
+      secret_type: vaultSecretPayload.value.secret_type || 'wordpress_admin',
+      label: vaultSecretPayload.value.label || 'Primary Console Access',
+      username: vaultSecretPayload.value.username,
+      password: vaultSecretPayload.value.password,
+      login_url: vaultSecretPayload.value.login_url || props.lead.prospect.website_url || null
     })
   }
 
@@ -161,25 +162,15 @@ function handleDispatch(): void {
       </div>
     </template>
 
-    <!-- Step 3: Vault Credentials & Provisioning -->
+    <!-- Step 3: Vault Credentials & Provisioning (Composes VaultSecretForm) -->
     <template #step-3>
       <div class="step-content">
         <h4 class="step-subheading">Initial Vault Infrastructure Secret</h4>
-        <div class="form-row-2col">
-          <BaseInput
-            id="onboard-vault-user"
-            v-model="vaultUsername"
-            label="Console / Admin Username"
-            placeholder="admin"
-          />
-          <BaseInput
-            id="onboard-vault-pass"
-            v-model="vaultPassword"
-            type="password"
-            label="Password / Token"
-            placeholder="••••••••••••"
-          />
-        </div>
+        <VaultSecretForm
+          v-model="vaultSecretPayload"
+          id-prefix="onboard-vault-secret"
+          @valid-change="(valid) => isVaultFormValid = valid"
+        />
 
         <div class="summary-box">
           <div>• Lead ID: <code class="mono-id">{{ lead?.prospect.id }}</code></div>
@@ -207,29 +198,26 @@ function handleDispatch(): void {
   margin: 0;
 }
 
-.form-row-2col {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-}
-
 .services-scroll-panel {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   max-height: 12rem;
   overflow-y: auto;
-  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.5rem;
+  background-color: var(--bg-surface-subtle);
 }
 
 .service-select-card {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.65rem 0.85rem;
+  padding: 0.75rem;
   border-radius: 6px;
+  background-color: var(--bg-surface);
   border: 1px solid var(--border-color);
-  background-color: var(--bg-surface-subtle);
   cursor: pointer;
   transition: all 0.15s ease;
 }
@@ -240,44 +228,48 @@ function handleDispatch(): void {
 
 .service-select-card.selected {
   border-color: var(--accent-primary);
-  background-color: var(--bg-surface);
+  background-color: var(--bg-surface-hover);
 }
 
 .service-meta-cluster {
   display: flex;
   align-items: center;
-  gap: 0.65rem;
+  gap: 0.75rem;
 }
 
 .service-checkbox {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--accent-primary);
   cursor: pointer;
 }
 
 .service-name {
   font-size: 0.85rem;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text-primary);
 }
 
 .service-code {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
+  font-family: var(--font-mono);
 }
 
 .summary-box {
-  border-radius: 6px;
-  border: 1px solid var(--border-color);
   background-color: var(--bg-surface-subtle);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
   padding: 0.75rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
-  font-size: 0.75rem;
-  color: var(--text-secondary);
+  gap: 0.4rem;
 }
 
 .mono-id {
-  font-family: var(--font-mono, monospace);
-  color: var(--text-primary);
+  font-family: var(--font-mono);
+  color: var(--accent-primary);
 }
 </style>

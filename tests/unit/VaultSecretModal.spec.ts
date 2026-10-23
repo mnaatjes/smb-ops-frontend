@@ -36,17 +36,22 @@ describe('VaultSecretModal Component Matrix', () => {
       attachTo: document.body
     })
 
-    const usernameInput = document.body.querySelector('#vault-secret-username') as HTMLInputElement
-    const passwordInput = document.body.querySelector('#vault-secret-password') as HTMLInputElement
+    const usernameInput = document.body.querySelector('#vault-modal-secret-username') as HTMLInputElement
+    const passwordInput = document.body.querySelector('#vault-modal-secret-password') as HTMLInputElement
 
     usernameInput.value = 'wp_operator'
     usernameInput.dispatchEvent(new Event('input'))
 
     passwordInput.value = 'secure_secret_pass_999'
     passwordInput.dispatchEvent(new Event('input'))
+    await wrapper.vm.$nextTick()
 
-    const form = document.body.querySelector('form') as HTMLFormElement
-    form.dispatchEvent(new Event('submit'))
+    const saveBtn = Array.from(document.body.querySelectorAll('button')).find(
+      (b) => b.textContent?.trim() === 'Store Credential'
+    )
+    expect(saveBtn).toBeDefined()
+    saveBtn?.click()
+    await wrapper.vm.$nextTick()
 
     expect(wrapper.emitted('save')).toHaveLength(1)
     expect(wrapper.emitted('save')?.[0]?.[0]).toEqual({
