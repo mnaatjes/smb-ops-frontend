@@ -22,8 +22,10 @@ import ContractAgreementModal from '@/features/client-contracts/ContractAgreemen
 import LogWorkModal from '@/features/client-maintenance/LogWorkModal.vue'
 import VaultSecretModal from '@/features/client-vault/VaultSecretModal.vue'
 import VaultSecretForm from '@/shared/ui/VaultSecretForm.vue'
+import ContractAgreementForm from '@/shared/ui/ContractAgreementForm.vue'
+import LogWorkForm from '@/shared/ui/LogWorkForm.vue'
 import ClientOnboardingModal from '@/features/client-onboarding/ClientOnboardingModal.vue'
-import type { ServiceCatalogItem, RankedLead, ClientSecretPayload } from '@/shared/types/lead'
+import type { ServiceCatalogItem, RankedLead, ClientSecretPayload, AttachContractPayload, LogTimecardPayload } from '@/shared/types/lead'
 
 // ==========================================
 // 1. Primitives (Wave 1) State
@@ -63,6 +65,20 @@ const formDemoSecret = ref<Partial<ClientSecretPayload>>({
 })
 const isFormDemoValid = ref(false)
 
+const formDemoContract = ref<Partial<AttachContractPayload>>({
+  service_code: 'SVC-RETAINER',
+  billing_rate: 150,
+  contract_type: 'retainer'
+})
+const isContractFormValid = ref(true)
+
+const formDemoLogWork = ref<Partial<LogTimecardPayload>>({
+  minutes_spent: 15,
+  entry_type: 'retainer_maintenance',
+  description: 'Proactive SSL renewal and nginx config check'
+})
+const isLogWorkFormValid = ref(true)
+
 interface DemoTableOperator extends Record<string, unknown> {
   id: string
   name: string
@@ -91,6 +107,13 @@ const modalSampleInput = ref('')
 
 const isAsideCollapsed = ref(false)
 const isDrawerOpen = ref(false)
+const drawerSize = ref<'sm' | 'md' | 'lg' | 'full'>('md')
+const cardClickCount = ref(0)
+
+function openDrawerWithSize(sz: 'sm' | 'md' | 'lg' | 'full') {
+  drawerSize.value = sz
+  isDrawerOpen.value = true
+}
 
 const isModalWizardOpen = ref(false)
 const wizardDemoStep = ref(1)
@@ -225,7 +248,7 @@ const workbenchMockLead: RankedLead = {
               <p class="section-subtext">Presentation primitives with explicit state contracts and zero business logic dependencies.</p>
             </div>
           </div>
-          <span class="count-tag">9 Components</span>
+          <span class="count-tag">11 Components</span>
         </div>
 
         <!-- 1.1 BaseButton -->
@@ -494,7 +517,65 @@ const workbenchMockLead: RankedLead = {
           </footer>
         </article>
 
-        <!-- 1.8 BaseCard -->
+        <!-- 1.8 ContractAgreementForm -->
+        <article class="component-card">
+          <header class="card-header">
+            <div>
+              <h3 class="component-name">ContractAgreementForm</h3>
+              <p class="component-desc">Extracted agreement sub-tree binding service catalog options, agreement billing rate, and contract scope.</p>
+            </div>
+            <span class="filepath-tag">src/shared/ui/ContractAgreementForm.vue</span>
+          </header>
+
+          <div class="staging-surface flex-col">
+            <ContractAgreementForm
+              id-prefix="wb-contract-form"
+              :services="workbenchCatalogServices"
+              initial-service-code="SVC-RETAINER"
+              :initial-billing-rate="150"
+              @valid-change="(valid) => isContractFormValid = valid"
+              @update:model-value="(payload) => formDemoContract = payload"
+            />
+          </div>
+
+          <footer class="card-footer">
+            <span class="counter-label">Contract Form Status:</span>
+            <span :class="['counter-badge', isContractFormValid ? 'text-emerald' : 'text-amber']">
+              {{ isContractFormValid ? 'Valid Agreement Scope' : 'Incomplete Fields' }}
+            </span>
+          </footer>
+        </article>
+
+        <!-- 1.9 LogWorkForm -->
+        <article class="component-card">
+          <header class="card-header">
+            <div>
+              <h3 class="component-name">LogWorkForm</h3>
+              <p class="component-desc">Extracted maintenance work logging sub-tree enforcing positive minutes, category allocation, and description.</p>
+            </div>
+            <span class="filepath-tag">src/shared/ui/LogWorkForm.vue</span>
+          </header>
+
+          <div class="staging-surface flex-col">
+            <LogWorkForm
+              id-prefix="wb-logwork-form"
+              :has-active-care-plan="true"
+              :initial-minutes="20"
+              initial-description="Proactive WordPress core security patching"
+              @valid-change="(valid) => isLogWorkFormValid = valid"
+              @update:model-value="(payload) => formDemoLogWork = payload"
+            />
+          </div>
+
+          <footer class="card-footer">
+            <span class="counter-label">Log Work Status:</span>
+            <span :class="['counter-badge', isLogWorkFormValid ? 'text-emerald' : 'text-amber']">
+              {{ isLogWorkFormValid ? 'Valid Timecard Entry' : 'Incomplete Description/Minutes' }}
+            </span>
+          </footer>
+        </article>
+
+        <!-- 1.10 BaseCard -->
         <article class="component-card">
           <header class="card-header">
             <div>
@@ -504,7 +585,7 @@ const workbenchMockLead: RankedLead = {
             <span class="filepath-tag">src/shared/ui/BaseCard.vue</span>
           </header>
 
-          <div class="staging-surface grid-2">
+          <div class="staging-surface grid-3">
             <BaseCard title="Nominal Staging Card" subtitle="Bordered with medium padding">
               <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0;">
                 Primary card body containing standard layout text or feature metrics.
@@ -523,10 +604,25 @@ const workbenchMockLead: RankedLead = {
                 <BaseButton label="Card Action" variant="primary" />
               </template>
             </BaseCard>
+
+            <BaseCard
+              title="Clickable Action Card"
+              subtitle="Triggers drawer inspection"
+              :clickable="true"
+              @click="openDrawerWithSize('md'); cardClickCount++"
+            >
+              <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0;">
+                Clicking anywhere on this card activates focus, depression state, and opens the flyout drawer.
+              </p>
+              <template #footer>
+                <span style="font-size: 0.75rem; color: var(--accent-primary); font-weight: 600;">Clicks: {{ cardClickCount }}</span>
+                <BaseBadge variant="indigo" size="sm">Interactive</BaseBadge>
+              </template>
+            </BaseCard>
           </div>
 
           <footer class="card-footer-note">
-            Provides a uniform surface primitive across dashboards, kanban boards, and workspace dossiers.
+            Provides a uniform surface primitive across dashboards, kanban boards, and workspace dossiers. Supports clickable mode with keyboard Enter/Space delegation.
           </footer>
         </article>
 
@@ -759,10 +855,18 @@ const workbenchMockLead: RankedLead = {
                 @toggle-collapse="isAsideCollapsed = !isAsideCollapsed"
               >
                 <div style="display: flex; flex-direction: column; gap: 0.35rem;">
-                  <button type="button" style="text-align: left; padding: 0.5rem; background: var(--bg-surface-hover); border: none; border-radius: 6px; color: var(--text-primary); font-size: 0.8rem; cursor: pointer;">
+                  <button
+                    type="button"
+                    data-tooltip="Triage Dashboard"
+                    style="text-align: left; padding: 0.5rem; background: var(--bg-surface-hover); border: none; border-radius: 6px; color: var(--text-primary); font-size: 0.8rem; cursor: pointer;"
+                  >
                     {{ isAsideCollapsed ? '⚡' : '⚡ Triage Dashboard' }}
                   </button>
-                  <button type="button" style="text-align: left; padding: 0.5rem; background: transparent; border: none; border-radius: 6px; color: var(--text-secondary); font-size: 0.8rem; cursor: pointer;">
+                  <button
+                    type="button"
+                    data-tooltip="Client Accounts"
+                    style="text-align: left; padding: 0.5rem; background: transparent; border: none; border-radius: 6px; color: var(--text-secondary); font-size: 0.8rem; cursor: pointer;"
+                  >
                     {{ isAsideCollapsed ? '🏢' : '🏢 Client Accounts' }}
                   </button>
                 </div>
@@ -838,26 +942,57 @@ const workbenchMockLead: RankedLead = {
             <span class="filepath-tag">src/shared/ui/BaseDrawer.vue</span>
           </header>
 
-          <div class="staging-surface flex-row items-center">
+          <div class="staging-surface flex-col" style="gap: 1.25rem;">
             <div class="modal-info">
-              <span class="modal-launch-title">Launch Flyout Drawer Simulation</span>
+              <span class="modal-launch-title">Launch Flyout Drawer By Size Variant</span>
               <p class="modal-launch-subtext">Slides across the Dashboard Stage and stops flush at the 240px Aside margin.</p>
             </div>
-            <BaseButton label="Open Flyout Drawer" variant="primary" @click="isDrawerOpen = true" />
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+              <BaseButton label="Inspect Drawer (sm: 420px)" variant="secondary" @click="openDrawerWithSize('sm')" />
+              <BaseButton label="Form Drawer (md: 680px)" variant="primary" @click="openDrawerWithSize('md')" />
+              <BaseButton label="Deep Drawer (lg: 960px)" variant="secondary" @click="openDrawerWithSize('lg')" />
+              <BaseButton label="Canvas Drawer (full: 100%)" variant="secondary" @click="openDrawerWithSize('full')" />
+            </div>
+
+            <!-- Architectural Governance Callout -->
+            <div style="background-color: var(--bg-surface-subtle); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
+              <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.05em;">
+                📐 Flyout Drawer vs. Stage vs. Modal Architectural Governance
+              </span>
+              <div style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.5; display: flex; flex-direction: column; gap: 0.4rem;">
+                <div>
+                  <strong>• Inspect Drawer (sm: 420px):</strong> Fast contextual preview (e.g. Lead Dossier summary, audit score breakdown) preserving table position and scroll context.
+                </div>
+                <div>
+                  <strong>• Form Drawer (md: 680px / lg: 960px):</strong> Multi-field editing workflows (e.g. Client Account updates, Work logging) without context switching or navigating away.
+                </div>
+                <div>
+                  <strong>• Canvas Drawer (full: calc(100vw - aside)):</strong> Focused, immersive work environments (e.g. Strategy/Doctrine Workspace, Client Dossier) requiring maximum workspace width while maintaining Aside rail orientation.
+                </div>
+                <div>
+                  <strong>• Update Stage (Router Navigation):</strong> Use when switching top-level operational domains (e.g. Triage Dashboard ↔ Service Catalog).
+                </div>
+                <div>
+                  <strong>• BaseModal Dialog:</strong> Reserved for atomic, blocking confirmation or creation flows (e.g. Confirm Delete, Wizard Deployment).
+                </div>
+              </div>
+            </div>
           </div>
 
           <BaseDrawer
             :show="isDrawerOpen"
-            title="Dossier Workspace Drawer"
-            subtitle="Contextual Lead Inspection"
+            :size="drawerSize"
+            :title="`Workspace Drawer — [${drawerSize.toUpperCase()}]`"
+            subtitle="Contextual Lead & Operational Inspection"
             aside-width="240px"
             @close="isDrawerOpen = false"
           >
             <div style="display: flex; flex-direction: column; gap: 1rem;">
               <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0;">
-                Contextual workspace canvas for deep records editing without losing aside navigational orientation.
+                Active size: <code>{{ drawerSize }}</code>. Contextual workspace canvas for deep records editing without losing aside navigational orientation.
               </p>
               <BaseInput label="Lead Business Name" model-value="Harbor Artisanal Bakery" />
+              <BaseInput label="Domain / URL" model-value="https://harborbakery.example.com" />
             </div>
 
             <template #footer>

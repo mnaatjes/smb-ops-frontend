@@ -1,17 +1,21 @@
 <script setup lang="ts">
 import { watch, onUnmounted } from 'vue'
 
+export type DrawerSize = 'sm' | 'md' | 'lg' | 'full'
+
 const props = withDefaults(
   defineProps<{
     show: boolean
     title?: string
     subtitle?: string
     asideWidth?: string
+    size?: DrawerSize
   }>(),
   {
     title: undefined,
     subtitle: undefined,
-    asideWidth: '240px'
+    asideWidth: '240px',
+    size: 'md'
   }
 )
 
@@ -58,7 +62,10 @@ onUnmounted(() => {
       <div class="drawer-backdrop" @click="emit('close')" />
 
       <!-- Drawer Content Canvas translating from right -->
-      <section class="drawer-canvas">
+      <section
+        class="drawer-canvas"
+        :class="`size-${size}`"
+      >
         <header class="drawer-header">
           <slot name="header">
             <div class="header-titles">
@@ -114,7 +121,6 @@ onUnmounted(() => {
 .drawer-canvas {
   position: relative;
   width: 100%;
-  max-width: 680px;
   height: 100%;
   background-color: var(--bg-surface);
   color: var(--text-primary);
@@ -125,6 +131,23 @@ onUnmounted(() => {
   pointer-events: auto;
   animation: slideLeft 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
+}
+
+/* Size Variants */
+.size-sm {
+  max-width: 420px;
+}
+
+.size-md {
+  max-width: 680px;
+}
+
+.size-lg {
+  max-width: 960px;
+}
+
+.size-full {
+  max-width: 100%;
 }
 
 .drawer-header {

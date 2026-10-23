@@ -10,6 +10,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Interactive Clickable Cards (`src/shared/ui/BaseCard.vue`):**
+  - Added `clickable?: boolean` prop supporting full-card click delegation, active depression (`scale(0.99)`), hover elevation (`translateY(-2px)`), and keyboard navigation (`Enter` and `Space` dispatching `@click`).
+  - Added unit test coverage in `tests/unit/BaseCard.spec.ts`.
+- **Flyout Drawer Multi-Size Variants & Governance (`src/shared/ui/BaseDrawer.vue`):**
+  - Added `size?: 'sm' | 'md' | 'lg' | 'full'` variants (`sm`: 420px for inspect, `md`: 680px for standard forms, `lg`: 960px for deep forms, `full`: 100% of Stage width).
+  - Exhibited all four size variants with architectural governance callout in `/dev/components`.
+  - Added unit test coverage in `tests/unit/BaseDrawer.spec.ts`.
+- **Form Sub-Tree Extraction Expansion (FEP / ADR-0030 / SDD-0013):**
+  - Created `src/shared/ui/ContractAgreementForm.vue` decoupled from `ContractAgreementModal.vue` with unit tests in `tests/unit/ContractAgreementForm.spec.ts`.
+  - Recomposed `src/features/client-contracts/ContractAgreementModal.vue` to wrap `ContractAgreementForm`.
+  - Created `src/shared/ui/LogWorkForm.vue` decoupled from `LogWorkModal.vue` with unit tests in `tests/unit/LogWorkForm.spec.ts`.
+  - Recomposed `src/features/client-maintenance/LogWorkModal.vue` to wrap `LogWorkForm`.
+  - Added interactive exhibition cards for both forms in `/dev/components` Wave 1.
+
+### Fixed
+- **BaseAside Collapsed State Ergonomics (`src/shared/ui/BaseAside.vue`):**
+  - Separated expand button from the brand logo in collapsed mode into a dedicated `.collapsed-expand-bar`, eliminating visual overlap.
+  - Added floating popover tooltips on hover for icon buttons in collapsed rail mode via `[data-tooltip]` attributes and CSS pseudo-elements.
+  - Verified and executed on conversation UUID: `52c10e21-b3db-439e-8f7c-c73cd78c0e55`.
+
+### Added
 - **Structural Shell & Navigation Primitives (GLOSSARY Section 5):**
   - Updated `architecture/GLOSSARY.md` formalizing definitions for Viewport, App Shell, Aside Navigation, Dashboard/Stage Canvas, and Flyout Workspace Drawer.
   - Created `src/shared/ui/BaseCard.vue` tokenized card surface primitive with slots and padding variants; verified with `tests/unit/BaseCard.spec.ts`.

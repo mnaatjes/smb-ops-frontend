@@ -45,17 +45,31 @@ function toggle(): void {
         </div>
       </slot>
 
-      <!-- Collapse Toggle Button -->
+      <!-- Collapse Toggle Button (Expanded Mode) -->
       <button
+        v-if="!collapsed"
         type="button"
         class="collapse-toggle-btn"
-        :title="collapsed ? 'Expand Sidebar' : 'Collapse Sidebar'"
-        :aria-label="collapsed ? 'Expand Sidebar' : 'Collapse Sidebar'"
+        title="Collapse Sidebar"
+        aria-label="Collapse Sidebar"
         @click="toggle"
       >
-        <span class="toggle-icon">{{ collapsed ? '▶' : '◀' }}</span>
+        <span class="toggle-icon">◀</span>
       </button>
     </header>
+
+    <!-- Dedicated Expand Strip (Collapsed Mode - Never overlaps logo) -->
+    <div v-if="collapsed" class="collapsed-expand-bar">
+      <button
+        type="button"
+        class="expand-rail-btn"
+        title="Expand Sidebar"
+        aria-label="Expand Sidebar"
+        @click="toggle"
+      >
+        <span class="toggle-icon">▶</span>
+      </button>
+    </div>
 
     <!-- Navigation Spine Slot -->
     <nav class="aside-nav-body">
@@ -156,21 +170,39 @@ function toggle(): void {
   line-height: 1;
 }
 
+/* Collapsed Header & Non-overlapping Expand Strip */
 .is-collapsed .aside-header {
-  padding: 0 0.75rem;
+  padding: 0;
   justify-content: center;
-  position: relative;
 }
 
-.is-collapsed .collapse-toggle-btn {
-  display: none;
-}
-
-.is-collapsed:hover .collapse-toggle-btn {
+.collapsed-expand-bar {
   display: flex;
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--bg-surface-subtle);
+}
+
+.expand-rail-btn {
+  width: 1.75rem;
+  height: 1.4rem;
+  border-radius: 4px;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.expand-rail-btn:hover {
+  background-color: var(--accent-primary);
+  color: #ffffff;
+  border-color: var(--accent-primary);
 }
 
 .aside-nav-body {
@@ -181,6 +213,39 @@ function toggle(): void {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
+  position: relative;
+}
+
+/* Tooltip hints for collapsed rail buttons */
+.is-collapsed [data-tooltip] {
+  position: relative;
+}
+
+.is-collapsed [data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: calc(100% + 0.65rem);
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: var(--text-primary);
+  color: var(--bg-surface);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  padding: 0.35rem 0.6rem;
+  border-radius: 4px;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 100;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.is-collapsed [data-tooltip]:hover::after {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(-50%) translateX(2px);
 }
 
 .aside-footer {

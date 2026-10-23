@@ -40,7 +40,7 @@ describe('LogWorkModal Component Matrix', () => {
     })
 
     expect(document.body.textContent).toContain('Client has no active care plan retainer')
-    const select = document.body.querySelector('#log-work-category') as HTMLSelectElement
+    const select = document.body.querySelector('#log-work-modal-category') as HTMLSelectElement
     const retainerOption = select.querySelector('option[value="retainer_maintenance"]') as HTMLOptionElement
     expect(retainerOption.disabled).toBe(true)
   })
@@ -56,7 +56,7 @@ describe('LogWorkModal Component Matrix', () => {
       attachTo: document.body
     })
 
-    const textarea = document.body.querySelector('#log-work-description') as HTMLTextAreaElement
+    const textarea = document.body.querySelector('#log-work-modal-description') as HTMLTextAreaElement
     textarea.value = 'Core web vitals fix and image compression'
     textarea.dispatchEvent(new Event('input'))
 
