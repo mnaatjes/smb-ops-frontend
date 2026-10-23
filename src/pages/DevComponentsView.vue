@@ -6,10 +6,15 @@ import BaseInput from '@/shared/ui/BaseInput.vue'
 import BaseSelect from '@/shared/ui/BaseSelect.vue'
 import BaseTextarea from '@/shared/ui/BaseTextarea.vue'
 import BaseList from '@/shared/ui/BaseList.vue'
+import BaseCard from '@/shared/ui/BaseCard.vue'
+import BaseTable, { type TableColumn } from '@/shared/ui/BaseTable.vue'
 import ThemeToggle from '@/shared/ui/ThemeToggle.vue'
 import BaseModal from '@/shared/ui/BaseModal.vue'
 import BaseWizard from '@/shared/ui/BaseWizard.vue'
 import ModalWizard from '@/shared/ui/ModalWizard.vue'
+import BaseAside from '@/shared/ui/BaseAside.vue'
+import BasePageContainer from '@/shared/ui/BasePageContainer.vue'
+import BaseDrawer from '@/shared/ui/BaseDrawer.vue'
 import ProgressionIndicator from '@/shared/ui/ProgressionIndicator.vue'
 import MaintenanceGauge from '@/shared/ui/MaintenanceGauge.vue'
 import ServiceFilterDropdown from '@/features/service-catalog/ServiceFilterDropdown.vue'
@@ -58,11 +63,34 @@ const formDemoSecret = ref<Partial<ClientSecretPayload>>({
 })
 const isFormDemoValid = ref(false)
 
+interface DemoTableOperator extends Record<string, unknown> {
+  id: string
+  name: string
+  role: string
+  status: string
+}
+
+const tableDemoColumns: TableColumn[] = [
+  { key: 'name', label: 'Operator Name' },
+  { key: 'role', label: 'Operational Role' },
+  { key: 'status', label: 'Cluster State' }
+]
+
+const tableDemoRows = ref<DemoTableOperator[]>([
+  { id: 'op-1', name: 'Alice Walker', role: 'Infrastructure Lead', status: 'Active' },
+  { id: 'op-2', name: 'Devon Vance', role: 'Security Auditor', status: 'Standby' },
+  { id: 'op-3', name: 'Elena Rostova', role: 'Site Reliability Engineer', status: 'Active' }
+])
+const selectedTableRow = ref<string>('None')
+
 // ==========================================
 // 2. Structural Shell (Wave 2) State
 // ==========================================
 const isModalOpen = ref(false)
 const modalSampleInput = ref('')
+
+const isAsideCollapsed = ref(false)
+const isDrawerOpen = ref(false)
 
 const isModalWizardOpen = ref(false)
 const wizardDemoStep = ref(1)
@@ -197,7 +225,7 @@ const workbenchMockLead: RankedLead = {
               <p class="section-subtext">Presentation primitives with explicit state contracts and zero business logic dependencies.</p>
             </div>
           </div>
-          <span class="count-tag">7 Components</span>
+          <span class="count-tag">9 Components</span>
         </div>
 
         <!-- 1.1 BaseButton -->
@@ -465,6 +493,66 @@ const workbenchMockLead: RankedLead = {
             </span>
           </footer>
         </article>
+
+        <!-- 1.8 BaseCard -->
+        <article class="component-card">
+          <header class="card-header">
+            <div>
+              <h3 class="component-name">BaseCard</h3>
+              <p class="component-desc">Theme-tokenized surface container with header, default, and footer slots, plus padding variants.</p>
+            </div>
+            <span class="filepath-tag">src/shared/ui/BaseCard.vue</span>
+          </header>
+
+          <div class="staging-surface grid-2">
+            <BaseCard title="Nominal Staging Card" subtitle="Bordered with medium padding">
+              <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0;">
+                Primary card body containing standard layout text or feature metrics.
+              </p>
+              <template #footer>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">Card Footer Slot</span>
+                <BaseBadge variant="emerald" size="sm">Active</BaseBadge>
+              </template>
+            </BaseCard>
+
+            <BaseCard title="Elevated Surface" subtitle="Box-shadow elevation variant" :elevated="true">
+              <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0;">
+                Subtle drop-shadow elevation for high-priority operational callouts.
+              </p>
+              <template #footer>
+                <BaseButton label="Card Action" variant="primary" />
+              </template>
+            </BaseCard>
+          </div>
+
+          <footer class="card-footer-note">
+            Provides a uniform surface primitive across dashboards, kanban boards, and workspace dossiers.
+          </footer>
+        </article>
+
+        <!-- 1.9 BaseTable -->
+        <article class="component-card">
+          <header class="card-header">
+            <div>
+              <h3 class="component-name">BaseTable</h3>
+              <p class="component-desc">High-contrast data table shell with column formatting, loading spinners, and row-click delegation.</p>
+            </div>
+            <span class="filepath-tag">src/shared/ui/BaseTable.vue</span>
+          </header>
+
+          <div class="staging-surface flex-col">
+            <BaseTable
+              :columns="tableDemoColumns"
+              :rows="tableDemoRows"
+              @row-click="(row) => selectedTableRow = String(row.name || 'Unknown')"
+            />
+          </div>
+
+          <footer class="card-footer">
+            <span class="counter-label">Last Row Clicked:</span>
+            <span class="counter-badge">{{ selectedTableRow }}</span>
+          </footer>
+        </article>
       </section>
 
       <!-- ================================================================= -->
@@ -479,7 +567,7 @@ const workbenchMockLead: RankedLead = {
               <p class="section-subtext">Headless modal shell governing body scroll locking, teleporting, and dismissal.</p>
             </div>
           </div>
-          <span class="count-tag">3 Components</span>
+          <span class="count-tag">6 Components</span>
         </div>
 
         <article class="component-card">
@@ -650,6 +738,133 @@ const workbenchMockLead: RankedLead = {
               </div>
             </template>
           </ModalWizard>
+        </article>
+
+        <!-- 2.4 BaseAside -->
+        <article class="component-card">
+          <header class="card-header">
+            <div>
+              <h3 class="component-name">BaseAside</h3>
+              <p class="component-desc">Controlled vertical navigation rail supporting expanded (240px) and collapsed (64px) interactive modes.</p>
+            </div>
+            <span class="filepath-tag">src/shared/ui/BaseAside.vue</span>
+          </header>
+
+          <div class="staging-surface flex-col" style="align-items: center;">
+            <div style="height: 280px; width: 100%; max-width: 380px; border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; display: flex;">
+              <BaseAside
+                :collapsed="isAsideCollapsed"
+                brand-title="Demo Rail"
+                brand-subtitle="Simulation"
+                @toggle-collapse="isAsideCollapsed = !isAsideCollapsed"
+              >
+                <div style="display: flex; flex-direction: column; gap: 0.35rem;">
+                  <button type="button" style="text-align: left; padding: 0.5rem; background: var(--bg-surface-hover); border: none; border-radius: 6px; color: var(--text-primary); font-size: 0.8rem; cursor: pointer;">
+                    {{ isAsideCollapsed ? '⚡' : '⚡ Triage Dashboard' }}
+                  </button>
+                  <button type="button" style="text-align: left; padding: 0.5rem; background: transparent; border: none; border-radius: 6px; color: var(--text-secondary); font-size: 0.8rem; cursor: pointer;">
+                    {{ isAsideCollapsed ? '🏢' : '🏢 Client Accounts' }}
+                  </button>
+                </div>
+
+                <template #footer>
+                  <div style="font-size: 0.7rem; color: var(--text-muted); text-align: center;">
+                    {{ isAsideCollapsed ? 'v1.0' : 'v1.0.0 — Online' }}
+                  </div>
+                </template>
+              </BaseAside>
+
+              <div style="flex: 1; padding: 1.5rem; background: var(--bg-app); display: flex; flex-direction: column; gap: 0.75rem;">
+                <span style="font-size: 0.8rem; font-weight: 700;">Simulated App Stage</span>
+                <p style="font-size: 0.75rem; color: var(--text-secondary); margin: 0;">
+                  Click arrow toggle inside aside header to alternate width (240px ↔ 64px).
+                </p>
+                <BaseButton
+                  :label="isAsideCollapsed ? 'Expand (240px)' : 'Collapse (64px)'"
+                  variant="secondary"
+                  @click="isAsideCollapsed = !isAsideCollapsed"
+                />
+              </div>
+            </div>
+          </div>
+
+          <footer class="card-footer-note">
+            Governs primary application routing spine with zero horizontal translation drift.
+          </footer>
+        </article>
+
+        <!-- 2.5 BasePageContainer -->
+        <article class="component-card">
+          <header class="card-header">
+            <div>
+              <h3 class="component-name">BasePageContainer</h3>
+              <p class="component-desc">Standardized Stage / Main Content Canvas wrapper establishing max-width bounds, page title rhythms, and toolbar slots.</p>
+            </div>
+            <span class="filepath-tag">src/shared/ui/BasePageContainer.vue</span>
+          </header>
+
+          <div class="staging-surface flex-col">
+            <div style="height: 240px; border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column;">
+              <BasePageContainer
+                title="Stage Header Simulation"
+                subtitle="Standardized layout wrapper"
+                max-width="100%"
+              >
+                <template #actions>
+                  <BaseButton label="Stage Action" variant="primary" />
+                </template>
+                <template #toolbar>
+                  <div style="font-size: 0.8rem; color: var(--text-muted);">Toolbar Slot (Search / Filters)</div>
+                </template>
+                <div style="font-size: 0.85rem; color: var(--text-secondary); background: var(--bg-surface); padding: 1rem; border: 1px solid var(--border-color); border-radius: 6px;">
+                  Scrollable default body content within the Stage bounds.
+                </div>
+              </BasePageContainer>
+            </div>
+          </div>
+
+          <footer class="card-footer-note">
+            Guarantees consistent header hierarchies and scroll properties across all top-level route views.
+          </footer>
+        </article>
+
+        <!-- 2.6 BaseDrawer -->
+        <article class="component-card">
+          <header class="card-header">
+            <div>
+              <h3 class="component-name">BaseDrawer</h3>
+              <p class="component-desc">Contextual flyout overlay translating from right screen edge, sized flush against the Aside Navigation.</p>
+            </div>
+            <span class="filepath-tag">src/shared/ui/BaseDrawer.vue</span>
+          </header>
+
+          <div class="staging-surface flex-row items-center">
+            <div class="modal-info">
+              <span class="modal-launch-title">Launch Flyout Drawer Simulation</span>
+              <p class="modal-launch-subtext">Slides across the Dashboard Stage and stops flush at the 240px Aside margin.</p>
+            </div>
+            <BaseButton label="Open Flyout Drawer" variant="primary" @click="isDrawerOpen = true" />
+          </div>
+
+          <BaseDrawer
+            :show="isDrawerOpen"
+            title="Dossier Workspace Drawer"
+            subtitle="Contextual Lead Inspection"
+            aside-width="240px"
+            @close="isDrawerOpen = false"
+          >
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+              <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0;">
+                Contextual workspace canvas for deep records editing without losing aside navigational orientation.
+              </p>
+              <BaseInput label="Lead Business Name" model-value="Harbor Artisanal Bakery" />
+            </div>
+
+            <template #footer>
+              <BaseButton label="Close (Esc)" variant="secondary" @click="isDrawerOpen = false" />
+              <BaseButton label="Save Changes" variant="primary" @click="isDrawerOpen = false" />
+            </template>
+          </BaseDrawer>
         </article>
       </section>
 

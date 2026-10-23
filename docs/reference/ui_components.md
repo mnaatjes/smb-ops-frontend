@@ -111,6 +111,26 @@ A quick-scan visual cheat sheet of core UI components in `smb-ops-frontend`, spe
 
 ---
 
+### BaseCard (`BaseCard.vue`)
+- **Role:** Unified content card surface with token-aware background, borders, and elevation.
+- **Visuals & Tokens:**
+  - Background `var(--bg-surface)`, border `1px solid var(--border-color)`, border-radius `12px`.
+  - Elevation: Optional drop-shadow (`is-elevated`).
+  - Padding Variants: `none`, `sm` (`0.75rem`), `md` (`1.25rem`), `lg` (`2rem`).
+- **Slots:** `#header` (titles & badges), `#default` (body content), `#footer` (actions).
+
+---
+
+### BaseTable (`BaseTable.vue`)
+- **Role:** Standardized data table shell with column formatting, loading spinners, and row-click delegation.
+- **Visuals & Tokens:**
+  - Header: Background `var(--bg-surface-subtle)`, border-bottom `2px solid var(--border-color)`, uppercase font size `0.75rem`.
+  - Rows: Alternating hover background `var(--bg-surface-hover)`, cursor `pointer`.
+  - States: Loading row with animated spinner; empty row slot (`emptyText`).
+- **Contracts:** Accepts typed columns (`key`, `label`, `width`, `align`, `formatter`) and emits `@row-click`.
+
+---
+
 ## 2. Wave 2: Structural Shells (`src/shared/ui/`)
 
 ### BaseModal (`BaseModal.vue`)
@@ -145,6 +165,35 @@ A quick-scan visual cheat sheet of core UI components in `smb-ops-frontend`, spe
 - **Visuals & Behavior:**
   - Combines `BaseModal` backdrop blur and teleporting with full `BaseWizard` stepper machinery.
   - Guarded Exit: Prompts confirmation on Escape or backdrop click when `currentStep > 1` to prevent accidental data loss.
+
+---
+
+### BaseAside (`BaseAside.vue`)
+- **Role:** Primary left-hand vertical navigation rail governing route selection and app-level actions.
+- **Visuals & Layout:**
+  - Expanded Mode (`width: 240px`): Full brand title, subtitle, and full label navigation links.
+  - Collapsed Mode (`width: 64px`): Icon-only compact rail maximizing dashboard table real estate.
+  - Background `var(--bg-surface)`, border-right `1px solid var(--border-color)`.
+- **Contracts:** Accepts `collapsed: boolean` prop, emits `@toggle-collapse` on toggle click.
+
+---
+
+### BasePageContainer (`BasePageContainer.vue`)
+- **Role:** Standardized Stage / Main Content Canvas wrapper establishing layout max-widths, title hierarchies, and scroll bounds.
+- **Visuals & Layout:**
+  - Bounds: Default `max-width: 1280px` centered, or `fluid: true` for 100% full-bleed displays.
+  - Header: Structured `#header` slot with `.stage-title` and `.stage-subtitle`.
+  - Toolbar: Dedicated `#toolbar` slot for search bars, filters, and bulk actions.
+  - Scroll Invariant: Vertically scrollable within its stage (`overflow-y: auto`), with zero horizontal translation.
+
+---
+
+### BaseDrawer (`BaseDrawer.vue`)
+- **Role:** Contextual flyout workspace overlay translating from the right browser edge.
+- **Visuals & Boundaries:**
+  - Anchored Margin: Occupies `calc(100vw - [aside_width])`, stopping flush against `BaseAside` to preserve navigational context.
+  - Animation: Slide-in cubic-bezier from right screen edge.
+  - Invariants: Escape listener dispatches `@close`; backdrop dimmer over dashboard stage dispatches `@close`.
 
 ---
 
