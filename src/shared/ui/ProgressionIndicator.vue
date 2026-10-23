@@ -134,8 +134,8 @@ withDefaults(
 }
 
 .label-active {
-  color: var(--text-primary);
-  font-weight: 600;
+  color: var(--accent-primary, #2563eb);
+  font-weight: 700;
 }
 
 .label-completed {

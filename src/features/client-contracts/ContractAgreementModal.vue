@@ -4,6 +4,7 @@ import BaseModal from '@/shared/ui/BaseModal.vue'
 import BaseButton from '@/shared/ui/BaseButton.vue'
 import BaseInput from '@/shared/ui/BaseInput.vue'
 import BaseSelect from '@/shared/ui/BaseSelect.vue'
+import BaseList from '@/shared/ui/BaseList.vue'
 import type { ServiceCatalogItem, AttachContractPayload } from '@/shared/types/lead'
 
 const props = withDefaults(
@@ -124,12 +125,7 @@ function handleSubmit(): void {
 
       <div class="deliverables-panel">
         <h4 class="deliverables-title">Contracted Deliverables Scope</h4>
-        <ul class="deliverables-list">
-          <li v-for="(item, idx) in deliverablesList" :key="idx" class="deliverable-item">
-            <span class="checkmark">✓</span>
-            <span class="deliverable-text">{{ item }}</span>
-          </li>
-        </ul>
+        <BaseList :items="deliverablesList" variant="checkmark" dense />
       </div>
     </form>
 

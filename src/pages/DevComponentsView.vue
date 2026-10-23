@@ -5,6 +5,8 @@ import BaseBadge from '@/shared/ui/BaseBadge.vue'
 import BaseInput from '@/shared/ui/BaseInput.vue'
 import BaseSelect from '@/shared/ui/BaseSelect.vue'
 import BaseTextarea from '@/shared/ui/BaseTextarea.vue'
+import BaseList from '@/shared/ui/BaseList.vue'
+import ThemeToggle from '@/shared/ui/ThemeToggle.vue'
 import BaseModal from '@/shared/ui/BaseModal.vue'
 import BaseWizard from '@/shared/ui/BaseWizard.vue'
 import ModalWizard from '@/shared/ui/ModalWizard.vue'
@@ -43,6 +45,12 @@ const selectOptions = [
 
 const textareaValue = ref('Proactive database indexing and weekly snapshot verification completed.')
 
+const listDemoItems = [
+  'Infrastructure Security Assessment',
+  'Automated Continuous Integration Gates',
+  '24/7 SLA Telemetry & Incident Dispatch'
+]
+
 // ==========================================
 // 2. Structural Shell (Wave 2) State
 // ==========================================
@@ -51,6 +59,8 @@ const modalSampleInput = ref('')
 
 const isModalWizardOpen = ref(false)
 const wizardDemoStep = ref(1)
+const wizardDemoCluster = ref('production-cluster-01')
+const wizardDemoEnv = ref('staging')
 const wizardDemoSteps = [
   { number: 1, label: 'Identity' },
   { number: 2, label: 'Configuration' },
@@ -160,6 +170,7 @@ const workbenchMockLead: RankedLead = {
           <a href="#wave-2" class="nav-pill">Wave 2: Shell</a>
           <a href="#wave-3" class="nav-pill">Wave 3: Telemetry</a>
           <a href="#wave-4" class="nav-pill">Wave 4: Modals</a>
+          <ThemeToggle />
         </nav>
       </div>
     </header>
@@ -179,7 +190,7 @@ const workbenchMockLead: RankedLead = {
               <p class="section-subtext">Presentation primitives with explicit state contracts and zero business logic dependencies.</p>
             </div>
           </div>
-          <span class="count-tag">5 Components</span>
+          <span class="count-tag">6 Components</span>
         </div>
 
         <!-- 1.1 BaseButton -->
@@ -389,6 +400,38 @@ const workbenchMockLead: RankedLead = {
             Enforces <code>resize: none</code> to prevent modal layout distortions.
           </footer>
         </article>
+
+        <!-- 1.6 BaseList -->
+        <article class="component-card">
+          <header class="card-header">
+            <div>
+              <h3 class="component-name">BaseList</h3>
+              <p class="component-desc">Standardized list primitive supporting bullet, checkmark, and numbered variants.</p>
+            </div>
+            <span class="filepath-tag">src/shared/ui/BaseList.vue</span>
+          </header>
+
+          <div class="staging-surface grid-3">
+            <div class="input-cell">
+              <label class="cell-label">Bullet Variant</label>
+              <BaseList :items="listDemoItems" variant="bullet" />
+            </div>
+
+            <div class="input-cell">
+              <label class="cell-label">Checkmark Variant</label>
+              <BaseList :items="listDemoItems" variant="checkmark" />
+            </div>
+
+            <div class="input-cell">
+              <label class="cell-label">Numbered Variant (Dense)</label>
+              <BaseList :items="listDemoItems" variant="numbered" dense />
+            </div>
+          </div>
+
+          <footer class="card-footer-note">
+            Standardizes deliverables lists, feature audits, and instructional progressions across all modal surfaces.
+          </footer>
+        </article>
       </section>
 
       <!-- ================================================================= -->
@@ -481,7 +524,7 @@ const workbenchMockLead: RankedLead = {
                   <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
                     Step 1 Content: Define primary system identifier.
                   </p>
-                  <BaseInput label="System Identifier" model-value="production-cluster-01" />
+                  <BaseInput v-model="wizardDemoCluster" label="System Identifier" />
                 </div>
               </template>
 
@@ -491,8 +534,8 @@ const workbenchMockLead: RankedLead = {
                     Step 2 Content: Select operational profile.
                   </p>
                   <BaseSelect
+                    v-model="wizardDemoEnv"
                     label="Environment Mode"
-                    model-value="staging"
                     :options="[
                       { value: 'staging', label: 'Staging Environment' },
                       { value: 'production', label: 'Production High-Availability' }
@@ -506,9 +549,21 @@ const workbenchMockLead: RankedLead = {
                   <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
                     Step 3 Content: Review configuration and confirm deployment.
                   </p>
-                  <div style="font-size: 0.8rem; background: var(--bg-surface-subtle); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.75rem;">
-                    <div>• Cluster: <strong>production-cluster-01</strong></div>
-                    <div>• Environment: <strong>Staging</strong></div>
+                  <div style="font-size: 0.85rem; background: var(--bg-surface-subtle); border: 1px solid var(--border-color); border-radius: 6px; padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem; color: var(--text-primary);">
+                    <div>Cluster Identifier: <strong>{{ wizardDemoCluster || 'Not set' }}</strong></div>
+                    <div>Operational Profile: <strong>{{ wizardDemoEnv }}</strong></div>
+                    <div style="margin-top: 0.5rem; border-top: 1px solid var(--border-color); padding-top: 0.5rem;">
+                      <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 0.35rem;">Pre-Flight Checks</span>
+                      <BaseList
+                        :items="[
+                          'Nodes healthy & ready for orchestration',
+                          'TLS certificates staged',
+                          'DNS records propagated'
+                        ]"
+                        variant="checkmark"
+                        dense
+                      />
+                    </div>
                   </div>
                 </div>
               </template>
@@ -839,7 +894,12 @@ const workbenchMockLead: RankedLead = {
         :show="showVaultModal"
         client-name="Harbor Artisanal Bakery"
         @close="showVaultModal = false"
-        @save="(payload) => { lastSavedVaultPayload = JSON.stringify({ ...payload, value: '***MASKED***' }, null, 2); showVaultModal = false; }"
+        @save="(payload) => {
+          const sanitized = { ...payload, password: '***MASKED***' }
+          if ('value' in sanitized) sanitized.value = '***MASKED***'
+          lastSavedVaultPayload = JSON.stringify(sanitized, null, 2)
+          showVaultModal = false
+        }"
       />
 
       <ClientOnboardingModal
@@ -857,10 +917,10 @@ const workbenchMockLead: RankedLead = {
 /* Page Layout */
 .workbench-page {
   min-height: 100vh;
-  background-color: #f1f5f9;
-  color: #0f172a;
+  background-color: var(--bg-app);
+  color: var(--text-primary);
   padding-bottom: 8rem;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-family: var(--font-sans);
 }
 
 /* Sticky Navigation Ribbon */
@@ -868,9 +928,9 @@ const workbenchMockLead: RankedLead = {
   position: sticky;
   top: 0;
   z-index: 40;
-  background-color: rgba(255, 255, 255, 0.96);
+  background-color: var(--bg-surface);
   backdrop-filter: blur(8px);
-  border-bottom: 2px solid #cbd5e1;
+  border-bottom: 1px solid var(--border-color);
   padding: 1.25rem 2rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
@@ -912,25 +972,25 @@ const workbenchMockLead: RankedLead = {
 .page-title {
   font-size: 1.25rem;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--text-primary);
   margin: 0;
   letter-spacing: -0.025em;
 }
 
 .path-badge {
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.75rem;
-  background-color: #f1f5f9;
-  color: #475569;
+  background-color: var(--bg-surface-subtle);
+  color: var(--text-secondary);
   padding: 0.2rem 0.5rem;
   border-radius: 6px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--border-color);
   font-weight: 600;
 }
 
 .page-subtitle {
   font-size: 0.75rem;
-  color: #64748b;
+  color: var(--text-muted);
   margin: 0.25rem 0 0 0;
   font-weight: 500;
 }
@@ -938,25 +998,26 @@ const workbenchMockLead: RankedLead = {
 .nav-links {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 0.5rem;
 }
 
 .nav-pill {
   padding: 0.5rem 0.85rem;
   border-radius: 8px;
-  background-color: #f1f5f9;
-  color: #334155;
+  background-color: var(--bg-surface-subtle);
+  color: var(--text-secondary);
   text-decoration: none;
   font-size: 0.75rem;
   font-weight: 700;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--border-color);
   transition: all 0.15s ease;
 }
 
 .nav-pill:hover {
-  background-color: #4f46e5;
+  background-color: var(--accent-primary);
   color: #ffffff;
-  border-color: #4f46e5;
+  border-color: var(--accent-primary);
 }
 
 /* Container */
@@ -972,7 +1033,7 @@ const workbenchMockLead: RankedLead = {
 }
 
 .section-header {
-  border-bottom: 2px solid #4f46e5;
+  border-bottom: 2px solid var(--accent-primary);
   padding-bottom: 0.75rem;
   margin-bottom: 2rem;
   display: flex;
@@ -990,7 +1051,7 @@ const workbenchMockLead: RankedLead = {
   width: 2.25rem;
   height: 2.25rem;
   border-radius: 8px;
-  background-color: #4f46e5;
+  background-color: var(--accent-primary);
   color: #ffffff;
   font-weight: 800;
   font-size: 1rem;
@@ -1002,22 +1063,22 @@ const workbenchMockLead: RankedLead = {
 .section-heading {
   font-size: 1.15rem;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--text-primary);
   margin: 0;
 }
 
 .section-subtext {
   font-size: 0.75rem;
-  color: #64748b;
+  color: var(--text-muted);
   margin: 0.15rem 0 0 0;
 }
 
 .count-tag {
   font-size: 0.75rem;
   font-weight: 700;
-  color: #4f46e5;
-  background-color: #eef2ff;
-  border: 1px solid #c7d2fe;
+  color: var(--accent-primary);
+  background-color: var(--bg-surface-subtle);
+  border: 1px solid var(--border-color);
   padding: 0.25rem 0.65rem;
   border-radius: 6px;
   text-transform: uppercase;
@@ -1025,8 +1086,8 @@ const workbenchMockLead: RankedLead = {
 
 /* Component Cards */
 .component-card {
-  background-color: #ffffff;
-  border: 2px solid #cbd5e1;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
   border-radius: 16px;
   padding: 2.5rem;
   margin-bottom: 2.5rem;
@@ -1038,7 +1099,7 @@ const workbenchMockLead: RankedLead = {
   flex-direction: column;
   gap: 0.75rem;
   padding-bottom: 1.25rem;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--border-color);
 }
 
 @media (min-width: 768px) {
@@ -1052,22 +1113,22 @@ const workbenchMockLead: RankedLead = {
 .component-name {
   font-size: 1.25rem;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--text-primary);
   margin: 0;
 }
 
 .component-desc {
   font-size: 0.875rem;
-  color: #64748b;
+  color: var(--text-secondary);
   margin: 0.25rem 0 0 0;
 }
 
 .filepath-tag {
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.75rem;
-  color: #64748b;
-  background-color: #f8fafc;
-  border: 1px solid #e2e8f0;
+  color: var(--text-muted);
+  background-color: var(--bg-surface-subtle);
+  border: 1px solid var(--border-color);
   padding: 0.35rem 0.75rem;
   border-radius: 8px;
   align-self: flex-start;
@@ -1075,8 +1136,8 @@ const workbenchMockLead: RankedLead = {
 
 /* Staging Surface */
 .staging-surface {
-  background-color: #f8fafc;
-  border: 2px dashed #cbd5e1;
+  background-color: var(--bg-surface-subtle);
+  border: 2px dashed var(--border-color);
   border-radius: 12px;
   padding: 2.25rem;
   margin: 1.75rem 0;
@@ -1117,7 +1178,7 @@ const workbenchMockLead: RankedLead = {
   font-size: 0.75rem;
   font-weight: 800;
   text-transform: uppercase;
-  color: #94a3b8;
+  color: var(--text-muted);
   letter-spacing: 0.05em;
 }
 
@@ -1157,12 +1218,12 @@ const workbenchMockLead: RankedLead = {
   font-size: 0.75rem;
   font-weight: 800;
   text-transform: uppercase;
-  color: #475569;
+  color: var(--text-secondary);
 }
 
 .cell-feedback {
   font-size: 0.75rem;
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 .error-feedback {
@@ -1180,24 +1241,24 @@ const workbenchMockLead: RankedLead = {
 
 .counter-label {
   font-size: 0.75rem;
-  color: #64748b;
+  color: var(--text-secondary);
   font-weight: 600;
 }
 
 .counter-badge {
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.85rem;
   font-weight: 800;
-  color: #4338ca;
-  background-color: #eef2ff;
-  border: 1px solid #c7d2fe;
+  color: var(--accent-primary);
+  background-color: var(--bg-surface-subtle);
+  border: 1px solid var(--border-color);
   padding: 0.25rem 0.65rem;
   border-radius: 6px;
 }
 
 .card-footer-note {
   font-size: 0.75rem;
-  color: #94a3b8;
+  color: var(--text-muted);
   padding-top: 0.5rem;
 }
 
@@ -1211,12 +1272,12 @@ const workbenchMockLead: RankedLead = {
 .shell-title {
   font-size: 1.1rem;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--text-primary);
 }
 
 .shell-subtext {
   font-size: 0.8rem;
-  color: #64748b;
+  color: var(--text-secondary);
   max-width: 450px;
   margin: 0;
 }
@@ -1235,8 +1296,8 @@ const workbenchMockLead: RankedLead = {
 }
 
 .feature-box {
-  background-color: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
   border-radius: 10px;
   padding: 1rem;
 }
@@ -1246,13 +1307,13 @@ const workbenchMockLead: RankedLead = {
   font-size: 0.75rem;
   font-weight: 800;
   text-transform: uppercase;
-  color: #334155;
+  color: var(--text-primary);
   margin-bottom: 0.25rem;
 }
 
 .feature-text {
   font-size: 0.75rem;
-  color: #64748b;
+  color: var(--text-secondary);
   margin: 0;
 }
 
@@ -1260,10 +1321,10 @@ const workbenchMockLead: RankedLead = {
 .gauge-preview-wrapper {
   max-width: 420px;
   margin: 0 auto;
-  background-color: #ffffff;
+  background-color: var(--bg-surface);
   padding: 1.5rem;
   border-radius: 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
 }
 
 .gauge-controls-wrapper {
@@ -1272,7 +1333,7 @@ const workbenchMockLead: RankedLead = {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--border-color);
   padding-top: 1.5rem;
 }
 
@@ -1292,16 +1353,16 @@ const workbenchMockLead: RankedLead = {
   font-size: 0.75rem;
   font-weight: 800;
   text-transform: uppercase;
-  color: #334155;
+  color: var(--text-secondary);
 }
 
 .slider-badge {
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.75rem;
   font-weight: 700;
-  color: #4338ca;
-  background-color: #eef2ff;
-  border: 1px solid #c7d2fe;
+  color: var(--accent-primary);
+  background-color: var(--bg-surface-subtle);
+  border: 1px solid var(--border-color);
   padding: 0.2rem 0.5rem;
   border-radius: 6px;
 }
@@ -1309,7 +1370,7 @@ const workbenchMockLead: RankedLead = {
 .range-slider {
   width: 100%;
   height: 0.65rem;
-  background-color: #e2e8f0;
+  background-color: var(--border-color);
   border-radius: 8px;
   appearance: none;
   cursor: pointer;
@@ -1334,8 +1395,8 @@ const workbenchMockLead: RankedLead = {
   max-width: 450px;
   margin: 0 auto;
   width: 100%;
-  background-color: #ffffff;
-  border: 1px solid #e2e8f0;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
   border-radius: 10px;
   padding: 1rem;
 }
@@ -1345,15 +1406,15 @@ const workbenchMockLead: RankedLead = {
   font-size: 0.75rem;
   font-weight: 800;
   text-transform: uppercase;
-  color: #334155;
+  color: var(--text-primary);
   margin-bottom: 0.25rem;
 }
 
 .feedback-code {
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.8rem;
   font-weight: 700;
-  color: #4338ca;
+  color: var(--accent-primary);
 }
 
 /* Feature Modals Styles */
@@ -1372,17 +1433,18 @@ const workbenchMockLead: RankedLead = {
 .modal-launch-title {
   font-size: 1rem;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--text-primary);
 }
 
 .modal-launch-subtext {
   font-size: 0.8rem;
-  color: #64748b;
+  color: var(--text-secondary);
   margin: 0;
 }
 
 .payload-box {
-  background-color: #0f172a;
+  background-color: var(--bg-surface-subtle);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 1.25rem;
   margin-top: 1rem;
@@ -1393,14 +1455,14 @@ const workbenchMockLead: RankedLead = {
   font-size: 0.7rem;
   font-weight: 800;
   text-transform: uppercase;
-  color: #94a3b8;
+  color: var(--text-muted);
   margin-bottom: 0.5rem;
 }
 
 .payload-code {
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.75rem;
-  color: #34d399;
+  color: var(--accent-primary);
   margin: 0;
   overflow-x: auto;
 }
