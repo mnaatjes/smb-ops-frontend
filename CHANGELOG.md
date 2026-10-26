@@ -10,6 +10,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Base Site Shell Architecture & Layout Refactor (ADR-0031):**
+  - Created universal application shell `src/app/layout/BaseSiteLayout.vue` featuring 3-tier navigation spine (`BaseAside.vue`), collapsible icon rail with `localStorage` persistence, off-canvas mobile drawer sheet, and stage canvas with root overlay portals (`#drawer-portal`, `#modal-portal`).
+  - Added decoupled placeholder workspace view `src/pages/PlaceholderWorkspaceView.vue` and cleared `src/pages/LeadsView.vue` to clean scaffolded stage.
+  - Authored full 4-step specification suite: SDD (`architecture/designs/0014_base_site_shell_layout_and_topology_spec.md`), FSM (`architecture/state-transitions/0008_base_site_shell_lifecycle_states.md`), Action Table (`architecture/action-tables/0011_base_site_shell_action_table.md`), and UAT Scenarios (`architecture/uat/0002_base_site_shell_acceptance_criteria.md`).
+  - Added headless unit test suite `tests/unit/BaseSiteLayout.spec.ts` asserting desktop topology, pure route stage invariant, mobile sheet drawer lifecycle, and rail collapse persistence.
+
+- **BaseBreadcrumb & BasePageHeader Orientation Primitives (`src/shared/ui/`):**
+  - Created `src/shared/ui/BaseBreadcrumb.vue` supporting nested breadcrumb items, custom separators, and router navigation; unit tested in `tests/unit/BaseBreadcrumb.spec.ts`.
+  - Created `src/shared/ui/BasePageHeader.vue` combining breadcrumbs, view title, subtitle, context badges, and slotted action clusters with responsive flex wrap; unit tested in `tests/unit/BasePageHeader.spec.ts`.
+  - Exhibited both components in `/dev/components` Wave 2 with interactive node tracking.
+
 - **Systematic Frontend Workflow Specification Procedure (ADR-0031):**
   - Documented 4-Step Systematic Execution Workflow (Layout SDD, State Transition Matrix, Action Table, Gherkin Scenarios) with concrete templates and operational guidelines in `architecture/adr/0031_systematic_frontend_workflow_and_layout_specification_procedure.md`.
 

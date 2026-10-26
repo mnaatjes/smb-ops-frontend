@@ -16,37 +16,27 @@ describe('BasePageContainer.vue Headless Assertion Matrix', () => {
     expect(stageWrapper.classes()).not.toContain('is-fluid')
   })
 
-  it('renders title, subtitle, and action buttons when provided', () => {
+  it('supports custom maxWidth prop', () => {
     const wrapper = mount(BasePageContainer, {
       props: {
-        title: 'Lead Operations & Triage',
-        subtitle: 'Region: North America'
+        maxWidth: '1440px'
       },
       slots: {
-        actions: '<button class="action-btn">Export Data</button>'
+        default: '<p>Custom max width content</p>'
       }
     })
 
-    expect(wrapper.find('.stage-title').text()).toBe('Lead Operations & Triage')
-    expect(wrapper.find('.stage-subtitle').text()).toBe('Region: North America')
-    expect(wrapper.find('.action-btn').exists()).toBe(true)
-  })
-
-  it('renders toolbar slot when supplied', () => {
-    const wrapper = mount(BasePageContainer, {
-      slots: {
-        toolbar: '<input class="search-input" placeholder="Search..." />'
-      }
-    })
-
-    expect(wrapper.find('.stage-toolbar').exists()).toBe(true)
-    expect(wrapper.find('.search-input').exists()).toBe(true)
+    const stageWrapper = wrapper.find('.page-stage-wrapper')
+    expect(stageWrapper.attributes('style')).toContain('max-width: 1440px')
   })
 
   it('supports fluid 100% width mode', () => {
     const wrapper = mount(BasePageContainer, {
       props: {
         fluid: true
+      },
+      slots: {
+        default: '<p>Fluid content</p>'
       }
     })
 

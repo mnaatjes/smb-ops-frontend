@@ -1,6 +1,26 @@
 <script setup lang="ts">
-withDefaults(
+import { computed } from 'vue'
+
+export interface NavItemDef {
+  id: string
+  label: string
+  icon: string
+  to?: string
+  badge?: number | string
+  badgeVariant?: 'neutral' | 'primary' | 'success' | 'warning' | 'danger' | 'emerald'
+}
+
+export interface NavSectionDef {
+  id: string
+  tier: 'primary' | 'secondary' | 'tertiary'
+  title?: string
+  items: NavItemDef[]
+}
+
+const props = withDefaults(
   defineProps<{
+    sections?: NavSectionDef[]
+    activeId?: string
     collapsed?: boolean
     width?: string
     collapsedWidth?: string
@@ -8,6 +28,8 @@ withDefaults(
     brandSubtitle?: string
   }>(),
   {
+    sections: () => [],
+    activeId: '',
     collapsed: false,
     width: '240px',
     collapsedWidth: '64px',
@@ -19,11 +41,18 @@ withDefaults(
 const emit = defineEmits<{
   (e: 'update:collapsed', val: boolean): void
   (e: 'toggle-collapse'): void
+  (e: 'select-item', item: NavItemDef): void
 }>()
 
 function toggle(): void {
   emit('toggle-collapse')
 }
+
+function handleItemClick(item: NavItemDef): void {
+  emit('select-item', item)
+}
+
+const hasSections = computed(() => props.sections && props.sections.length > 0)
 </script>
 
 <template>
@@ -71,9 +100,53 @@ function toggle(): void {
       </button>
     </div>
 
-    <!-- Navigation Spine Slot -->
+    <!-- Navigation Spine -->
     <nav class="aside-nav-body">
-      <slot :collapsed="collapsed" />
+      <!-- Data-driven section rendering with visual tier distinction -->
+      <template v-if="hasSections">
+        <div
+          v-for="section in sections"
+          :key="section.id"
+          class="nav-tier-section"
+          :class="`tier-${section.tier}`"
+        >
+          <!-- Section Divider / Header -->
+          <div v-if="section.title && !collapsed" class="section-title-row">
+            <span class="section-heading">{{ section.title }}</span>
+          </div>
+          <div v-else-if="collapsed" class="section-rail-divider" aria-hidden="true" />
+
+          <!-- Items List -->
+          <ul class="nav-items-list">
+            <li v-for="item in section.items" :key="item.id" class="nav-item-wrapper">
+              <button
+                type="button"
+                class="nav-link-btn"
+                :class="[
+                  `btn-tier-${section.tier}`,
+                  { 'is-active': item.id === activeId }
+                ]"
+                :data-tooltip="item.label"
+                :aria-current="item.id === activeId ? 'page' : undefined"
+                @click="handleItemClick(item)"
+              >
+                <span class="nav-item-icon" aria-hidden="true">{{ item.icon }}</span>
+                <span v-if="!collapsed" class="nav-item-label">{{ item.label }}</span>
+                <span
+                  v-if="!collapsed && item.badge !== undefined"
+                  class="nav-item-badge"
+                  :class="`badge-${item.badgeVariant || 'neutral'}`"
+                >
+                  {{ item.badge }}
+                </span>
+              </button>
+            </li>
+          </ul>
+        </div>
+      </template>
+
+      <!-- Fallback / Slotted Navigation Spine Slot -->
+      <slot v-else :collapsed="collapsed" />
     </nav>
 
     <!-- Footer Controls Slot -->
@@ -212,11 +285,167 @@ function toggle(): void {
   padding: 0.75rem 0.5rem;
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.75rem;
   position: relative;
 }
 
-/* Allow tooltips to fly out freely over the adjacent stage canvas in collapsed mode */
+/* Tiered Sections */
+.nav-tier-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.section-title-row {
+  padding: 0.35rem 0.5rem 0.2rem;
+}
+
+.section-heading {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.tier-primary .section-heading {
+  color: var(--accent-primary);
+}
+
+.tier-secondary .section-heading {
+  color: var(--text-muted);
+}
+
+.tier-tertiary .section-heading {
+  color: var(--text-muted);
+  opacity: 0.8;
+}
+
+.section-rail-divider {
+  height: 1px;
+  background-color: var(--border-color);
+  margin: 0.4rem 0.25rem;
+}
+
+.nav-items-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.nav-link-btn {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 0.65rem;
+  padding: 0.5rem 0.625rem;
+  border-radius: 6px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.is-collapsed .nav-link-btn {
+  justify-content: center;
+  padding: 0.5rem 0;
+}
+
+.nav-item-icon {
+  font-size: 1rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.nav-item-label {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nav-item-badge {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  padding: 0.1rem 0.4rem;
+  border-radius: 10px;
+  line-height: 1.2;
+}
+
+.badge-neutral {
+  background-color: var(--badge-neutral-bg);
+  color: var(--badge-neutral-text);
+  border: 1px solid var(--badge-neutral-border);
+}
+
+.badge-primary {
+  background-color: var(--badge-primary-bg);
+  color: var(--badge-primary-text);
+  border: 1px solid var(--badge-primary-border);
+}
+
+.badge-emerald {
+  background-color: var(--badge-emerald-bg);
+  color: var(--badge-emerald-text);
+  border: 1px solid var(--badge-emerald-border);
+}
+
+/* Tier Specific Visual Differentiation */
+.btn-tier-primary {
+  font-weight: 600;
+}
+
+.btn-tier-primary:hover {
+  background-color: var(--bg-surface-hover);
+  color: var(--text-primary);
+}
+
+.btn-tier-primary.is-active {
+  background-color: var(--badge-primary-bg);
+  color: var(--accent-primary);
+  border-color: var(--badge-primary-border);
+}
+
+.btn-tier-secondary {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+.btn-tier-secondary:hover {
+  background-color: var(--bg-surface-hover);
+  color: var(--text-primary);
+}
+
+.btn-tier-secondary.is-active {
+  background-color: var(--bg-surface-subtle);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+.btn-tier-tertiary {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.btn-tier-tertiary:hover {
+  background-color: var(--bg-surface-hover);
+  color: var(--text-secondary);
+}
+
+.btn-tier-tertiary.is-active {
+  background-color: var(--bg-surface-subtle);
+  color: var(--text-primary);
+}
+
+/* Tooltips in Collapsed Mode */
 .base-aside.is-collapsed {
   overflow: visible;
 }
@@ -225,7 +454,6 @@ function toggle(): void {
   overflow: visible;
 }
 
-/* Tooltip hints for collapsed rail buttons penetrating slotted items */
 .is-collapsed :deep([data-tooltip]) {
   position: relative;
 }
