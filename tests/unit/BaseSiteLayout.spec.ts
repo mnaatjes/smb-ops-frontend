@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { createRouter, createMemoryHistory } from 'vue-router'
+import { createRouter, createMemoryHistory, type Router } from 'vue-router'
 import { createPinia, setActivePinia } from 'pinia'
 import BaseSiteLayout from '@/app/layout/BaseSiteLayout.vue'
 import BaseAside from '@/shared/ui/BaseAside.vue'
@@ -8,7 +8,7 @@ import LeadsView from '@/pages/LeadsView.vue'
 import PlaceholderWorkspaceView from '@/pages/PlaceholderWorkspaceView.vue'
 
 describe('BaseSiteLayout.vue Headless Assertion Matrix (UAT-0002)', () => {
-  let router: any
+  let router: Router
 
   beforeEach(async () => {
     setActivePinia(createPinia())
