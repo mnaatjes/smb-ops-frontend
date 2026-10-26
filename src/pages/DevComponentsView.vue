@@ -12,7 +12,7 @@ import ThemeToggle from '@/shared/ui/ThemeToggle.vue'
 import BaseModal from '@/shared/ui/BaseModal.vue'
 import BaseWizard from '@/shared/ui/BaseWizard.vue'
 import ModalWizard from '@/shared/ui/ModalWizard.vue'
-import BaseAside from '@/shared/ui/BaseAside.vue'
+import BaseAside, { type NavSectionDef, type NavItemDef } from '@/shared/ui/BaseAside.vue'
 import BaseBreadcrumb, { type BreadcrumbItem } from '@/shared/ui/BaseBreadcrumb.vue'
 import BasePageHeader from '@/shared/ui/BasePageHeader.vue'
 import BasePageContainer from '@/shared/ui/BasePageContainer.vue'
@@ -152,6 +152,42 @@ const isAsideCollapsed = ref(false)
 const isDrawerOpen = ref(false)
 const drawerSize = ref<'sm' | 'md' | 'lg' | 'full'>('md')
 const cardClickCount = ref(0)
+
+const activeAsideNavId = ref('leads')
+const demoNavSections = ref<NavSectionDef[]>([
+  {
+    id: 'primary-funnel',
+    tier: 'primary',
+    title: 'Core Funnel',
+    items: [
+      { id: 'leads', label: 'Leads', icon: '🔍', badge: 14, badgeVariant: 'primary' },
+      { id: 'pursued', label: 'Pursued', icon: '🎯', badge: 3, badgeVariant: 'warning' },
+      { id: 'accounts', label: 'Accounts', icon: '💼', badge: 8, badgeVariant: 'emerald' }
+    ]
+  },
+  {
+    id: 'secondary-catalogs',
+    tier: 'secondary',
+    title: 'Catalogs',
+    items: [
+      { id: 'services', label: 'Service Catalog', icon: '📋' },
+      { id: 'addons', label: 'Add-ons & Subs', icon: '📦' }
+    ]
+  },
+  {
+    id: 'tertiary-system',
+    tier: 'tertiary',
+    title: 'Doctrine & Tools',
+    items: [
+      { id: 'doctrine', label: 'Business Doctrine', icon: '📖' },
+      { id: 'components', label: 'Dev Components', icon: '⚡' }
+    ]
+  }
+])
+
+function handleAsideItemSelect(item: NavItemDef) {
+  activeAsideNavId.value = item.id
+}
 
 const demoBreadcrumbs = ref<BreadcrumbItem[]>([
   { label: 'Operations Hub', to: '/dev/components' },
@@ -1041,46 +1077,34 @@ const workbenchMockLead: RankedLead = {
           </header>
 
           <div class="staging-surface flex-col" style="align-items: center;">
-            <div style="height: 280px; width: 100%; max-width: 440px; border: 1px solid var(--border-color); border-radius: 8px; position: relative; display: flex;">
+            <div style="height: 380px; width: 100%; max-width: 520px; border: 1px solid var(--border-color); border-radius: 8px; position: relative; display: flex; overflow: visible;">
               <BaseAside
                 :collapsed="isAsideCollapsed"
-                brand-title="Demo Rail"
-                brand-subtitle="Simulation"
+                :sections="demoNavSections"
+                :active-id="activeAsideNavId"
+                brand-title="SMB Ops"
+                brand-subtitle="Practice Engine"
                 @toggle-collapse="isAsideCollapsed = !isAsideCollapsed"
+                @select-item="handleAsideItemSelect"
               >
-                <div style="display: flex; flex-direction: column; gap: 0.35rem;">
-                  <button
-                    type="button"
-                    title="Triage Dashboard"
-                    data-tooltip="Triage Dashboard"
-                    style="text-align: left; padding: 0.5rem; background: var(--bg-surface-hover); border: none; border-radius: 6px; color: var(--text-primary); font-size: 0.8rem; cursor: pointer;"
-                  >
-                    {{ isAsideCollapsed ? '⚡' : '⚡ Triage Dashboard' }}
-                  </button>
-                  <button
-                    type="button"
-                    title="Client Accounts"
-                    data-tooltip="Client Accounts"
-                    style="text-align: left; padding: 0.5rem; background: transparent; border: none; border-radius: 6px; color: var(--text-secondary); font-size: 0.8rem; cursor: pointer;"
-                  >
-                    {{ isAsideCollapsed ? '🏢' : '🏢 Client Accounts' }}
-                  </button>
-                </div>
-
                 <template #footer>
-                  <div style="font-size: 0.7rem; color: var(--text-muted); text-align: center;">
-                    {{ isAsideCollapsed ? 'v1.0' : 'v1.0.0 — Online' }}
+                  <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); width: 100%;">
+                    <span v-if="!isAsideCollapsed">v1.2.0 • Active</span>
+                    <ThemeToggle />
                   </div>
                 </template>
               </BaseAside>
 
               <div style="flex: 1; padding: 1.5rem; background: var(--bg-app); display: flex; flex-direction: column; gap: 0.75rem;">
-                <span style="font-size: 0.8rem; font-weight: 700;">Simulated App Stage</span>
+                <span style="font-size: 0.8rem; font-weight: 700;">Simulated Stage</span>
                 <p style="font-size: 0.75rem; color: var(--text-secondary); margin: 0;">
-                  Click arrow toggle inside aside header to alternate width (240px ↔ 64px).
+                  Active Route: <code style="font-weight: 700; color: var(--accent-primary);">{{ activeAsideNavId }}</code>
+                </p>
+                <p style="font-size: 0.75rem; color: var(--text-secondary); margin: 0;">
+                  Tiers rendered: <strong>Primary Funnel</strong> (with count badges), <strong>Secondary Catalogs</strong>, and <strong>Tertiary Tools</strong>.
                 </p>
                 <BaseButton
-                  :label="isAsideCollapsed ? 'Expand (240px)' : 'Collapse (64px)'"
+                  :label="isAsideCollapsed ? 'Expand Rail (240px)' : 'Collapse to Rail (64px)'"
                   variant="secondary"
                   @click="isAsideCollapsed = !isAsideCollapsed"
                 />
@@ -1089,7 +1113,7 @@ const workbenchMockLead: RankedLead = {
           </div>
 
           <footer class="card-footer-note">
-            Governs primary application routing spine with zero horizontal translation drift.
+            Provides unambiguous visual hierarchy across acquisition funnel, catalogs, and documentation with popover tooltips in collapsed mode.
           </footer>
         </article>
 
@@ -1098,33 +1122,23 @@ const workbenchMockLead: RankedLead = {
           <header class="card-header">
             <div>
               <h3 class="component-name">BasePageContainer</h3>
-              <p class="component-desc">Standardized Stage / Main Content Canvas wrapper establishing max-width bounds, page title rhythms, and toolbar slots.</p>
+              <p class="component-desc">Standardized viewport stage wrapper establishing max-width constraints, fluid width options, and vertical scroll containment.</p>
             </div>
             <span class="filepath-tag">src/shared/ui/BasePageContainer.vue</span>
           </header>
 
           <div class="staging-surface flex-col">
-            <div style="height: 240px; border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column;">
-              <BasePageContainer
-                title="Stage Header Simulation"
-                subtitle="Standardized layout wrapper"
-                max-width="100%"
-              >
-                <template #actions>
-                  <BaseButton label="Stage Action" variant="primary" />
-                </template>
-                <template #toolbar>
-                  <div style="font-size: 0.8rem; color: var(--text-muted);">Toolbar Slot (Search / Filters)</div>
-                </template>
-                <div style="font-size: 0.85rem; color: var(--text-secondary); background: var(--bg-surface); padding: 1rem; border: 1px solid var(--border-color); border-radius: 6px;">
-                  Scrollable default body content within the Stage bounds.
+            <div style="height: 180px; border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column;">
+              <BasePageContainer max-width="100%">
+                <div style="font-size: 0.85rem; color: var(--text-secondary); background: var(--bg-surface); padding: 1.25rem; border: 1px solid var(--border-color); border-radius: 6px;">
+                  Pure Stage Canvas: Content scrolls smoothly within container bounds while maintaining consistent horizontal padding rhythms.
                 </div>
               </BasePageContainer>
             </div>
           </div>
 
           <footer class="card-footer-note">
-            Guarantees consistent header hierarchies and scroll properties across all top-level route views.
+            Decoupled from headers and actions: use BasePageHeader inside this container for route title and breadcrumb orientation.
           </footer>
         </article>
 

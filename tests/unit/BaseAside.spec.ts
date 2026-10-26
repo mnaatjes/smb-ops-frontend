@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
-import BaseAside from '@/shared/ui/BaseAside.vue'
+import BaseAside, { type NavSectionDef } from '@/shared/ui/BaseAside.vue'
 
 describe('BaseAside.vue Headless Assertion Matrix', () => {
   it('renders in expanded mode with default width 240px and brand text', () => {
@@ -44,7 +44,7 @@ describe('BaseAside.vue Headless Assertion Matrix', () => {
     expect(wrapper.emitted('toggle-collapse')).toHaveLength(1)
   })
 
-  it('renders default navigation body and footer slot content', () => {
+  it('renders default fallback slot content when sections prop is not supplied', () => {
     const wrapper = mount(BaseAside, {
       slots: {
         default: '<a href="#" class="test-nav-link">Dashboard</a>',
@@ -56,18 +56,45 @@ describe('BaseAside.vue Headless Assertion Matrix', () => {
     expect(wrapper.find('.test-footer-profile').exists()).toBe(true)
   })
 
-  it('renders slotted navigation item with data-tooltip in collapsed mode', () => {
+  it('renders tiered navigation sections and highlights active item', async () => {
+    const sections: NavSectionDef[] = [
+      {
+        id: 'primary-funnel',
+        tier: 'primary',
+        title: 'Core Funnel',
+        items: [
+          { id: 'leads', label: 'Leads', icon: '🔍', badge: 12 },
+          { id: 'pursued', label: 'Pursued', icon: '🎯', badge: 3 }
+        ]
+      },
+      {
+        id: 'secondary-catalog',
+        tier: 'secondary',
+        title: 'Catalogs',
+        items: [
+          { id: 'services', label: 'Services', icon: '📋' }
+        ]
+      }
+    ]
+
     const wrapper = mount(BaseAside, {
       props: {
-        collapsed: true
-      },
-      slots: {
-        default: '<button type="button" data-tooltip="Triage Dashboard">⚡</button>'
+        sections,
+        activeId: 'leads'
       }
     })
 
-    const buttonWithTooltip = wrapper.find('[data-tooltip="Triage Dashboard"]')
-    expect(buttonWithTooltip.exists()).toBe(true)
-    expect(wrapper.classes()).toContain('is-collapsed')
+    expect(wrapper.findAll('.nav-tier-section')).toHaveLength(2)
+    const activeBtn = wrapper.find('.btn-tier-primary.is-active')
+    expect(activeBtn.exists()).toBe(true)
+    expect(activeBtn.text()).toContain('Leads')
+    expect(activeBtn.find('.nav-item-badge').text()).toBe('12')
+
+    // Click navigation item
+    const pursuedBtn = wrapper.findAll('.nav-link-btn')[1]
+    await pursuedBtn.trigger('click')
+
+    expect(wrapper.emitted('select-item')).toBeTruthy()
+    expect(wrapper.emitted('select-item')?.[0]).toEqual([sections[0].items[1]])
   })
 })
