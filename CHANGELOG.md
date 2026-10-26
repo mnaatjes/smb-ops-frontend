@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Systematic Frontend Workflow Specification Procedure (ADR-0031):**
+  - Documented 4-Step Systematic Execution Workflow (Layout SDD, State Transition Matrix, Action Table, Gherkin Scenarios) with concrete templates and operational guidelines in `architecture/adr/0031_systematic_frontend_workflow_and_layout_specification_procedure.md`.
+
 - **BaseMetricCard & BaseAlert Primitives (`src/shared/ui/`):**
   - Created `src/shared/ui/BaseMetricCard.vue` executive KPI ribbon card supporting nominal, alert, success, and warning tokens with clickable delegation; unit tested in `tests/unit/BaseMetricCard.spec.ts`.
   - Created `src/shared/ui/BaseAlert.vue` feedback notification banner with info, success, warning, and danger palettes and dismiss emission; unit tested in `tests/unit/BaseAlert.spec.ts`.
