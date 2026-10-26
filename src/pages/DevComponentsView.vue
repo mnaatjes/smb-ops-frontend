@@ -13,6 +13,8 @@ import BaseModal from '@/shared/ui/BaseModal.vue'
 import BaseWizard from '@/shared/ui/BaseWizard.vue'
 import ModalWizard from '@/shared/ui/ModalWizard.vue'
 import BaseAside from '@/shared/ui/BaseAside.vue'
+import BaseBreadcrumb, { type BreadcrumbItem } from '@/shared/ui/BaseBreadcrumb.vue'
+import BasePageHeader from '@/shared/ui/BasePageHeader.vue'
 import BasePageContainer from '@/shared/ui/BasePageContainer.vue'
 import BaseDrawer from '@/shared/ui/BaseDrawer.vue'
 import BaseMetricCard from '@/shared/ui/BaseMetricCard.vue'
@@ -150,6 +152,16 @@ const isAsideCollapsed = ref(false)
 const isDrawerOpen = ref(false)
 const drawerSize = ref<'sm' | 'md' | 'lg' | 'full'>('md')
 const cardClickCount = ref(0)
+
+const demoBreadcrumbs = ref<BreadcrumbItem[]>([
+  { label: 'Operations Hub', to: '/dev/components' },
+  { label: 'Client Accounts', to: '/dev/components' },
+  { label: 'Acme Logistics Retainer', current: true }
+])
+const lastBreadcrumbNav = ref<string>('None')
+function handleBreadcrumbClick(item: BreadcrumbItem) {
+  lastBreadcrumbNav.value = item.label
+}
 
 function openDrawerWithSize(sz: 'sm' | 'md' | 'lg' | 'full') {
   drawerSize.value = sz
@@ -1113,6 +1125,70 @@ const workbenchMockLead: RankedLead = {
 
           <footer class="card-footer-note">
             Guarantees consistent header hierarchies and scroll properties across all top-level route views.
+          </footer>
+        </article>
+
+        <!-- 2.5a BaseBreadcrumb -->
+        <article class="component-card">
+          <header class="card-header">
+            <div>
+              <h3 class="component-name">BaseBreadcrumb</h3>
+              <p class="component-desc">Orientation breadcrumb trail supporting nested hierarchies, custom separators, and router navigation emission.</p>
+            </div>
+            <span class="filepath-tag">src/shared/ui/BaseBreadcrumb.vue</span>
+          </header>
+
+          <div class="staging-surface flex-col" style="gap: 1rem;">
+            <div style="background: var(--bg-surface); padding: 1rem; border: 1px solid var(--border-color); border-radius: 6px;">
+              <BaseBreadcrumb
+                :items="demoBreadcrumbs"
+                @navigate="handleBreadcrumbClick"
+              />
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-secondary);">
+              Last Clicked Node: <strong>{{ lastBreadcrumbNav }}</strong>
+            </div>
+          </div>
+
+          <footer class="card-footer-note">
+            Enforces strict aria-current="page" accessibility semantics and non-navigable leaf styling.
+          </footer>
+        </article>
+
+        <!-- 2.5b BasePageHeader -->
+        <article class="component-card">
+          <header class="card-header">
+            <div>
+              <h3 class="component-name">BasePageHeader</h3>
+              <p class="component-desc">Top-of-view orientation header unifying breadcrumbs, page title, subtitle, and primary stage actions.</p>
+            </div>
+            <span class="filepath-tag">src/shared/ui/BasePageHeader.vue</span>
+          </header>
+
+          <div class="staging-surface flex-col">
+            <div style="background: var(--bg-surface); padding: 1.25rem; border: 1px solid var(--border-color); border-radius: 6px; width: 100%;">
+              <BasePageHeader
+                title="Client Account Ledger"
+                subtitle="Active service retainers, SLA fulfillment, and credential vaults"
+                :breadcrumbs="demoBreadcrumbs"
+                @navigate-breadcrumb="handleBreadcrumbClick"
+              >
+                <template #actions>
+                  <BaseButton label="Export Ledger" variant="secondary" />
+                  <BaseButton label="Create Account" variant="primary" />
+                </template>
+                <template #context>
+                  <div style="display: inline-flex; gap: 0.5rem; align-items: center; font-size: 0.8rem; color: var(--text-muted);">
+                    <BaseBadge label="14 Active Retainers" variant="emerald" />
+                    <span>Last audited: 10m ago</span>
+                  </div>
+                </template>
+              </BasePageHeader>
+            </div>
+          </div>
+
+          <footer class="card-footer-note">
+            Responsive flexbox structure drops actions below title row seamlessly on mobile (&le;640px).
           </footer>
         </article>
 

@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **BaseBreadcrumb & BasePageHeader Orientation Primitives (`src/shared/ui/`):**
+  - Created `src/shared/ui/BaseBreadcrumb.vue` supporting nested breadcrumb items, custom separators, and router navigation; unit tested in `tests/unit/BaseBreadcrumb.spec.ts`.
+  - Created `src/shared/ui/BasePageHeader.vue` combining breadcrumbs, view title, subtitle, context badges, and slotted action clusters with responsive flex wrap; unit tested in `tests/unit/BasePageHeader.spec.ts`.
+  - Exhibited both components in `/dev/components` Wave 2 with interactive node tracking.
+
 - **Systematic Frontend Workflow Specification Procedure (ADR-0031):**
   - Documented 4-Step Systematic Execution Workflow (Layout SDD, State Transition Matrix, Action Table, Gherkin Scenarios) with concrete templates and operational guidelines in `architecture/adr/0031_systematic_frontend_workflow_and_layout_specification_procedure.md`.
 
