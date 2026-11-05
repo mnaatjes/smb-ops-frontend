@@ -104,6 +104,38 @@ export interface CreateServicePayload {
   minimum_opportunity_score?: number
 }
 
+export interface CreateCoreServicePayload {
+  code: string
+  name: string
+  description: string
+  rank: 'Rank 1A' | 'Rank 1B' | 'Rank 3' | 'Rank 4' | string
+  pricing_model: 'FLAT_FEE' | 'HYBRID' | string
+  price_min: number
+  price_max: number
+  target_profile: string
+  scope: string[]
+  deliverables: string[]
+  exclusions: string[]
+  audit_parameters: string[]
+  minimum_opportunity_score: number
+}
+
+export interface CreateAddOnPayload {
+  code: string
+  name: string
+  description: string
+  rank: 'Rank 2' | string
+  pricing_model: 'MONTHLY_RETAINER'
+  monthly_rate: number
+  monthly_retainer_cap_minutes: number
+  target_profile: string
+  scope: string[]
+  deliverables: string[]
+  exclusions: string[]
+  audit_parameters: string[]
+  minimum_opportunity_score: number
+}
+
 export interface ServiceCatalogItem {
   id: string
   code: string

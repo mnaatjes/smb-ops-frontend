@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import BaseButton from '@/shared/ui/BaseButton.vue'
 import BaseBadge from '@/shared/ui/BaseBadge.vue'
 import BaseInput from '@/shared/ui/BaseInput.vue'
+import BaseRepeater from '@/shared/ui/BaseRepeater.vue'
 import BaseSelect from '@/shared/ui/BaseSelect.vue'
 import BaseTextarea from '@/shared/ui/BaseTextarea.vue'
 import BaseList from '@/shared/ui/BaseList.vue'
@@ -33,7 +34,9 @@ import VaultSecretForm from '@/shared/ui/VaultSecretForm.vue'
 import ContractAgreementForm from '@/shared/ui/ContractAgreementForm.vue'
 import LogWorkForm from '@/shared/ui/LogWorkForm.vue'
 import ClientOnboardingModal from '@/features/client-onboarding/ClientOnboardingModal.vue'
-import type { ServiceCatalogItem, RankedLead, ClientSecretPayload, AttachContractPayload, LogTimecardPayload, CreateProspectPayload, AuditResult } from '@/shared/types/lead'
+import CreateCoreServiceForm from '@/shared/ui/CreateCoreServiceForm.vue'
+import CreateAddOnForm from '@/shared/ui/CreateAddOnForm.vue'
+import type { CreateCoreServicePayload, CreateAddOnPayload, ServiceCatalogItem, RankedLead, ClientSecretPayload, AttachContractPayload, LogTimecardPayload, CreateProspectPayload, AuditResult } from '@/shared/types/lead'
 
 // ==========================================
 // 1. Primitives (Wave 1) State
@@ -51,6 +54,17 @@ const textInput = ref('Sample text entry')
 const emailInput = ref('operator@smbops.internal')
 const errorInput = ref('')
 const inputError = ref('This field is required and cannot be empty')
+
+const repeaterDemoItems = ref<string[]>([
+  'Weekly automated database snapshots',
+  '24/7 SSL renewal and TLS verification',
+  'PHP runtime vulnerability patching'
+])
+
+const repeaterMinMaxItems = ref<string[]>([
+  'Core Service Offering',
+  'Monthly Retainer Scope'
+])
 
 const selectChoice = ref('retainer')
 const selectOptions = [
@@ -100,6 +114,40 @@ const formDemoDisqualify = ref<Partial<DisqualifyLeadPayload>>({
   suppress: true
 })
 const isDisqualifyFormValid = ref(true)
+
+const formDemoCoreService = ref<Partial<CreateCoreServicePayload>>({
+  code: 'SVC-RANK-1A',
+  name: 'Site Performance & Security Audit + Fix',
+  description: 'CMS Door-Opener: Fix slow WordPress/PHP sites and SSL posture.',
+  rank: 'Rank 1A',
+  pricing_model: 'FLAT_FEE',
+  price_min: 150,
+  price_max: 150,
+  target_profile: 'Establishments with slow, unmaintained WordPress/PHP sites',
+  scope: ['Full snapshot backup', 'Image compression', 'Core updates', 'SSL enforcement'],
+  deliverables: ['1-page health report', 'Secured live production site'],
+  exclusions: ['Zero structural graphic redesign'],
+  audit_parameters: ['ssl_active', 'status_code', 'response_time_ms', 'cms_detected'],
+  minimum_opportunity_score: 50
+})
+const isCoreServiceFormValid = ref(true)
+
+const formDemoAddOn = ref<Partial<CreateAddOnPayload>>({
+  code: 'CARE_PLAN_30',
+  name: 'Essential Website Care',
+  description: 'Core recurring digital continuity and uptime monitoring.',
+  rank: 'Rank 2',
+  pricing_model: 'MONTHLY_RETAINER',
+  monthly_rate: 99,
+  monthly_retainer_cap_minutes: 30,
+  target_profile: 'Independent establishments requiring hands-off digital reliability',
+  scope: ['Weekly offsite S3 backup', '5-minute uptime probe', 'Security patch rollback'],
+  deliverables: ['Monthly digital continuity report', 'Uptime & SLA ledger'],
+  exclusions: ['Zero graphic design redesign', 'Zero photo editing'],
+  audit_parameters: ['ssl_active', 'status_code'],
+  minimum_opportunity_score: 40
+})
+const isAddOnFormValid = ref(true)
 
 const alertDismissed = ref(false)
 const metricCardClicks = ref(0)
@@ -313,34 +361,36 @@ const workbenchMockLead: RankedLead = {
         </div>
 
         <nav class="nav-links">
-          <a href="#wave-1" class="nav-pill">Wave 1: Primitives</a>
-          <a href="#wave-2" class="nav-pill">Wave 2: Shell</a>
-          <a href="#wave-3" class="nav-pill">Wave 3: Telemetry</a>
-          <a href="#wave-4" class="nav-pill">Wave 4: Modals</a>
+          <a href="#cat-primitives" class="nav-pill">Primitives (11)</a>
+          <a href="#cat-forms" class="nav-pill">Forms (7)</a>
+          <a href="#cat-shell" class="nav-pill">Shell (5)</a>
+          <a href="#cat-wizards" class="nav-pill">Wizards (2)</a>
+          <a href="#cat-modals" class="nav-pill">Modals (5)</a>
+          <a href="#cat-telemetry" class="nav-pill">Telemetry (5)</a>
           <ThemeToggle />
         </nav>
       </div>
     </header>
 
     <!-- Content Container -->
-    <main class="workbench-container">
+        <main class="workbench-container">
 
       <!-- ================================================================= -->
-      <!-- WAVE 1: PRIMITIVES                                                -->
+      <!-- ATOMIC UI PRIMITIVES -->
       <!-- ================================================================= -->
-      <section id="wave-1" class="wave-section">
+      <section id="cat-primitives" class="wave-section">
         <div class="section-header">
           <div class="section-title-cluster">
             <span class="wave-number">1</span>
             <div>
-              <h2 class="section-heading">Wave 1: Atomic Primitives</h2>
-              <p class="section-subtext">Presentation primitives with explicit state contracts and zero business logic dependencies.</p>
+              <h2 class="section-heading">Atomic UI Primitives</h2>
+              <p class="section-subtext">Foundation presentation elements with explicit state contracts and zero business logic dependencies.</p>
             </div>
           </div>
-          <span class="count-tag">15 Components</span>
+          <span class="count-tag">11 Components</span>
         </div>
 
-        <!-- 1.1 BaseButton -->
+
         <article class="component-card">
           <header class="card-header">
             <div>
@@ -380,7 +430,6 @@ const workbenchMockLead: RankedLead = {
           </footer>
         </article>
 
-        <!-- 1.2 BaseBadge -->
         <article class="component-card">
           <header class="card-header">
             <div>
@@ -419,7 +468,6 @@ const workbenchMockLead: RankedLead = {
           </footer>
         </article>
 
-        <!-- 1.3 BaseInput -->
         <article class="component-card">
           <header class="card-header">
             <div>
@@ -454,7 +502,6 @@ const workbenchMockLead: RankedLead = {
           </footer>
         </article>
 
-        <!-- 1.4 BaseSelect -->
         <article class="component-card">
           <header class="card-header">
             <div>
@@ -506,7 +553,6 @@ const workbenchMockLead: RankedLead = {
           </footer>
         </article>
 
-        <!-- 1.5 BaseTextarea -->
         <article class="component-card">
           <header class="card-header">
             <div>
@@ -548,7 +594,6 @@ const workbenchMockLead: RankedLead = {
           </footer>
         </article>
 
-        <!-- 1.6 BaseList -->
         <article class="component-card">
           <header class="card-header">
             <div>
@@ -580,143 +625,6 @@ const workbenchMockLead: RankedLead = {
           </footer>
         </article>
 
-        <!-- 1.7 VaultSecretForm -->
-        <article class="component-card">
-          <header class="card-header">
-            <div>
-              <h3 class="component-name">VaultSecretForm</h3>
-              <p class="component-desc">Extracted form sub-tree primitive managing credential category schemas, reactive validation, and payload binding.</p>
-            </div>
-            <span class="filepath-tag">src/shared/ui/VaultSecretForm.vue</span>
-          </header>
-
-          <div class="staging-surface flex-col">
-            <VaultSecretForm
-              v-model="formDemoSecret"
-              id-prefix="wb-vault-form"
-              @valid-change="(valid) => isFormDemoValid = valid"
-            />
-          </div>
-
-          <footer class="card-footer">
-            <span class="counter-label">Form Validation Status:</span>
-            <span :class="['counter-badge', isFormDemoValid ? 'text-emerald' : 'text-amber']">
-              {{ isFormDemoValid ? 'Valid (Ready for Dispatch)' : 'Incomplete (Required Fields Missing)' }}
-            </span>
-          </footer>
-        </article>
-
-        <!-- 1.8 ContractAgreementForm -->
-        <article class="component-card">
-          <header class="card-header">
-            <div>
-              <h3 class="component-name">ContractAgreementForm</h3>
-              <p class="component-desc">Extracted agreement sub-tree binding service catalog options, agreement billing rate, and contract scope.</p>
-            </div>
-            <span class="filepath-tag">src/shared/ui/ContractAgreementForm.vue</span>
-          </header>
-
-          <div class="staging-surface flex-col">
-            <ContractAgreementForm
-              id-prefix="wb-contract-form"
-              :services="workbenchCatalogServices"
-              initial-service-code="SVC-RETAINER"
-              :initial-billing-rate="150"
-              @valid-change="(valid) => isContractFormValid = valid"
-              @update:model-value="(payload) => formDemoContract = payload"
-            />
-          </div>
-
-          <footer class="card-footer">
-            <span class="counter-label">Contract Form Status:</span>
-            <span :class="['counter-badge', isContractFormValid ? 'text-emerald' : 'text-amber']">
-              {{ isContractFormValid ? 'Valid Agreement Scope' : 'Incomplete Fields' }}
-            </span>
-          </footer>
-        </article>
-
-        <!-- 1.9 LogWorkForm -->
-        <article class="component-card">
-          <header class="card-header">
-            <div>
-              <h3 class="component-name">LogWorkForm</h3>
-              <p class="component-desc">Extracted maintenance work logging sub-tree enforcing positive minutes, category allocation, and description.</p>
-            </div>
-            <span class="filepath-tag">src/shared/ui/LogWorkForm.vue</span>
-          </header>
-
-          <div class="staging-surface flex-col">
-            <LogWorkForm
-              id-prefix="wb-logwork-form"
-              :has-active-care-plan="true"
-              :initial-minutes="20"
-              initial-description="Proactive WordPress core security patching"
-              @valid-change="(valid) => isLogWorkFormValid = valid"
-              @update:model-value="(payload) => formDemoLogWork = payload"
-            />
-          </div>
-
-          <footer class="card-footer">
-            <span class="counter-label">Log Work Status:</span>
-            <span :class="['counter-badge', isLogWorkFormValid ? 'text-emerald' : 'text-amber']">
-              {{ isLogWorkFormValid ? 'Valid Timecard Entry' : 'Incomplete Description/Minutes' }}
-            </span>
-          </footer>
-        </article>
-
-        <!-- 1.10 ManualLeadForm -->
-        <article class="component-card">
-          <header class="card-header">
-            <div>
-              <h3 class="component-name">ManualLeadForm</h3>
-              <p class="component-desc">Extracted manual prospect intake sub-tree standardizing business identity, URL, and phone contact validation.</p>
-            </div>
-            <span class="filepath-tag">src/shared/ui/ManualLeadForm.vue</span>
-          </header>
-
-          <div class="staging-surface flex-col">
-            <ManualLeadForm
-              id-prefix="wb-manual-lead-form"
-              v-model="formDemoManualLead"
-              @valid-change="(valid) => isManualLeadFormValid = valid"
-            />
-          </div>
-
-          <footer class="card-footer">
-            <span class="counter-label">Manual Lead Form Status:</span>
-            <span :class="['counter-badge', isManualLeadFormValid ? 'text-emerald' : 'text-amber']">
-              {{ isManualLeadFormValid ? 'Valid Intake Payload' : 'Business Name Required' }}
-            </span>
-          </footer>
-        </article>
-
-        <!-- 1.11 DisqualifyLeadForm -->
-        <article class="component-card">
-          <header class="card-header">
-            <div>
-              <h3 class="component-name">DisqualifyLeadForm</h3>
-              <p class="component-desc">Extracted prospect disqualification sub-tree capturing categorized reason, triage notes, and suppression flags.</p>
-            </div>
-            <span class="filepath-tag">src/shared/ui/DisqualifyLeadForm.vue</span>
-          </header>
-
-          <div class="staging-surface flex-col">
-            <DisqualifyLeadForm
-              id-prefix="wb-disqualify-form"
-              v-model="formDemoDisqualify"
-              @valid-change="(valid) => isDisqualifyFormValid = valid"
-            />
-          </div>
-
-          <footer class="card-footer">
-            <span class="counter-label">Disqualification Form Status:</span>
-            <span :class="['counter-badge', isDisqualifyFormValid ? 'text-emerald' : 'text-amber']">
-              {{ isDisqualifyFormValid ? 'Valid Archive Record' : 'Reason Required' }}
-            </span>
-          </footer>
-        </article>
-
-        <!-- 1.12 BaseCard -->
         <article class="component-card">
           <header class="card-header">
             <div>
@@ -767,7 +675,6 @@ const workbenchMockLead: RankedLead = {
           </footer>
         </article>
 
-        <!-- 1.9 BaseTable -->
         <article class="component-card">
           <header class="card-header">
             <div>
@@ -791,7 +698,6 @@ const workbenchMockLead: RankedLead = {
           </footer>
         </article>
 
-        <!-- 1.14 BaseAlert -->
         <article class="component-card">
           <header class="card-header">
             <div>
@@ -836,7 +742,6 @@ const workbenchMockLead: RankedLead = {
           </footer>
         </article>
 
-        <!-- 1.15 BaseMetricCard -->
         <article class="component-card">
           <header class="card-header">
             <div>
@@ -879,77 +784,519 @@ const workbenchMockLead: RankedLead = {
             <span class="counter-badge">{{ metricCardClicks }} Clicks</span>
           </footer>
         </article>
+
+        <article class="component-card">
+          <header class="card-header">
+            <div>
+              <h3 class="component-name">BaseRepeater</h3>
+              <p class="component-desc">Dynamic array repeater primitive with text inputs, row insertion, and indexed removal buttons.</p>
+            </div>
+            <span class="filepath-tag">src/shared/ui/BaseRepeater.vue</span>
+          </header>
+
+          <div class="staging-surface grid-2">
+            <div class="input-cell">
+              <label class="cell-label">Standard Deliverables Repeater</label>
+              <BaseRepeater
+                v-model="repeaterDemoItems"
+                label="Scope Deliverables"
+                placeholder="Enter scope line item..."
+                add-button-label="Add Another Item"
+                remove-button-label="Remove"
+              />
+              <span class="cell-feedback font-mono">Count: {{ repeaterDemoItems.length }} items</span>
+              <pre class="schema-json" style="margin-top: 0.5rem; max-height: 120px; overflow-y: auto;">{{ JSON.stringify(repeaterDemoItems, null, 2) }}</pre>
+            </div>
+
+            <div class="input-cell">
+              <label class="cell-label">Constrained Repeater (Min: 1, Max: 4)</label>
+              <BaseRepeater
+                v-model="repeaterMinMaxItems"
+                label="Required Retainer Terms"
+                placeholder="Enter core term..."
+                :min-items="1"
+                :max-items="4"
+                add-button-label="Add Term"
+              />
+              <span class="cell-feedback font-mono">Min: 1 / Max: 4 (Current: {{ repeaterMinMaxItems.length }})</span>
+              <pre class="schema-json" style="margin-top: 0.5rem; max-height: 120px; overflow-y: auto;">{{ JSON.stringify(repeaterMinMaxItems, null, 2) }}</pre>
+            </div>
+          </div>
+
+          <footer class="card-footer-note">
+            Provides a uniform repeatable row primitive for deliverables, exclusions, and custom tag collections. Dispatches reactive <code>update:modelValue</code>, <code>add</code>, and <code>remove</code> events.
+          </footer>
+        </article>
       </section>
 
+
       <!-- ================================================================= -->
-      <!-- WAVE 2: STRUCTURAL SHELL                                          -->
+      <!-- DECOUPLED FORMS & SUB-TREES -->
       <!-- ================================================================= -->
-      <section id="wave-2" class="wave-section">
+      <section id="cat-forms" class="wave-section">
         <div class="section-header">
           <div class="section-title-cluster">
             <span class="wave-number">2</span>
             <div>
-              <h2 class="section-heading">Wave 2: Structural Shell</h2>
-              <p class="section-subtext">Headless modal shell governing body scroll locking, teleporting, and dismissal.</p>
+              <h2 class="section-heading">Decoupled Forms & Sub-trees</h2>
+              <p class="section-subtext">Pure form presentation atoms with reactive v-model binding and validation status signaling.</p>
             </div>
           </div>
-          <span class="count-tag">6 Components</span>
+          <span class="count-tag">7 Components</span>
         </div>
 
         <article class="component-card">
           <header class="card-header">
             <div>
-              <h3 class="component-name">BaseModal</h3>
-              <p class="component-desc">Teleported shell with Escape listener, backdrop dismiss, and max-w-xl (640px) geometry.</p>
+              <h3 class="component-name">VaultSecretForm</h3>
+              <p class="component-desc">Extracted form sub-tree primitive managing credential category schemas, reactive validation, and payload binding.</p>
             </div>
-            <span class="filepath-tag">src/shared/ui/BaseModal.vue</span>
+            <span class="filepath-tag">src/shared/ui/VaultSecretForm.vue</span>
           </header>
 
-          <div class="staging-surface flex-row items-center">
-            <div class="shell-info">
-              <span class="shell-title">Interactive Modal Verification</span>
-              <p class="shell-subtext">
-                Click below to launch the modal shell. Test backdrop interception, the Escape key, and body scroll lock.
-              </p>
-            </div>
-            <BaseButton label="Launch BaseModal Verification Shell" variant="primary" @click="isModalOpen = true" />
+          <div class="staging-surface flex-col">
+            <VaultSecretForm
+              v-model="formDemoSecret"
+              id-prefix="wb-vault-form"
+              @valid-change="(valid) => isFormDemoValid = valid"
+            />
           </div>
 
-          <div class="feature-grid">
-            <div class="feature-box">
-              <span class="feature-title">DOM Teleport</span>
-              <p class="feature-text">Mounts into <code>document.body</code> to prevent z-index clipping.</p>
-            </div>
-            <div class="feature-box">
-              <span class="feature-title">Scroll Lock</span>
-              <p class="feature-text">Locks background scrolling and restores cleanly on dismiss.</p>
-            </div>
-            <div class="feature-box">
-              <span class="feature-title">Max-Width 640px</span>
-              <p class="feature-text">Centered flexbox canvas preventing viewport bleed.</p>
-            </div>
-          </div>
+          <footer class="card-footer">
+            <span class="counter-label">Form Validation Status:</span>
+            <span :class="['counter-badge', isFormDemoValid ? 'text-emerald' : 'text-amber']">
+              {{ isFormDemoValid ? 'Valid (Ready for Dispatch)' : 'Incomplete (Required Fields Missing)' }}
+            </span>
+          </footer>
 
-          <BaseModal :show="isModalOpen" title="BaseModal Verification Shell" @close="isModalOpen = false">
-            <div style="padding: 1rem 0;">
-              <p style="color: #475569; font-size: 0.9rem; margin-bottom: 1rem;">
-                This modal is rendered cleanly via <code>&lt;Teleport to="body"&gt;</code> without canvas bleed.
-              </p>
-              <div>
-                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #334155; text-transform: uppercase; margin-bottom: 0.35rem;">Focus Target</label>
-                <BaseInput v-model="modalSampleInput" placeholder="Test input inside modal..." />
-              </div>
-            </div>
-            <template #footer>
-              <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
-                <BaseButton label="Dismiss" variant="secondary" @click="isModalOpen = false" />
-                <BaseButton label="Confirm" variant="primary" @click="isModalOpen = false" />
-              </div>
-            </template>
-          </BaseModal>
+          <div class="payload-box">
+            <span class="payload-header">Active Submitted Schema (v-model):</span>
+            <pre class="payload-code">{{ JSON.stringify(formDemoSecret, null, 2) }}</pre>
+          </div>
         </article>
 
-        <!-- 2.2 BaseWizard -->
+        <article class="component-card">
+          <header class="card-header">
+            <div>
+              <h3 class="component-name">ContractAgreementForm</h3>
+              <p class="component-desc">Extracted agreement sub-tree binding service catalog options, agreement billing rate, and contract scope.</p>
+            </div>
+            <span class="filepath-tag">src/shared/ui/ContractAgreementForm.vue</span>
+          </header>
+
+          <div class="staging-surface flex-col">
+            <ContractAgreementForm
+              id-prefix="wb-contract-form"
+              :services="workbenchCatalogServices"
+              initial-service-code="SVC-RETAINER"
+              :initial-billing-rate="150"
+              @valid-change="(valid) => isContractFormValid = valid"
+              @update:model-value="(payload) => formDemoContract = payload"
+            />
+          </div>
+
+          <footer class="card-footer">
+            <span class="counter-label">Contract Form Status:</span>
+            <span :class="['counter-badge', isContractFormValid ? 'text-emerald' : 'text-amber']">
+              {{ isContractFormValid ? 'Valid Agreement Scope' : 'Incomplete Fields' }}
+            </span>
+          </footer>
+
+          <div class="payload-box">
+            <span class="payload-header">Active Submitted Schema (v-model):</span>
+            <pre class="payload-code">{{ JSON.stringify(formDemoContract, null, 2) }}</pre>
+          </div>
+        </article>
+
+        <article class="component-card">
+          <header class="card-header">
+            <div>
+              <h3 class="component-name">LogWorkForm</h3>
+              <p class="component-desc">Extracted maintenance work logging sub-tree enforcing positive minutes, category allocation, and description.</p>
+            </div>
+            <span class="filepath-tag">src/shared/ui/LogWorkForm.vue</span>
+          </header>
+
+          <div class="staging-surface flex-col">
+            <LogWorkForm
+              id-prefix="wb-logwork-form"
+              :has-active-care-plan="true"
+              :initial-minutes="20"
+              initial-description="Proactive WordPress core security patching"
+              @valid-change="(valid) => isLogWorkFormValid = valid"
+              @update:model-value="(payload) => formDemoLogWork = payload"
+            />
+          </div>
+
+          <footer class="card-footer">
+            <span class="counter-label">Log Work Status:</span>
+            <span :class="['counter-badge', isLogWorkFormValid ? 'text-emerald' : 'text-amber']">
+              {{ isLogWorkFormValid ? 'Valid Timecard Entry' : 'Incomplete Description/Minutes' }}
+            </span>
+          </footer>
+
+          <div class="payload-box">
+            <span class="payload-header">Active Submitted Schema (v-model):</span>
+            <pre class="payload-code">{{ JSON.stringify(formDemoLogWork, null, 2) }}</pre>
+          </div>
+        </article>
+
+        <article class="component-card">
+          <header class="card-header">
+            <div>
+              <h3 class="component-name">ManualLeadForm</h3>
+              <p class="component-desc">Extracted manual prospect intake sub-tree standardizing business identity, URL, and phone contact validation.</p>
+            </div>
+            <span class="filepath-tag">src/shared/ui/ManualLeadForm.vue</span>
+          </header>
+
+          <div class="staging-surface flex-col">
+            <ManualLeadForm
+              id-prefix="wb-manual-lead-form"
+              v-model="formDemoManualLead"
+              @valid-change="(valid) => isManualLeadFormValid = valid"
+            />
+          </div>
+
+          <footer class="card-footer">
+            <span class="counter-label">Manual Lead Form Status:</span>
+            <span :class="['counter-badge', isManualLeadFormValid ? 'text-emerald' : 'text-amber']">
+              {{ isManualLeadFormValid ? 'Valid Intake Payload' : 'Business Name Required' }}
+            </span>
+          </footer>
+
+          <div class="payload-box">
+            <span class="payload-header">Active Submitted Schema (v-model):</span>
+            <pre class="payload-code">{{ JSON.stringify(formDemoManualLead, null, 2) }}</pre>
+          </div>
+        </article>
+
+        <article class="component-card">
+          <header class="card-header">
+            <div>
+              <h3 class="component-name">DisqualifyLeadForm</h3>
+              <p class="component-desc">Extracted prospect disqualification sub-tree capturing categorized reason, triage notes, and suppression flags.</p>
+            </div>
+            <span class="filepath-tag">src/shared/ui/DisqualifyLeadForm.vue</span>
+          </header>
+
+          <div class="staging-surface flex-col">
+            <DisqualifyLeadForm
+              id-prefix="wb-disqualify-form"
+              v-model="formDemoDisqualify"
+              @valid-change="(valid) => isDisqualifyFormValid = valid"
+            />
+          </div>
+
+          <footer class="card-footer">
+            <span class="counter-label">Disqualification Form Status:</span>
+            <span :class="['counter-badge', isDisqualifyFormValid ? 'text-emerald' : 'text-amber']">
+              {{ isDisqualifyFormValid ? 'Valid Archive Record' : 'Reason Required' }}
+            </span>
+          </footer>
+
+          <div class="payload-box">
+            <span class="payload-header">Active Submitted Schema (v-model):</span>
+            <pre class="payload-code">{{ JSON.stringify(formDemoDisqualify, null, 2) }}</pre>
+          </div>
+        </article>
+        <article class="component-card">
+          <header class="card-header">
+            <div>
+              <h3 class="component-name">CreateCoreServiceForm</h3>
+              <p class="component-desc">Dedicated form sub-tree for fixed-scope consulting services with rank selection, price bounds, and audit triggers.</p>
+            </div>
+            <span class="filepath-tag">src/shared/ui/CreateCoreServiceForm.vue</span>
+          </header>
+
+          <div class="staging-surface flex-col">
+            <CreateCoreServiceForm
+              id-prefix="wb-core-service-form"
+              v-model="formDemoCoreService"
+              @valid-change="(valid) => isCoreServiceFormValid = valid"
+            />
+          </div>
+
+          <footer class="card-footer">
+            <span class="counter-label">Core Service Form Status:</span>
+            <span :class="['counter-badge', isCoreServiceFormValid ? 'text-emerald' : 'text-amber']">
+              {{ isCoreServiceFormValid ? 'Valid Core Service Offering' : 'Incomplete Required Fields' }}
+            </span>
+          </footer>
+
+          <div class="payload-box">
+            <span class="payload-header">Active Submitted Schema (v-model):</span>
+            <pre class="payload-code">{{ JSON.stringify(formDemoCoreService, null, 2) }}</pre>
+          </div>
+        </article>
+
+        <article class="component-card">
+          <header class="card-header">
+            <div>
+              <h3 class="component-name">CreateAddOnForm</h3>
+              <p class="component-desc">Dedicated form sub-tree for recurring care plan subscriptions with monthly rate, support cap minutes, and continuity deliverables.</p>
+            </div>
+            <span class="filepath-tag">src/shared/ui/CreateAddOnForm.vue</span>
+          </header>
+
+          <div class="staging-surface flex-col">
+            <CreateAddOnForm
+              id-prefix="wb-add-on-form"
+              v-model="formDemoAddOn"
+              @valid-change="(valid) => isAddOnFormValid = valid"
+            />
+          </div>
+
+          <footer class="card-footer">
+            <span class="counter-label">Add-on Plan Form Status:</span>
+            <span :class="['counter-badge', isAddOnFormValid ? 'text-emerald' : 'text-amber']">
+              {{ isAddOnFormValid ? 'Valid Add-on Plan' : 'Incomplete Required Fields' }}
+            </span>
+          </footer>
+
+          <div class="payload-box">
+            <span class="payload-header">Active Submitted Schema (v-model):</span>
+            <pre class="payload-code">{{ JSON.stringify(formDemoAddOn, null, 2) }}</pre>
+          </div>
+        </article>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- APPLICATION SHELL & NAVIGATION -->
+      <!-- ================================================================= -->
+      <section id="cat-shell" class="wave-section">
+        <div class="section-header">
+          <div class="section-title-cluster">
+            <span class="wave-number">3</span>
+            <div>
+              <h2 class="section-heading">Application Shell & Navigation</h2>
+              <p class="section-subtext">Structural navigation rails, orientation headers, responsive stage canvases, and flyout drawer workspaces.</p>
+            </div>
+          </div>
+          <span class="count-tag">5 Components</span>
+        </div>
+
+        <article class="component-card">
+          <header class="card-header">
+            <div>
+              <h3 class="component-name">BaseAside</h3>
+              <p class="component-desc">Controlled vertical navigation rail supporting expanded (240px) and collapsed (64px) interactive modes.</p>
+            </div>
+            <span class="filepath-tag">src/shared/ui/BaseAside.vue</span>
+          </header>
+
+          <div class="staging-surface flex-col" style="align-items: center;">
+            <div style="height: 380px; width: 100%; max-width: 520px; border: 1px solid var(--border-color); border-radius: 8px; position: relative; display: flex; overflow: visible;">
+              <BaseAside
+                :collapsed="isAsideCollapsed"
+                :sections="demoNavSections"
+                :active-id="activeAsideNavId"
+                brand-title="SMB Ops"
+                brand-subtitle="Practice Engine"
+                @toggle-collapse="isAsideCollapsed = !isAsideCollapsed"
+                @select-item="handleAsideItemSelect"
+              >
+                <template #footer>
+                  <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); width: 100%;">
+                    <span v-if="!isAsideCollapsed">v1.2.0 • Active</span>
+                    <ThemeToggle />
+                  </div>
+                </template>
+              </BaseAside>
+
+              <div style="flex: 1; padding: 1.5rem; background: var(--bg-app); display: flex; flex-direction: column; gap: 0.75rem;">
+                <span style="font-size: 0.8rem; font-weight: 700;">Simulated Stage</span>
+                <p style="font-size: 0.75rem; color: var(--text-secondary); margin: 0;">
+                  Active Route: <code style="font-weight: 700; color: var(--accent-primary);">{{ activeAsideNavId }}</code>
+                </p>
+                <p style="font-size: 0.75rem; color: var(--text-secondary); margin: 0;">
+                  Tiers rendered: <strong>Primary Funnel</strong> (with count badges), <strong>Secondary Catalogs</strong>, and <strong>Tertiary Tools</strong>.
+                </p>
+                <BaseButton
+                  :label="isAsideCollapsed ? 'Expand Rail (240px)' : 'Collapse to Rail (64px)'"
+                  variant="secondary"
+                  @click="isAsideCollapsed = !isAsideCollapsed"
+                />
+              </div>
+            </div>
+          </div>
+
+          <footer class="card-footer-note">
+            Provides unambiguous visual hierarchy across acquisition funnel, catalogs, and documentation with popover tooltips in collapsed mode.
+          </footer>
+        </article>
+
+        <article class="component-card">
+          <header class="card-header">
+            <div>
+              <h3 class="component-name">BaseBreadcrumb</h3>
+              <p class="component-desc">Orientation breadcrumb trail supporting nested hierarchies, custom separators, and router navigation emission.</p>
+            </div>
+            <span class="filepath-tag">src/shared/ui/BaseBreadcrumb.vue</span>
+          </header>
+
+          <div class="staging-surface flex-col" style="gap: 1rem;">
+            <div style="background: var(--bg-surface); padding: 1rem; border: 1px solid var(--border-color); border-radius: 6px;">
+              <BaseBreadcrumb
+                :items="demoBreadcrumbs"
+                @navigate="handleBreadcrumbClick"
+              />
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-secondary);">
+              Last Clicked Node: <strong>{{ lastBreadcrumbNav }}</strong>
+            </div>
+          </div>
+
+          <footer class="card-footer-note">
+            Enforces strict aria-current="page" accessibility semantics and non-navigable leaf styling.
+          </footer>
+        </article>
+
+        <article class="component-card">
+          <header class="card-header">
+            <div>
+              <h3 class="component-name">BasePageHeader</h3>
+              <p class="component-desc">Top-of-view orientation header unifying breadcrumbs, page title, subtitle, and primary stage actions.</p>
+            </div>
+            <span class="filepath-tag">src/shared/ui/BasePageHeader.vue</span>
+          </header>
+
+          <div class="staging-surface flex-col">
+            <div style="background: var(--bg-surface); padding: 1.25rem; border: 1px solid var(--border-color); border-radius: 6px; width: 100%;">
+              <BasePageHeader
+                title="Client Account Ledger"
+                subtitle="Active service retainers, SLA fulfillment, and credential vaults"
+                :breadcrumbs="demoBreadcrumbs"
+                @navigate-breadcrumb="handleBreadcrumbClick"
+              >
+                <template #actions>
+                  <BaseButton label="Export Ledger" variant="secondary" />
+                  <BaseButton label="Create Account" variant="primary" />
+                </template>
+                <template #context>
+                  <div style="display: inline-flex; gap: 0.5rem; align-items: center; font-size: 0.8rem; color: var(--text-muted);">
+                    <BaseBadge label="14 Active Retainers" variant="emerald" />
+                    <span>Last audited: 10m ago</span>
+                  </div>
+                </template>
+              </BasePageHeader>
+            </div>
+          </div>
+
+          <footer class="card-footer-note">
+            Responsive flexbox structure drops actions below title row seamlessly on mobile (&le;640px).
+          </footer>
+        </article>
+
+        <article class="component-card">
+          <header class="card-header">
+            <div>
+              <h3 class="component-name">BasePageContainer</h3>
+              <p class="component-desc">Standardized viewport stage wrapper establishing max-width constraints, fluid width options, and vertical scroll containment.</p>
+            </div>
+            <span class="filepath-tag">src/shared/ui/BasePageContainer.vue</span>
+          </header>
+
+          <div class="staging-surface flex-col">
+            <div style="height: 180px; border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column;">
+              <BasePageContainer max-width="100%">
+                <div style="font-size: 0.85rem; color: var(--text-secondary); background: var(--bg-surface); padding: 1.25rem; border: 1px solid var(--border-color); border-radius: 6px;">
+                  Pure Stage Canvas: Content scrolls smoothly within container bounds while maintaining consistent horizontal padding rhythms.
+                </div>
+              </BasePageContainer>
+            </div>
+          </div>
+
+          <footer class="card-footer-note">
+            Decoupled from headers and actions: use BasePageHeader inside this container for route title and breadcrumb orientation.
+          </footer>
+        </article>
+
+        <article class="component-card">
+          <header class="card-header">
+            <div>
+              <h3 class="component-name">BaseDrawer</h3>
+              <p class="component-desc">Contextual flyout overlay translating from right screen edge, sized flush against the Aside Navigation.</p>
+            </div>
+            <span class="filepath-tag">src/shared/ui/BaseDrawer.vue</span>
+          </header>
+
+          <div class="staging-surface flex-col" style="gap: 1.25rem;">
+            <div class="modal-info">
+              <span class="modal-launch-title">Launch Flyout Drawer By Size Variant</span>
+              <p class="modal-launch-subtext">Slides across the Dashboard Stage and stops flush at the 240px Aside margin.</p>
+            </div>
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+              <BaseButton label="Inspect Drawer (sm: 420px)" variant="secondary" @click="openDrawerWithSize('sm')" />
+              <BaseButton label="Form Drawer (md: 680px)" variant="primary" @click="openDrawerWithSize('md')" />
+              <BaseButton label="Deep Drawer (lg: 960px)" variant="secondary" @click="openDrawerWithSize('lg')" />
+              <BaseButton label="Canvas Drawer (full: 100%)" variant="secondary" @click="openDrawerWithSize('full')" />
+            </div>
+
+            <!-- Architectural Governance Callout -->
+            <div style="background-color: var(--bg-surface-subtle); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
+              <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.05em;">
+                📐 Flyout Drawer vs. Stage vs. Modal Architectural Governance
+              </span>
+              <div style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.5; display: flex; flex-direction: column; gap: 0.4rem;">
+                <div>
+                  <strong>• Inspect Drawer (sm: 420px):</strong> Fast contextual preview (e.g. Lead Dossier summary, audit score breakdown) preserving table position and scroll context.
+                </div>
+                <div>
+                  <strong>• Form Drawer (md: 680px / lg: 960px):</strong> Multi-field editing workflows (e.g. Client Account updates, Work logging) without context switching or navigating away.
+                </div>
+                <div>
+                  <strong>• Canvas Drawer (full: calc(100vw - aside)):</strong> Focused, immersive work environments (e.g. Strategy/Doctrine Workspace, Client Dossier) requiring maximum workspace width while maintaining Aside rail orientation.
+                </div>
+                <div>
+                  <strong>• Update Stage (Router Navigation):</strong> Use when switching top-level operational domains (e.g. Triage Dashboard ↔ Service Catalog).
+                </div>
+                <div>
+                  <strong>• BaseModal Dialog:</strong> Reserved for atomic, blocking confirmation or creation flows (e.g. Confirm Delete, Wizard Deployment).
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <BaseDrawer
+            :show="isDrawerOpen"
+            :size="drawerSize"
+            :title="`Workspace Drawer — [${drawerSize.toUpperCase()}]`"
+            subtitle="Contextual Lead & Operational Inspection"
+            aside-width="240px"
+            @close="isDrawerOpen = false"
+          >
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+              <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0;">
+                Active size: <code>{{ drawerSize }}</code>. Contextual workspace canvas for deep records editing without losing aside navigational orientation.
+              </p>
+              <BaseInput label="Lead Business Name" model-value="Harbor Artisanal Bakery" />
+              <BaseInput label="Domain / URL" model-value="https://harborbakery.example.com" />
+            </div>
+
+            <template #footer>
+              <BaseButton label="Close (Esc)" variant="secondary" @click="isDrawerOpen = false" />
+              <BaseButton label="Save Changes" variant="primary" @click="isDrawerOpen = false" />
+            </template>
+          </BaseDrawer>
+        </article>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- GUIDED WORKFLOW ENGINES -->
+      <!-- ================================================================= -->
+      <section id="cat-wizards" class="wave-section">
+        <div class="section-header">
+          <div class="section-title-cluster">
+            <span class="wave-number">4</span>
+            <div>
+              <h2 class="section-heading">Guided Workflow Engines</h2>
+              <p class="section-subtext">Multi-step canvas engines and dialog wizards with step progression and validation guardrails.</p>
+            </div>
+          </div>
+          <span class="count-tag">2 Components</span>
+        </div>
+
         <article class="component-card">
           <header class="card-header">
             <div>
@@ -1022,7 +1369,6 @@ const workbenchMockLead: RankedLead = {
           </footer>
         </article>
 
-        <!-- 2.3 ModalWizard -->
         <article class="component-card">
           <header class="card-header">
             <div>
@@ -1065,234 +1411,196 @@ const workbenchMockLead: RankedLead = {
             </template>
           </ModalWizard>
         </article>
-
-        <!-- 2.4 BaseAside -->
-        <article class="component-card">
-          <header class="card-header">
-            <div>
-              <h3 class="component-name">BaseAside</h3>
-              <p class="component-desc">Controlled vertical navigation rail supporting expanded (240px) and collapsed (64px) interactive modes.</p>
-            </div>
-            <span class="filepath-tag">src/shared/ui/BaseAside.vue</span>
-          </header>
-
-          <div class="staging-surface flex-col" style="align-items: center;">
-            <div style="height: 380px; width: 100%; max-width: 520px; border: 1px solid var(--border-color); border-radius: 8px; position: relative; display: flex; overflow: visible;">
-              <BaseAside
-                :collapsed="isAsideCollapsed"
-                :sections="demoNavSections"
-                :active-id="activeAsideNavId"
-                brand-title="SMB Ops"
-                brand-subtitle="Practice Engine"
-                @toggle-collapse="isAsideCollapsed = !isAsideCollapsed"
-                @select-item="handleAsideItemSelect"
-              >
-                <template #footer>
-                  <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); width: 100%;">
-                    <span v-if="!isAsideCollapsed">v1.2.0 • Active</span>
-                    <ThemeToggle />
-                  </div>
-                </template>
-              </BaseAside>
-
-              <div style="flex: 1; padding: 1.5rem; background: var(--bg-app); display: flex; flex-direction: column; gap: 0.75rem;">
-                <span style="font-size: 0.8rem; font-weight: 700;">Simulated Stage</span>
-                <p style="font-size: 0.75rem; color: var(--text-secondary); margin: 0;">
-                  Active Route: <code style="font-weight: 700; color: var(--accent-primary);">{{ activeAsideNavId }}</code>
-                </p>
-                <p style="font-size: 0.75rem; color: var(--text-secondary); margin: 0;">
-                  Tiers rendered: <strong>Primary Funnel</strong> (with count badges), <strong>Secondary Catalogs</strong>, and <strong>Tertiary Tools</strong>.
-                </p>
-                <BaseButton
-                  :label="isAsideCollapsed ? 'Expand Rail (240px)' : 'Collapse to Rail (64px)'"
-                  variant="secondary"
-                  @click="isAsideCollapsed = !isAsideCollapsed"
-                />
-              </div>
-            </div>
-          </div>
-
-          <footer class="card-footer-note">
-            Provides unambiguous visual hierarchy across acquisition funnel, catalogs, and documentation with popover tooltips in collapsed mode.
-          </footer>
-        </article>
-
-        <!-- 2.5 BasePageContainer -->
-        <article class="component-card">
-          <header class="card-header">
-            <div>
-              <h3 class="component-name">BasePageContainer</h3>
-              <p class="component-desc">Standardized viewport stage wrapper establishing max-width constraints, fluid width options, and vertical scroll containment.</p>
-            </div>
-            <span class="filepath-tag">src/shared/ui/BasePageContainer.vue</span>
-          </header>
-
-          <div class="staging-surface flex-col">
-            <div style="height: 180px; border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column;">
-              <BasePageContainer max-width="100%">
-                <div style="font-size: 0.85rem; color: var(--text-secondary); background: var(--bg-surface); padding: 1.25rem; border: 1px solid var(--border-color); border-radius: 6px;">
-                  Pure Stage Canvas: Content scrolls smoothly within container bounds while maintaining consistent horizontal padding rhythms.
-                </div>
-              </BasePageContainer>
-            </div>
-          </div>
-
-          <footer class="card-footer-note">
-            Decoupled from headers and actions: use BasePageHeader inside this container for route title and breadcrumb orientation.
-          </footer>
-        </article>
-
-        <!-- 2.5a BaseBreadcrumb -->
-        <article class="component-card">
-          <header class="card-header">
-            <div>
-              <h3 class="component-name">BaseBreadcrumb</h3>
-              <p class="component-desc">Orientation breadcrumb trail supporting nested hierarchies, custom separators, and router navigation emission.</p>
-            </div>
-            <span class="filepath-tag">src/shared/ui/BaseBreadcrumb.vue</span>
-          </header>
-
-          <div class="staging-surface flex-col" style="gap: 1rem;">
-            <div style="background: var(--bg-surface); padding: 1rem; border: 1px solid var(--border-color); border-radius: 6px;">
-              <BaseBreadcrumb
-                :items="demoBreadcrumbs"
-                @navigate="handleBreadcrumbClick"
-              />
-            </div>
-            <div style="font-size: 0.8rem; color: var(--text-secondary);">
-              Last Clicked Node: <strong>{{ lastBreadcrumbNav }}</strong>
-            </div>
-          </div>
-
-          <footer class="card-footer-note">
-            Enforces strict aria-current="page" accessibility semantics and non-navigable leaf styling.
-          </footer>
-        </article>
-
-        <!-- 2.5b BasePageHeader -->
-        <article class="component-card">
-          <header class="card-header">
-            <div>
-              <h3 class="component-name">BasePageHeader</h3>
-              <p class="component-desc">Top-of-view orientation header unifying breadcrumbs, page title, subtitle, and primary stage actions.</p>
-            </div>
-            <span class="filepath-tag">src/shared/ui/BasePageHeader.vue</span>
-          </header>
-
-          <div class="staging-surface flex-col">
-            <div style="background: var(--bg-surface); padding: 1.25rem; border: 1px solid var(--border-color); border-radius: 6px; width: 100%;">
-              <BasePageHeader
-                title="Client Account Ledger"
-                subtitle="Active service retainers, SLA fulfillment, and credential vaults"
-                :breadcrumbs="demoBreadcrumbs"
-                @navigate-breadcrumb="handleBreadcrumbClick"
-              >
-                <template #actions>
-                  <BaseButton label="Export Ledger" variant="secondary" />
-                  <BaseButton label="Create Account" variant="primary" />
-                </template>
-                <template #context>
-                  <div style="display: inline-flex; gap: 0.5rem; align-items: center; font-size: 0.8rem; color: var(--text-muted);">
-                    <BaseBadge label="14 Active Retainers" variant="emerald" />
-                    <span>Last audited: 10m ago</span>
-                  </div>
-                </template>
-              </BasePageHeader>
-            </div>
-          </div>
-
-          <footer class="card-footer-note">
-            Responsive flexbox structure drops actions below title row seamlessly on mobile (&le;640px).
-          </footer>
-        </article>
-
-        <!-- 2.6 BaseDrawer -->
-        <article class="component-card">
-          <header class="card-header">
-            <div>
-              <h3 class="component-name">BaseDrawer</h3>
-              <p class="component-desc">Contextual flyout overlay translating from right screen edge, sized flush against the Aside Navigation.</p>
-            </div>
-            <span class="filepath-tag">src/shared/ui/BaseDrawer.vue</span>
-          </header>
-
-          <div class="staging-surface flex-col" style="gap: 1.25rem;">
-            <div class="modal-info">
-              <span class="modal-launch-title">Launch Flyout Drawer By Size Variant</span>
-              <p class="modal-launch-subtext">Slides across the Dashboard Stage and stops flush at the 240px Aside margin.</p>
-            </div>
-            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
-              <BaseButton label="Inspect Drawer (sm: 420px)" variant="secondary" @click="openDrawerWithSize('sm')" />
-              <BaseButton label="Form Drawer (md: 680px)" variant="primary" @click="openDrawerWithSize('md')" />
-              <BaseButton label="Deep Drawer (lg: 960px)" variant="secondary" @click="openDrawerWithSize('lg')" />
-              <BaseButton label="Canvas Drawer (full: 100%)" variant="secondary" @click="openDrawerWithSize('full')" />
-            </div>
-
-            <!-- Architectural Governance Callout -->
-            <div style="background-color: var(--bg-surface-subtle); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
-              <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.05em;">
-                📐 Flyout Drawer vs. Stage vs. Modal Architectural Governance
-              </span>
-              <div style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.5; display: flex; flex-direction: column; gap: 0.4rem;">
-                <div>
-                  <strong>• Inspect Drawer (sm: 420px):</strong> Fast contextual preview (e.g. Lead Dossier summary, audit score breakdown) preserving table position and scroll context.
-                </div>
-                <div>
-                  <strong>• Form Drawer (md: 680px / lg: 960px):</strong> Multi-field editing workflows (e.g. Client Account updates, Work logging) without context switching or navigating away.
-                </div>
-                <div>
-                  <strong>• Canvas Drawer (full: calc(100vw - aside)):</strong> Focused, immersive work environments (e.g. Strategy/Doctrine Workspace, Client Dossier) requiring maximum workspace width while maintaining Aside rail orientation.
-                </div>
-                <div>
-                  <strong>• Update Stage (Router Navigation):</strong> Use when switching top-level operational domains (e.g. Triage Dashboard ↔ Service Catalog).
-                </div>
-                <div>
-                  <strong>• BaseModal Dialog:</strong> Reserved for atomic, blocking confirmation or creation flows (e.g. Confirm Delete, Wizard Deployment).
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <BaseDrawer
-            :show="isDrawerOpen"
-            :size="drawerSize"
-            :title="`Workspace Drawer — [${drawerSize.toUpperCase()}]`"
-            subtitle="Contextual Lead & Operational Inspection"
-            aside-width="240px"
-            @close="isDrawerOpen = false"
-          >
-            <div style="display: flex; flex-direction: column; gap: 1rem;">
-              <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0;">
-                Active size: <code>{{ drawerSize }}</code>. Contextual workspace canvas for deep records editing without losing aside navigational orientation.
-              </p>
-              <BaseInput label="Lead Business Name" model-value="Harbor Artisanal Bakery" />
-              <BaseInput label="Domain / URL" model-value="https://harborbakery.example.com" />
-            </div>
-
-            <template #footer>
-              <BaseButton label="Close (Esc)" variant="secondary" @click="isDrawerOpen = false" />
-              <BaseButton label="Save Changes" variant="primary" @click="isDrawerOpen = false" />
-            </template>
-          </BaseDrawer>
-        </article>
       </section>
 
       <!-- ================================================================= -->
-      <!-- WAVE 3: TELEMETRY & SELECTION                                     -->
+      <!-- DIALOG & FEATURE MODALS -->
       <!-- ================================================================= -->
-      <section id="wave-3" class="wave-section">
+      <section id="cat-modals" class="wave-section">
         <div class="section-header">
           <div class="section-title-cluster">
-            <span class="wave-number">3</span>
+            <span class="wave-number">5</span>
             <div>
-              <h2 class="section-heading">Wave 3: Telemetry & Selection</h2>
-              <p class="section-subtext">Care plan capacity threshold gauges and multi-select service catalog filters.</p>
+              <h2 class="section-heading">Dialog & Feature Modals</h2>
+              <p class="section-subtext">Teleported dialog shells and domain business dialogs with guarded dismissal and payload contracts.</p>
             </div>
           </div>
           <span class="count-tag">5 Components</span>
         </div>
 
-        <!-- 3.1 MaintenanceGauge -->
+        <article class="component-card">
+          <header class="card-header">
+            <div>
+              <h3 class="component-name">BaseModal</h3>
+              <p class="component-desc">Teleported shell with Escape listener, backdrop dismiss, and max-w-xl (640px) geometry.</p>
+            </div>
+            <span class="filepath-tag">src/shared/ui/BaseModal.vue</span>
+          </header>
+
+          <div class="staging-surface flex-row items-center">
+            <div class="shell-info">
+              <span class="shell-title">Interactive Modal Verification</span>
+              <p class="shell-subtext">
+                Click below to launch the modal shell. Test backdrop interception, the Escape key, and body scroll lock.
+              </p>
+            </div>
+            <BaseButton label="Launch BaseModal Verification Shell" variant="primary" @click="isModalOpen = true" />
+          </div>
+
+          <div class="feature-grid">
+            <div class="feature-box">
+              <span class="feature-title">DOM Teleport</span>
+              <p class="feature-text">Mounts into <code>document.body</code> to prevent z-index clipping.</p>
+            </div>
+            <div class="feature-box">
+              <span class="feature-title">Scroll Lock</span>
+              <p class="feature-text">Locks background scrolling and restores cleanly on dismiss.</p>
+            </div>
+            <div class="feature-box">
+              <span class="feature-title">Max-Width 640px</span>
+              <p class="feature-text">Centered flexbox canvas preventing viewport bleed.</p>
+            </div>
+          </div>
+
+          <BaseModal :show="isModalOpen" title="BaseModal Verification Shell" @close="isModalOpen = false">
+            <div style="padding: 1rem 0;">
+              <p style="color: #475569; font-size: 0.9rem; margin-bottom: 1rem;">
+                This modal is rendered cleanly via <code>&lt;Teleport to="body"&gt;</code> without canvas bleed.
+              </p>
+              <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #334155; text-transform: uppercase; margin-bottom: 0.35rem;">Focus Target</label>
+                <BaseInput v-model="modalSampleInput" placeholder="Test input inside modal..." />
+              </div>
+            </div>
+            <template #footer>
+              <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+                <BaseButton label="Dismiss" variant="secondary" @click="isModalOpen = false" />
+                <BaseButton label="Confirm" variant="primary" @click="isModalOpen = false" />
+              </div>
+            </template>
+          </BaseModal>
+        </article>
+
+        <article class="component-card">
+          <header class="card-header">
+            <div>
+              <div class="title-with-badge">
+                <h3 class="component-name">ContractAgreementModal</h3>
+                <BaseBadge variant="indigo" size="sm">Dual-Mode</BaseBadge>
+              </div>
+              <p class="component-desc">Single agreed rate input, agreement type toggle (Monthly vs One-Time), deliverables checklist preview.</p>
+            </div>
+            <span class="filepath-tag">src/features/client-contracts/ContractAgreementModal.vue</span>
+          </header>
+
+          <div class="staging-surface flex-row items-center">
+            <div class="modal-info">
+              <span class="modal-launch-title">Launch Contract Agreement Modal</span>
+              <p class="modal-launch-subtext">Attach a service agreement to a client account or stage during onboarding.</p>
+            </div>
+            <BaseButton label="Open Contract Agreement Modal" variant="primary" @click="showContractModal = true" />
+          </div>
+
+          <div v-if="lastSavedContractPayload" class="payload-box">
+            <span class="payload-header">Emitted Payload Contract:</span>
+            <pre class="payload-code">{{ lastSavedContractPayload }}</pre>
+          </div>
+        </article>
+
+        <article class="component-card">
+          <header class="card-header">
+            <div>
+              <div class="title-with-badge">
+                <h3 class="component-name">LogWorkModal</h3>
+                <BaseBadge variant="emerald" size="sm">Timecard</BaseBadge>
+              </div>
+              <p class="component-desc">Minutes spent input, 3-way work category dropdown (retainer, billable_extra, internal), care plan scope guardrails.</p>
+            </div>
+            <span class="filepath-tag">src/features/client-maintenance/LogWorkModal.vue</span>
+          </header>
+
+          <div class="staging-surface flex-row items-center">
+            <div class="modal-info">
+              <span class="modal-launch-title">Launch Log Work Modal</span>
+              <p class="modal-launch-subtext">Record maintenance work with care plan validation and category tags.</p>
+            </div>
+            <BaseButton label="Open Log Work Modal" variant="primary" @click="showLogWorkModal = true" />
+          </div>
+
+          <div v-if="lastSavedWorkPayload" class="payload-box">
+            <span class="payload-header">Emitted Payload Contract:</span>
+            <pre class="payload-code">{{ lastSavedWorkPayload }}</pre>
+          </div>
+        </article>
+
+        <article class="component-card">
+          <header class="card-header">
+            <div>
+              <div class="title-with-badge">
+                <h3 class="component-name">VaultSecretModal</h3>
+                <BaseBadge variant="amber" size="sm">Vault & Keys</BaseBadge>
+              </div>
+              <p class="component-desc">Secret label, credential type selector (SSH, WP Admin, DB, API Key), username, and password fields.</p>
+            </div>
+            <span class="filepath-tag">src/features/client-vault/VaultSecretModal.vue</span>
+          </header>
+
+          <div class="staging-surface flex-row items-center">
+            <div class="modal-info">
+              <span class="modal-launch-title">Launch Vault Secret Modal</span>
+              <p class="modal-launch-subtext">Store credentials securely in the client vault with masked previews.</p>
+            </div>
+            <BaseButton label="Open Vault Secret Modal" variant="primary" @click="showVaultModal = true" />
+          </div>
+
+          <div v-if="lastSavedVaultPayload" class="payload-box">
+            <span class="payload-header">Emitted Payload Contract:</span>
+            <pre class="payload-code">{{ lastSavedVaultPayload }}</pre>
+          </div>
+        </article>
+
+        <article class="component-card">
+          <header class="card-header">
+            <div>
+              <div class="title-with-badge">
+                <h3 class="component-name">ClientOnboardingModal</h3>
+                <BaseBadge variant="rose" size="sm">3-Step Wizard</BaseBadge>
+              </div>
+              <p class="component-desc">Streamlined 3-step wizard (Contact Details &rarr; Service Offerings &rarr; Vault & Dispatch).</p>
+            </div>
+            <span class="filepath-tag">src/features/client-onboarding/ClientOnboardingModal.vue</span>
+          </header>
+
+          <div class="staging-surface flex-row items-center">
+            <div class="modal-info">
+              <span class="modal-launch-title">Launch Client Onboarding Wizard</span>
+              <p class="modal-launch-subtext">Step through full onboarding flow and inspect composite payload emission.</p>
+            </div>
+            <BaseButton label="Open Client Onboarding Wizard" variant="primary" @click="showOnboardingModal = true" />
+          </div>
+
+          <div v-if="lastSavedOnboardPayload" class="payload-box">
+            <span class="payload-header">Emitted Payload Contract:</span>
+            <pre class="payload-code">{{ lastSavedOnboardPayload }}</pre>
+          </div>
+        </article>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- TELEMETRY, BADGES & FILTER ATOMS -->
+      <!-- ================================================================= -->
+      <section id="cat-telemetry" class="wave-section">
+        <div class="section-header">
+          <div class="section-title-cluster">
+            <span class="wave-number">6</span>
+            <div>
+              <h2 class="section-heading">Telemetry, Badges & Filter Atoms</h2>
+              <p class="section-subtext">Operational gauges, opportunity score tiers, audit findings chips, and multi-select filter dropdowns.</p>
+            </div>
+          </div>
+          <span class="count-tag">5 Components</span>
+        </div>
+
         <article class="component-card">
           <header class="card-header">
             <div>
@@ -1345,7 +1653,6 @@ const workbenchMockLead: RankedLead = {
           </footer>
         </article>
 
-        <!-- 3.2 ServiceFilterDropdown -->
         <article class="component-card">
           <header class="card-header">
             <div>
@@ -1377,7 +1684,6 @@ const workbenchMockLead: RankedLead = {
           </footer>
         </article>
 
-        <!-- 3.3 ProgressionIndicator -->
         <article class="component-card">
           <header class="card-header">
             <div>
@@ -1405,7 +1711,6 @@ const workbenchMockLead: RankedLead = {
           </footer>
         </article>
 
-        <!-- 3.4 ScoreBadge -->
         <article class="component-card">
           <header class="card-header">
             <div>
@@ -1442,7 +1747,6 @@ const workbenchMockLead: RankedLead = {
           </footer>
         </article>
 
-        <!-- 3.5 IssueChips -->
         <article class="component-card">
           <header class="card-header">
             <div>
@@ -1467,130 +1771,6 @@ const workbenchMockLead: RankedLead = {
           <footer class="card-footer-note">
             Provides instant visual indicators for key technical pain points driving sales outreach playbooks.
           </footer>
-        </article>
-      </section>
-
-      <!-- ================================================================= -->
-      <!-- WAVE 4: DOMAIN FEATURE MODALS                                     -->
-      <!-- ================================================================= -->
-      <section id="wave-4" class="wave-section">
-        <div class="section-header">
-          <div class="section-title-cluster">
-            <span class="wave-number">4</span>
-            <div>
-              <h2 class="section-heading">Wave 4: Domain Feature Modals</h2>
-              <p class="section-subtext">Business-critical dialogs composing BaseModal with clean payload emission contracts.</p>
-            </div>
-          </div>
-          <span class="count-tag">4 Modals</span>
-        </div>
-
-        <!-- 4.1 ContractAgreementModal -->
-        <article class="component-card">
-          <header class="card-header">
-            <div>
-              <div class="title-with-badge">
-                <h3 class="component-name">ContractAgreementModal</h3>
-                <BaseBadge variant="indigo" size="sm">Dual-Mode</BaseBadge>
-              </div>
-              <p class="component-desc">Single agreed rate input, agreement type toggle (Monthly vs One-Time), deliverables checklist preview.</p>
-            </div>
-            <span class="filepath-tag">src/features/client-contracts/ContractAgreementModal.vue</span>
-          </header>
-
-          <div class="staging-surface flex-row items-center">
-            <div class="modal-info">
-              <span class="modal-launch-title">Launch Contract Agreement Modal</span>
-              <p class="modal-launch-subtext">Attach a service agreement to a client account or stage during onboarding.</p>
-            </div>
-            <BaseButton label="Open Contract Agreement Modal" variant="primary" @click="showContractModal = true" />
-          </div>
-
-          <div v-if="lastSavedContractPayload" class="payload-box">
-            <span class="payload-header">Emitted Payload Contract:</span>
-            <pre class="payload-code">{{ lastSavedContractPayload }}</pre>
-          </div>
-        </article>
-
-        <!-- 4.2 LogWorkModal -->
-        <article class="component-card">
-          <header class="card-header">
-            <div>
-              <div class="title-with-badge">
-                <h3 class="component-name">LogWorkModal</h3>
-                <BaseBadge variant="emerald" size="sm">Timecard</BaseBadge>
-              </div>
-              <p class="component-desc">Minutes spent input, 3-way work category dropdown (retainer, billable_extra, internal), care plan scope guardrails.</p>
-            </div>
-            <span class="filepath-tag">src/features/client-maintenance/LogWorkModal.vue</span>
-          </header>
-
-          <div class="staging-surface flex-row items-center">
-            <div class="modal-info">
-              <span class="modal-launch-title">Launch Log Work Modal</span>
-              <p class="modal-launch-subtext">Record maintenance work with care plan validation and category tags.</p>
-            </div>
-            <BaseButton label="Open Log Work Modal" variant="primary" @click="showLogWorkModal = true" />
-          </div>
-
-          <div v-if="lastSavedWorkPayload" class="payload-box">
-            <span class="payload-header">Emitted Payload Contract:</span>
-            <pre class="payload-code">{{ lastSavedWorkPayload }}</pre>
-          </div>
-        </article>
-
-        <!-- 4.3 VaultSecretModal -->
-        <article class="component-card">
-          <header class="card-header">
-            <div>
-              <div class="title-with-badge">
-                <h3 class="component-name">VaultSecretModal</h3>
-                <BaseBadge variant="amber" size="sm">Vault & Keys</BaseBadge>
-              </div>
-              <p class="component-desc">Secret label, credential type selector (SSH, WP Admin, DB, API Key), username, and password fields.</p>
-            </div>
-            <span class="filepath-tag">src/features/client-vault/VaultSecretModal.vue</span>
-          </header>
-
-          <div class="staging-surface flex-row items-center">
-            <div class="modal-info">
-              <span class="modal-launch-title">Launch Vault Secret Modal</span>
-              <p class="modal-launch-subtext">Store credentials securely in the client vault with masked previews.</p>
-            </div>
-            <BaseButton label="Open Vault Secret Modal" variant="primary" @click="showVaultModal = true" />
-          </div>
-
-          <div v-if="lastSavedVaultPayload" class="payload-box">
-            <span class="payload-header">Emitted Payload Contract:</span>
-            <pre class="payload-code">{{ lastSavedVaultPayload }}</pre>
-          </div>
-        </article>
-
-        <!-- 4.4 ClientOnboardingModal -->
-        <article class="component-card">
-          <header class="card-header">
-            <div>
-              <div class="title-with-badge">
-                <h3 class="component-name">ClientOnboardingModal</h3>
-                <BaseBadge variant="rose" size="sm">3-Step Wizard</BaseBadge>
-              </div>
-              <p class="component-desc">Streamlined 3-step wizard (Contact Details &rarr; Service Offerings &rarr; Vault & Dispatch).</p>
-            </div>
-            <span class="filepath-tag">src/features/client-onboarding/ClientOnboardingModal.vue</span>
-          </header>
-
-          <div class="staging-surface flex-row items-center">
-            <div class="modal-info">
-              <span class="modal-launch-title">Launch Client Onboarding Wizard</span>
-              <p class="modal-launch-subtext">Step through full onboarding flow and inspect composite payload emission.</p>
-            </div>
-            <BaseButton label="Open Client Onboarding Wizard" variant="primary" @click="showOnboardingModal = true" />
-          </div>
-
-          <div v-if="lastSavedOnboardPayload" class="payload-box">
-            <span class="payload-header">Emitted Payload Contract:</span>
-            <pre class="payload-code">{{ lastSavedOnboardPayload }}</pre>
-          </div>
         </article>
       </section>
 

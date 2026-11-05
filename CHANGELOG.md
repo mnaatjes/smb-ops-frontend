@@ -10,6 +10,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **BaseRepeater Dynamic Array Primitive (`src/shared/ui/BaseRepeater.vue`):**
+  - Created dynamic array repeater primitive driven by an in-memory string array with text inputs, row insertion via "Add Another" button, and indexed row removal buttons.
+  - Implemented constraints for `minItems`, `maxItems`, `disabled`, and customizable empty state slot.
+  - Authored headless unit assertion matrix in `tests/unit/BaseRepeater.spec.ts` under ADR-0029 covering empty states, addition, indexed splicing, text binding, disabled states, and min/max boundaries.
+  - Exhibited in `/dev/components` under Atomic UI Primitives (`#cat-primitives`) with both standard and min/max constrained demos.
+  - Replaced multi-line textareas requiring "(One per line)" in both `CreateCoreServiceForm.vue` and `CreateAddOnForm.vue` (for Scope, Deliverables, and Exclusions) with `BaseRepeater`.
+
+- **Dedicated Service Catalog & Add-On Creation Forms (`src/shared/ui/`):**
+  - Created `CreateCoreServiceForm.vue` supporting canonical catalog rank pricing ($150 for Rank 1A, $350 for Rank 1B, $300 for Rank 3, $250 for Rank 4) with read-only price preview banner; unit tested in `tests/unit/CreateCoreServiceForm.spec.ts`.
+  - Created `CreateAddOnForm.vue` supporting recurring digital care plans ($99, $199, $299) and retainer support caps (0, 30, 60, 90, 120m); unit tested in `tests/unit/CreateAddOnForm.spec.ts`.
+  - Exhibited both forms in `/dev/components` under Decoupled Forms (`#cat-forms`) alongside live reactive JSON schema display panels.
+
+- **Developer Components Workbench Reorganization & Scrolling Fix (`src/pages/DevComponentsView.vue`):**
+  - Grouped all showcase components into 6 functional sections: Primitives (`#cat-primitives`), Forms (`#cat-forms`), Shell (`#cat-shell`), Wizards (`#cat-wizards`), Modals (`#cat-modals`), and Telemetry (`#cat-telemetry`).
+  - Added sticky anchor navigation pills with live counts for each section.
+  - Added reactive JSON payload inspect panels underneath all form cards.
+  - Fixed vertical scrolling in `src/App.vue` for `#app-root.isolated-workspace`.
+  - Verified and executed on conversation UUID: `f168e79f-2cab-4b17-9ef2-607df09b9ede`.
+
 - **Base Site Shell Architecture & Layout Refactor (ADR-0031 / PR #65):**
   - Created universal application shell `src/app/layout/BaseSiteLayout.vue` featuring 3-tier navigation spine (`BaseAside.vue`), collapsible icon rail with `localStorage` persistence, off-canvas mobile drawer sheet, and stage canvas with root overlay portals (`#drawer-portal`, `#modal-portal`).
   - Isolated `/dev/components` workbench from `BaseSiteLayout` via `src/App.vue` conditional layout rendering (`route.meta.layout === 'isolated'`), enabling full vertical page scrolling and removing production navigation and orientation headers from the development staging environment.
