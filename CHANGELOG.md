@@ -10,7 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- **Opportunity Dossier Overlay Refactor & Theme Adaptation (`src/features/opportunity-dossier/OpportunityDossierDrawer.vue`):**
+- **Client Accounts & Retainers Workspace (`src/pages/ClientAccountsView.vue`):**
+  - Implemented primary Client Accounts & Retainers operational ledger conforming to ADR-0031 4-Step UI Specification Architecture (SDD-0020, FSM-0014, Action Table 0017, UAT-0008).
+  - Designed with responsive `BaseCard.vue` card deck (`repeat(auto-fill, minmax(360px, 1fr))`) presenting account identity, state badge, primary contact, external URL, and active service contracts.
+  - Implemented 4-column executive KPI metric ribbon (`Total Client Accounts`, `Active Retainers`, `Onboarding in Progress`, `Active Care Plans`).
+  - Added interactive account state filtering pills (`All Accounts`, `Active Retainers`, `Onboarding`, `Dormant`) and real-time multi-field search.
+  - Mounted full-canvas slideout `ClientDossierDrawer.vue` (`BaseDrawer size="lg"`, 960px) providing access to SLA continuity health probes, active contracts with git commit sha tagging, monthly retainer timecard gauge (`MaintenanceGauge`), and encrypted credential vault.
+  - Integrated `LogWorkModal.vue`, `ContractAgreementModal.vue`, and `VaultSecretModal.vue` through `#modal-portal`.
+  - Authored headless Vitest assertion matrix `tests/unit/ClientAccountsView.spec.ts` asserting orientation, KPI calculations, state filtering, drawer slideout, and maintenance work logging.
   - Conformed to ADR-0031 4-Step UI Specification Architecture (SDD-0019, FSM-0013, Action Table 0016, UAT-0007).
   - Decoupled hardcoded dark palette hex codes into semantic design tokens (`--bg-surface`, `--bg-app`, `--bg-surface-subtle`, `--text-primary`, `--text-secondary`, `--text-muted`, `--border-color`), enabling both light and dark modes.
   - Retained dual-column independent scroll layout (44% Vitals & Diagnostic Deficit Rubric, 56% Commercial Engagement Hub & Activity Feed).
