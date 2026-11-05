@@ -42,12 +42,7 @@ export const router = createRouter({
     {
       path: '/addons',
       name: 'addons',
-      component: PlaceholderWorkspaceView,
-      props: {
-        title: 'Add-ons & Recurring Subscriptions',
-        subtitle: 'Monthly care plans, retainer scopes, and specialized add-on attachments',
-        sectionName: 'Add-ons & Subs'
-      }
+      component: () => import('@/pages/AddOnsView.vue')
     },
     {
       path: '/doctrine',

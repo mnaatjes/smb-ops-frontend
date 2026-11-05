@@ -10,6 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Add-ons & Recurring Subscriptions Workspace (`src/pages/AddOnsView.vue`):**
+  - Implemented primary Add-ons and Recurring Subscriptions workspace conforming to ADR-0031 4-Step UI Specification Architecture (SDD-0016, FSM-0010, Action Table 0013, UAT-0004).
+  - Decoupled recurring digital care plans (`Rank 2`, `MONTHLY_RETAINER`) from one-off core consulting services.
+  - Added retainer support cap filtering ribbon (`All`, `Automated 0m`, `30m Cap`, `60m Cap`, `90m+ Cap`).
+  - Created `AddOnDetailsDrawer.vue` (`BaseDrawer size="md"`) surfacing SLA commitments, monthly client deliverables, and recurring scope via `BaseList`.
+  - Mounted dynamic plan registration through `BaseDrawer size="lg"` (960px) wrapping `CreateAddOnForm.vue` and `BaseRepeater.vue`.
+  - Added headless Vitest assertion matrix `tests/unit/AddOnsView.spec.ts` asserting orientation, core package exclusion, cap filtering, drawer inspection, and plan creation.
 - **Core Service Catalog Workspace & Deep Inspection (`src/pages/ServiceCatalogView.vue`):**
   - Implemented primary Core Service Catalog workspace conforming to ADR-0031 4-Step UI Specification Architecture (SDD-0015, FSM-0009, Action Table 0012, UAT-0003).
   - Composed pre-tested primitives and layout atoms: `BasePageContainer`, `BasePageHeader`, clickable `BaseCard` grid, `BaseBadge`, `BaseAlert`, `BaseModal`, `CreateCoreServiceForm`, and `ServiceDetailsDrawer` (`BaseDrawer` size="md" + `BaseList`).
