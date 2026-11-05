@@ -10,6 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Lead Operations & Triage Workspace (`src/pages/LeadsView.vue`):**
+  - Implemented primary Lead Operations and Triage workspace conforming to ADR-0031 4-Step UI Specification Architecture (SDD-0017, FSM-0011, Action Table 0014, UAT-0005).
+  - Implemented executive KPI metric ribbon powered by 4 `BaseMetricCard` instances (`Discovery Pool`, `High Risk 70+`, `Moderate Deficit 40-69`, `Average Opp Score`).
+  - Integrated `BaseTable.vue` with custom slot cells for business contact links, opportunity score badge (`ScoreBadge`), audited deficit chips (`IssueChips`), and action button cluster.
+  - Implemented unified 1-click qualification transitioning leads out of Discovery Pool to `status = 'PURSUED'`, incrementing the Aside badge counter.
+  - Mounted deep technical audit inspection via slideout drawer (`OpportunityDossierDrawer.vue`) on table row click.
+  - Integrated manual prospect ingestion via deep drawer (`BaseDrawer.vue size="lg"` wrapping `ManualLeadForm.vue`) and unified disqualification modal (`BaseModal.vue` wrapping `DisqualifyLeadForm.vue`).
+  - Added headless Vitest assertion matrix `tests/unit/LeadsView.spec.ts` asserting orientation, table rendering, deficit/score filtering, 1-click qualification, and drawer lifecycle.
 - **Add-ons & Recurring Subscriptions Workspace (`src/pages/AddOnsView.vue`):**
   - Implemented primary Add-ons and Recurring Subscriptions workspace conforming to ADR-0031 4-Step UI Specification Architecture (SDD-0016, FSM-0010, Action Table 0013, UAT-0004).
   - Decoupled recurring digital care plans (`Rank 2`, `MONTHLY_RETAINER`) from one-off core consulting services.

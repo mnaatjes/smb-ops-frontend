@@ -31,7 +31,12 @@ defineEmits<{
     <!-- Main Title & Action Bar Row -->
     <div class="page-header-main-row">
       <div class="title-cluster">
-        <h1 class="page-title">{{ title }}</h1>
+        <div class="title-row">
+          <h1 class="page-title">{{ title }}</h1>
+          <div v-if="$slots.badges" class="header-badges">
+            <slot name="badges" />
+          </div>
+        </div>
         <p v-if="subtitle" class="page-subtitle">{{ subtitle }}</p>
       </div>
 
@@ -75,6 +80,18 @@ defineEmits<{
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+}
+
+.title-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.header-badges {
+  display: inline-flex;
+  align-items: center;
 }
 
 .page-title {

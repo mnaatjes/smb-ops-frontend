@@ -7,6 +7,25 @@ import BaseAside from '@/shared/ui/BaseAside.vue'
 import LeadsView from '@/pages/LeadsView.vue'
 import PlaceholderWorkspaceView from '@/pages/PlaceholderWorkspaceView.vue'
 
+const storageMap = new Map<string, string>()
+const mockStorage = {
+  getItem: (key: string) => storageMap.get(key) ?? null,
+  setItem: (key: string, val: string) => storageMap.set(key, String(val)),
+  removeItem: (key: string) => storageMap.delete(key),
+  clear: () => storageMap.clear(),
+  key: (index: number) => Array.from(storageMap.keys())[index] ?? null,
+  get length() {
+    return storageMap.size
+  }
+}
+
+if (typeof window !== 'undefined' && !window.localStorage) {
+  Object.defineProperty(window, 'localStorage', { value: mockStorage, configurable: true, writable: true })
+}
+if (typeof globalThis.localStorage === 'undefined' || !globalThis.localStorage?.clear) {
+  Object.defineProperty(globalThis, 'localStorage', { value: mockStorage, configurable: true, writable: true })
+}
+
 describe('BaseSiteLayout.vue Headless Assertion Matrix (UAT-0002)', () => {
   let router: Router
 
