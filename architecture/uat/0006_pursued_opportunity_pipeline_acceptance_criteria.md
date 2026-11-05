@@ -12,8 +12,8 @@ reviewers: ["Engineering Lead"]
 ## 1. Architectural Invariants (Core Rules)
 
 * **Invariant 1.1 (Pure Route Stage Navigation):** The Pursued Opportunity Pipeline workspace must mount as a top-level stage route (`/pursued`) inside `BasePageContainer.vue` and oriented with `BasePageHeader.vue`. No modal or drawer may open automatically on route load.
-* **Invariant 1.2 (Standardized Table Invariant):** Pursued opportunities must appear strictly in a tabular format powered by `BaseTable.vue`. Card grids, board columns, or floating card tiles are prohibited for opportunity rows.
-* **Invariant 1.3 (Pipeline Stage Invariant):** Each table row must render the current engagement stage (`claimed`, `contact_attempted`, `engaged`, `appointment_scheduled`, `proposal_presented`) with semantic badges and allow single-click advancement.
+* **Invariant 1.2 (Responsive Opportunity Card Invariant):** Pursued opportunities must appear in structured, high-density cards powered by `BaseCard.vue` within a responsive grid (`minmax(360px, 1fr)`), preventing horizontal clipping and comfortably accommodating stage, contact, and action elements.
+* **Invariant 1.3 (Pipeline Stage Invariant):** Each opportunity card must render the current engagement stage (`claimed`, `contact_attempted`, `engaged`, `appointment_scheduled`, `proposal_presented`) with semantic badges and allow single-click advancement.
 * **Invariant 1.4 (Client Conversion Invariant):** Successful conversion of an opportunity via `ClientOnboardingModal.vue` must transition the prospect to `status = 'CONVERTED'`, remove it from the pursued table, and increment the Client Accounts counter badge.
 
 ---
@@ -29,7 +29,7 @@ Feature: Pursued Opportunity Pipeline Progression, Dossier Inspection, and Clien
     And the backend service catalog and client account registries are initialized
 
   # =========================================================================
-  # SCENARIO 1: WORKSPACE MOUNTING & BASETABLE RENDERING
+  # SCENARIO 1: WORKSPACE MOUNTING & OPPORTUNITY CARDS RENDERING
   # =========================================================================
   Scenario: Mounting the Pursued Opportunity Pipeline workspace route
     When the operator navigates to "/pursued"
@@ -39,8 +39,8 @@ Feature: Pursued Opportunity Pipeline Progression, Dossier Inspection, and Clien
       | Title       | Pursued Opportunity Pipeline                                 |
       | Subtitle    | Engage Qualified Prospects & Assemble Proposals              |
     And the stage should display an executive KPI ribbon with 4 BaseMetricCards
-    And the pursued opportunities should render inside BaseTable
-    And each table row should render business name, stage badge, opportunity score, and actions
+    And the pursued opportunities should render inside responsive BaseCards
+    And each opportunity card should render business name, stage badge, opportunity score, and actions
 
   # =========================================================================
   # SCENARIO 2: FILTERING OPPORTUNITIES BY PIPELINE STAGE

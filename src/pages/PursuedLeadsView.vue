@@ -6,14 +6,14 @@ import BaseBadge from '@/shared/ui/BaseBadge.vue'
 import BaseMetricCard from '@/shared/ui/BaseMetricCard.vue'
 import BaseButton from '@/shared/ui/BaseButton.vue'
 import BaseAlert from '@/shared/ui/BaseAlert.vue'
-import BaseTable, { type TableColumn } from '@/shared/ui/BaseTable.vue'
+import BaseCard from '@/shared/ui/BaseCard.vue'
 import BaseModal from '@/shared/ui/BaseModal.vue'
 import ScoreBadge from '@/features/lead-triage/ScoreBadge.vue'
 import OpportunityDossierDrawer from '@/features/opportunity-dossier/OpportunityDossierDrawer.vue'
 import ClientOnboardingModal from '@/features/client-onboarding/ClientOnboardingModal.vue'
 import DisqualifyLeadForm, { type DisqualifyLeadPayload } from '@/shared/ui/DisqualifyLeadForm.vue'
 import { useLeadStore } from '@/entities/lead/store'
-import type { RankedLead, OnboardClientPayload, AuditResult } from '@/shared/types/lead'
+import type { RankedLead, OnboardClientPayload } from '@/shared/types/lead'
 
 const store = useLeadStore()
 
@@ -35,15 +35,6 @@ const PIPELINE_STAGES = [
 const activeStageFilter = ref<string>('ALL')
 const searchQuery = ref<string>('')
 const minScore = ref<number>(0)
-
-// Table Columns Definition (Standardized BaseTable format, card decks prohibited)
-const tableColumns: TableColumn[] = [
-  { key: 'business_name', label: 'Opportunity & Contact', width: '32%' },
-  { key: 'stage', label: 'Engagement Stage', width: '18%', align: 'center' },
-  { key: 'opportunity_score', label: 'Deficit Score', width: '12%', align: 'center' },
-  { key: 'audit_summary', label: 'Stack / Findings', width: '14%' },
-  { key: 'actions', label: 'Deal Actions', width: '24%', align: 'right' }
-]
 
 // Modals and Drawer state
 const selectedLead = ref<RankedLead | null>(null)
@@ -81,7 +72,7 @@ const avgScore = computed(() => {
   return (total / scored.length).toFixed(1)
 })
 
-// Filtered Pursued Leads
+// Filtered Pursued Leads for Cards
 const filteredPursuedLeads = computed(() => {
   return store.pursuedLeads.filter((lead) => {
     const stage = (lead.prospect.opportunity_stage || 'claimed').toLowerCase()
@@ -106,21 +97,6 @@ const filteredPursuedLeads = computed(() => {
 
     return true
   })
-})
-
-// Transform into BaseTable rows
-const tableRows = computed(() => {
-  return filteredPursuedLeads.value.map((item) => ({
-    id: item.prospect.id,
-    business_name: item.prospect.business_name,
-    website_url: item.prospect.website_url,
-    phone: item.prospect.phone,
-    address: item.prospect.address,
-    stage: item.prospect.opportunity_stage || 'claimed',
-    opportunity_score: item.audit?.opportunity_score ?? null,
-    audit: item.audit,
-    rawLead: item
-  }))
 })
 
 onMounted(async () => {
@@ -167,12 +143,9 @@ function getNextStage(current: string): string | null {
   }
 }
 
-function handleRowClick(row: Record<string, unknown>) {
-  const lead = row.rawLead as RankedLead
-  if (lead) {
-    selectedLead.value = lead
-    isDossierOpen.value = true
-  }
+function handleCardClick(lead: RankedLead) {
+  selectedLead.value = lead
+  isDossierOpen.value = true
 }
 
 function handleCloseDossier() {
@@ -349,88 +322,92 @@ async function handleConfirmDisqualify(payload: DisqualifyLeadPayload) {
       </div>
     </section>
 
-    <!-- Pursued Opportunities Tabular Data Table (Strictly BaseTable format) -->
-    <section class="pipeline-table-section">
-      <BaseTable
-        :columns="tableColumns"
-        :rows="tableRows"
-        :loading="store.loading"
-        empty-text="No pursued opportunities found. Qualify leads from the Discovery Pool to engage them here."
-        @row-click="handleRowClick"
-      >
-        <!-- Custom Column: Opportunity & Contact -->
-        <template #cell-business_name="{ row }">
-          <div class="business-cell">
-            <span class="business-title">{{ row.business_name }}</span>
-            <div class="business-meta">
+    <!-- Pursued Opportunities Responsive Card Grid -->
+    <section class="pipeline-cards-section" aria-label="Pursued Opportunities Deck">
+      <div v-if="filteredPursuedLeads.length > 0" class="cards-grid">
+        <BaseCard
+          v-for="lead in filteredPursuedLeads"
+          :key="lead.prospect.id"
+          class="opportunity-card"
+          :clickable="true"
+          padding="md"
+          @click="handleCardClick(lead)"
+        >
+          <template #header>
+            <div class="card-header-cluster">
+              <div class="header-main-meta">
+                <h3 class="opportunity-title">{{ lead.prospect.business_name }}</h3>
+                <span class="opportunity-stage-pill">
+                  <BaseBadge :variant="getStageVariant(lead.prospect.opportunity_stage || 'claimed')">
+                    {{ (lead.prospect.opportunity_stage || 'claimed').replace('_', ' ').toUpperCase() }}
+                  </BaseBadge>
+                </span>
+              </div>
+              <div class="header-score-wrapper">
+                <ScoreBadge :score="lead.audit?.opportunity_score ?? null" />
+              </div>
+            </div>
+          </template>
+
+          <div class="card-body-content">
+            <div class="vitals-row">
               <a
-                v-if="row.website_url"
-                :href="(row.website_url as string)"
+                v-if="lead.prospect.website_url"
+                :href="lead.prospect.website_url"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="external-site-link"
                 @click.stop
               >
-                🌐 {{ row.website_url }}
+                🌐 {{ lead.prospect.website_url }}
               </a>
-              <span v-if="row.phone" class="meta-tag">📞 {{ row.phone }}</span>
-              <span v-if="row.address" class="meta-tag address-tag">📍 {{ row.address }}</span>
+              <span v-if="lead.prospect.phone" class="phone-chip">📞 {{ lead.prospect.phone }}</span>
+            </div>
+
+            <p v-if="lead.prospect.address" class="address-text">
+              📍 {{ lead.prospect.address }}
+            </p>
+
+            <div class="audit-chips-row">
+              <span class="tech-tag">
+                Stack: {{ lead.audit?.cms_detected || 'Standard Stack' }}
+              </span>
+              <span v-if="lead.audit?.ssl_active != null" :class="['ssl-pill', lead.audit.ssl_active ? 'ssl-ok' : 'ssl-bad']">
+                {{ lead.audit.ssl_active ? '✓ SSL Active' : '⚠ Missing SSL' }}
+              </span>
             </div>
           </div>
-        </template>
 
-        <!-- Custom Column: Engagement Stage -->
-        <template #cell-stage="{ value }">
-          <div class="stage-cell">
-            <BaseBadge :variant="getStageVariant(String(value))">
-              {{ String(value).replace('_', ' ').toUpperCase() }}
-            </BaseBadge>
-          </div>
-        </template>
+          <template #footer>
+            <div class="card-actions-cluster" @click.stop>
+              <BaseButton
+                label="Dossier"
+                variant="secondary"
+                class="action-btn-dossier"
+                @click="handleCardClick(lead)"
+              />
+              <BaseButton
+                v-if="getNextStage(lead.prospect.opportunity_stage || 'claimed')"
+                label="Advance Stage"
+                variant="secondary"
+                :disabled="isAdvancing === lead.prospect.id"
+                class="action-btn-advance"
+                @click="handleAdvanceStage(lead)"
+              />
+              <BaseButton
+                label="Convert to Client"
+                variant="primary"
+                class="action-btn-convert"
+                @click="handleOpenConvertModal(lead)"
+              />
+            </div>
+          </template>
+        </BaseCard>
+      </div>
 
-        <!-- Custom Column: Deficit Score -->
-        <template #cell-opportunity_score="{ value }">
-          <div class="score-cell">
-            <ScoreBadge :score="(value as number | null)" />
-          </div>
-        </template>
-
-        <!-- Custom Column: Audit Highlights -->
-        <template #cell-audit_summary="{ row }">
-          <div class="audit-summary-cell">
-            <span v-if="row.audit" class="cms-tag">
-              {{ (row.audit as AuditResult | null)?.cms_detected || 'Standard Stack' }}
-            </span>
-            <span v-else class="text-muted">No audit findings</span>
-          </div>
-        </template>
-
-        <!-- Custom Column: Deal Actions -->
-        <template #cell-actions="{ row }">
-          <div class="actions-cell" @click.stop>
-            <BaseButton
-              label="Dossier"
-              variant="secondary"
-              class="action-btn-dossier"
-              @click="handleRowClick(row)"
-            />
-            <BaseButton
-              v-if="getNextStage(String(row.stage))"
-              label="Advance Stage"
-              variant="secondary"
-              :disabled="isAdvancing === (row.rawLead as RankedLead).prospect.id"
-              class="action-btn-advance"
-              @click="handleAdvanceStage(row.rawLead as RankedLead)"
-            />
-            <BaseButton
-              label="Convert to Client"
-              variant="primary"
-              class="action-btn-convert"
-              @click="handleOpenConvertModal(row.rawLead as RankedLead)"
-            />
-          </div>
-        </template>
-      </BaseTable>
+      <div v-else class="empty-pipeline-state">
+        <p class="empty-text">No pursued opportunities found. Qualify leads from the Discovery Pool to engage them here.</p>
+      </div>
     </section>
 
     <!-- Deep Opportunity Dossier Drawer (Slideout lg 960px) -->
@@ -567,35 +544,55 @@ async function handleConfirmDisqualify(payload: DisqualifyLeadPayload) {
   cursor: pointer;
 }
 
-.pipeline-table-section {
-  background-color: var(--color-surface, #ffffff);
-  border: 1px solid var(--border-color, #e2e8f0);
-  border-radius: 0.75rem;
-  overflow: hidden;
+.pipeline-cards-section {
+  width: 100%;
 }
 
-.business-cell {
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 1.25rem;
+}
+
+.opportunity-card {
+  transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card-header-cluster {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.opportunity-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.opportunity-stage-pill {
+  margin-top: 0.35rem;
+  display: inline-block;
+}
+
+.card-body-content {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.75rem;
+  font-size: 0.8125rem;
 }
 
-.business-title {
-  font-weight: 600;
-  color: var(--text-primary, #0f172a);
-  font-size: 0.9375rem;
-}
-
-.business-meta {
+.vitals-row {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   flex-wrap: wrap;
-  font-size: 0.8125rem;
 }
 
 .external-site-link {
-  color: var(--color-primary, #2563eb);
+  color: var(--accent-primary, #3b82f6);
   text-decoration: none;
 }
 
@@ -603,49 +600,73 @@ async function handleConfirmDisqualify(payload: DisqualifyLeadPayload) {
   text-decoration: underline;
 }
 
-.meta-tag {
-  color: var(--text-secondary, #64748b);
+.phone-chip {
+  color: var(--text-secondary);
 }
 
-.address-tag {
-  max-width: 220px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.address-text {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.35;
 }
 
-.stage-cell,
-.score-cell {
-  display: flex;
-  justify-content: center;
-}
-
-.audit-summary-cell {
+.audit-chips-row {
   display: flex;
   align-items: center;
-  font-size: 0.8125rem;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
-.cms-tag {
-  background-color: var(--bg-hover, #f1f5f9);
+.tech-tag {
+  background-color: var(--bg-surface-subtle);
   padding: 0.2rem 0.5rem;
   border-radius: 0.25rem;
+  color: var(--text-secondary);
   font-weight: 500;
-  color: var(--text-secondary, #475569);
 }
 
-.actions-cell {
-  display: inline-flex;
+.ssl-pill {
+  font-size: 0.75rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 0.25rem;
+  font-weight: 600;
+}
+
+.ssl-ok {
+  background-color: var(--badge-success-bg);
+  color: var(--badge-success-text);
+}
+
+.ssl-bad {
+  background-color: var(--badge-danger-bg);
+  color: var(--badge-danger-text);
+}
+
+.card-actions-cluster {
+  display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 0.375rem;
-  flex-wrap: nowrap;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
-.actions-cell :deep(.base-button) {
+.card-actions-cluster :deep(.base-button) {
   padding: 0.35rem 0.6rem;
   font-size: 0.775rem;
   white-space: nowrap;
+}
+
+.empty-pipeline-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  background-color: var(--bg-surface);
+  border: 1px dashed var(--border-color);
+  border-radius: 0.75rem;
+}
+
+.empty-text {
+  color: var(--text-muted);
+  font-size: 0.875rem;
 }
 
 .disqualify-modal-content {

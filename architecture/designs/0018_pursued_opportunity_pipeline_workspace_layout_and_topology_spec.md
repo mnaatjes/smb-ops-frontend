@@ -23,15 +23,13 @@ The Pursued Opportunity Pipeline Workspace (`PursuedLeadsView.vue`) resides with
    - Stage Filter Pills: `All Stages`, `Claimed`, `Contact Attempted`, `Engaged`, `Appointment Scheduled`, `Proposal Presented`.
    - Opportunity Search & Keyword Filter (`business_name`, address, phone).
    - Opportunity Score Filter / Quick Sort (Score descending, Created at descending).
-4. **Primary Opportunity Data Table (`BaseTable.vue`):** Standardized, sortable, responsive data table with custom column slot renders:
-   - `business_name`: Business name with external website link, contact telephone link, and street address.
-   - `opportunity_stage`: Semantic stage progression badge with stage stepper or dropdown indicator (`claimed` $\rightarrow$ `proposal_presented`).
-   - `opportunity_score`: `ScoreBadge.vue` with semantic variant mapping (70+ `danger`, 40–69 `warning`, <40 `success`).
-   - `primary_contact`: Name, role, and phone/email of identified primary stakeholder.
-   - `last_activity`: Date and channel badge (`Call`, `Email`, `Meeting`) of the most recent touchpoint.
-   - `actions`: Quick-action button cluster including "Open Dossier" (launches slideout drawer), "Advance Stage" (steps opportunity to next pipeline stage), and "Convert to Client" (triggers client onboarding).
+4. **Primary Opportunity Presentation (`BaseCard.vue` Grid):** Responsive, high-density opportunity card deck (`grid-template-columns: repeat(auto-fill, minmax(360px, 1fr))`):
+   - **Card Header:** Business name with external website link, phone, and opportunity score badge (`ScoreBadge.vue`).
+   - **Card Stage Ribbon:** Current milestone badge (`Claimed` to `Proposal Presented`) with visual indicator.
+   - **Card Body Vitals:** Address, CMS platform badge, primary stakeholder contact, and last activity touchpoint.
+   - **Card Actions Footer:** Full-width action button cluster: "Dossier" (drawer inspection), "Advance Stage" (steps pipeline), and "Convert to Client" (client onboarding).
 5. **Contextual Overlay Portals:**
-   - **Full-Depth Opportunity Dossier Drawer (`OpportunityDossierDrawer.vue`, `BaseDrawer size="lg"`, 960px):** Slideout mounted via `#drawer-portal` upon row click or action button click, hosting the dual-column engagement hub, Google Maps telemetry, pitch scripts, contact discovery, and activity timeline.
+   - **Full-Depth Opportunity Dossier Drawer (`OpportunityDossierDrawer.vue`, `BaseDrawer size="lg"`, 960px):** Slideout mounted via `#drawer-portal` upon card or action button click, hosting the dual-column engagement hub, Google Maps telemetry, pitch scripts, contact discovery, and activity timeline.
    - **Client Onboarding Modal (`ClientOnboardingModal.vue`, `BaseModal.vue`):** Mounted via `#modal-portal` upon clicking "Convert to Client", establishing retainer contract terms and transitioning prospect to active client account.
    - **Disqualification Modal (`BaseModal.vue` wrapping `DisqualifyLeadForm.vue`):** Accessible for dropping pursued opportunities from the pipeline with structured loss reasoning.
 
@@ -59,13 +57,14 @@ The Pursued Opportunity Pipeline Workspace (`PursuedLeadsView.vue`) resides with
 |                                             |    [ All ] [ Claimed ] [ Contact Attempted ] [ Engaged ] [ Proposal ] |
 |                                             |    [ Search Business Name... ] [ Min Score Slider ]                 |
 |                                             |                                                                     |
-|                                             |  * PURSUED PIPELINE DATA TABLE (BaseTable.vue):                     |
-|                                             |    +--------------------------------------------------------------+ |
-|                                             |    | Business Name  | Stage    | Score | Primary Contact | Actions    | |
-|                                             |    |----------------|----------|-------|-----------------|------------| |
-|                                             |    | Grand Rapids B.| Engaged  | 82/100| John Doe (Owner)| [Dossier]  | |
-|                                             |    | Lakeside Auto  | Proposal | 65/100| Jane Smith (Mgr)| [Convert]  | |
-|                                             |    +--------------------------------------------------------------+ |
+|                                             |  * PURSUED OPPORTUNITY CARDS GRID (BaseCard.vue):                   |
+|                                             |    +----------------------------+  +----------------------------+   |
+|                                             |    | [Score: 82] Grand Rapids B.|  | [Score: 65] Lakeside Auto  |   |
+|                                             |    | Stage: [ ENGAGED ]         |  | Stage: [ PROPOSAL SENT ]   |   |
+|                                             |    | 📍 100 Main St             |  | 📍 200 Lake Dr             |   |
+|                                             |    | 👤 John Doe (Owner)        |  | 👤 Jane Smith (Manager)    |   |
+|                                             |    | [Dossier] [Advance] [Onboard]| | [Dossier] [Advance] [Onboard]|   |
+|                                             |    +----------------------------+  +----------------------------+   |
 |                                             |                                                                     |
 +=============================================+=====================================================================+
 |  OVERLAYS (Portaled):                                                                                             |
@@ -80,6 +79,6 @@ The Pursued Opportunity Pipeline Workspace (`PursuedLeadsView.vue`) resides with
 ## 2. Invariant Layout Geometry
 
 * **Stage Canvas Width:** Occupies `100%` width of stage viewport up to `max-width: 1440px`.
-* **Table Rows:** Standardized `BaseTable.vue` layout. Card grids and multi-column tile decks are strictly prohibited for pursued opportunity rows to preserve information density and scanning ergonomics.
+* **Card Grid Architecture:** Driven by `BaseCard.vue` in a responsive auto-fill grid (`minmax(360px, 1fr)`), eliminating horizontal squishing and accommodating multi-dimensional opportunity metadata comfortably.
 * **Drawer Portaling:** `OpportunityDossierDrawer.vue` mounts to `#drawer-portal` with `size="lg"` (960px) and slideout transition.
 * **Modal Portaling:** `ClientOnboardingModal.vue` mounts to `#modal-portal` without nested modal inception.

@@ -120,9 +120,9 @@ describe('PursuedLeadsView.vue Headless Assertion Matrix (UAT-0006)', () => {
   })
 
   // =========================================================================
-  // SCENARIO 1: WORKSPACE MOUNTING & BASETABLE RENDERING
+  // SCENARIO 1: WORKSPACE MOUNTING & BASECARD GRID RENDERING
   // =========================================================================
-  it('renders BasePageHeader, 4 BaseMetricCards, and BaseTable with pursued rows (Scenario 1)', () => {
+  it('renders BasePageHeader, 4 BaseMetricCards, and BaseCard grid with pursued opportunities (Scenario 1)', () => {
     const wrapper = mount(PursuedLeadsView, {
       global: {
         stubs: {
@@ -150,15 +150,15 @@ describe('PursuedLeadsView.vue Headless Assertion Matrix (UAT-0006)', () => {
     expect(metricCards[3].text()).toContain('Average Opp Score')
     expect(metricCards[3].text()).toContain('67.3')
 
-    // Tabular rows in BaseTable
-    const rows = wrapper.findAll('tbody tr')
-    expect(rows.length).toBe(3)
-    expect(rows[0].text()).toContain('Grand Rapids Bakery')
-    expect(rows[0].text()).toContain('CLAIMED')
-    expect(rows[0].text()).toContain('82')
-    expect(rows[0].text()).toContain('Dossier')
-    expect(rows[0].text()).toContain('Advance Stage')
-    expect(rows[0].text()).toContain('Convert to Client')
+    // Opportunity cards in BaseCard grid
+    const cards = wrapper.findAll('.opportunity-card')
+    expect(cards.length).toBe(3)
+    expect(cards[0].text()).toContain('Grand Rapids Bakery')
+    expect(cards[0].text()).toContain('CLAIMED')
+    expect(cards[0].text()).toContain('82')
+    expect(cards[0].text()).toContain('Dossier')
+    expect(cards[0].text()).toContain('Advance Stage')
+    expect(cards[0].text()).toContain('Convert to Client')
   })
 
   // =========================================================================
@@ -174,7 +174,7 @@ describe('PursuedLeadsView.vue Headless Assertion Matrix (UAT-0006)', () => {
       }
     })
 
-    expect(wrapper.findAll('tbody tr').length).toBe(3)
+    expect(wrapper.findAll('.opportunity-card').length).toBe(3)
 
     // Click "Engaged" pill
     const pills = wrapper.findAll('.stage-pill')
@@ -183,10 +183,10 @@ describe('PursuedLeadsView.vue Headless Assertion Matrix (UAT-0006)', () => {
     await engagedPill!.trigger('click')
     await wrapper.vm.$nextTick()
 
-    // Table should now only show Lakeside Auto Repair
-    const filteredRows = wrapper.findAll('tbody tr')
-    expect(filteredRows.length).toBe(1)
-    expect(filteredRows[0].text()).toContain('Lakeside Auto Repair')
+    // Grid should now only show Lakeside Auto Repair
+    const filteredCards = wrapper.findAll('.opportunity-card')
+    expect(filteredCards.length).toBe(1)
+    expect(filteredCards[0].text()).toContain('Lakeside Auto Repair')
 
     // Click "Proposal Presented" pill
     const proposalPill = pills.find((p) => p.text() === 'Proposal Presented')
@@ -194,9 +194,9 @@ describe('PursuedLeadsView.vue Headless Assertion Matrix (UAT-0006)', () => {
     await proposalPill!.trigger('click')
     await wrapper.vm.$nextTick()
 
-    const proposalRows = wrapper.findAll('tbody tr')
-    expect(proposalRows.length).toBe(1)
-    expect(proposalRows[0].text()).toContain('Alpine Dental Care')
+    const proposalCards = wrapper.findAll('.opportunity-card')
+    expect(proposalCards.length).toBe(1)
+    expect(proposalCards[0].text()).toContain('Alpine Dental Care')
   })
 
   // =========================================================================
@@ -219,8 +219,8 @@ describe('PursuedLeadsView.vue Headless Assertion Matrix (UAT-0006)', () => {
       }
     })
 
-    // Click Advance Stage on first row (Grand Rapids Bakery at 'claimed')
-    const advanceBtn = wrapper.find('tbody tr .action-btn-advance')
+    // Click Advance Stage on first card (Grand Rapids Bakery at 'claimed')
+    const advanceBtn = wrapper.find('.opportunity-card .action-btn-advance')
     expect(advanceBtn.exists()).toBe(true)
     await advanceBtn.trigger('click')
     await flushPromises()
@@ -232,7 +232,7 @@ describe('PursuedLeadsView.vue Headless Assertion Matrix (UAT-0006)', () => {
   // =========================================================================
   // SCENARIO 4: DEEP OPPORTUNITY DOSSIER DRAWER INSPECTION
   // =========================================================================
-  it('opens OpportunityDossierDrawer when clicking a table row (Scenario 4)', async () => {
+  it('opens OpportunityDossierDrawer when clicking an opportunity card (Scenario 4)', async () => {
     const wrapper = mount(PursuedLeadsView, {
       global: {
         stubs: {
@@ -241,9 +241,9 @@ describe('PursuedLeadsView.vue Headless Assertion Matrix (UAT-0006)', () => {
       }
     })
 
-    // Click row 1 (Grand Rapids Bakery)
-    const rows = wrapper.findAll('tbody tr')
-    await rows[0].trigger('click')
+    // Click card 1 (Grand Rapids Bakery)
+    const cards = wrapper.findAll('.opportunity-card')
+    await cards[0].trigger('click')
     await wrapper.vm.$nextTick()
 
     const dossier = wrapper.findComponent({ name: 'OpportunityDossierDrawer' })
