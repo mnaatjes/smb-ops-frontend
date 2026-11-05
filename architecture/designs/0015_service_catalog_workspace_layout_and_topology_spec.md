@@ -1,22 +1,22 @@
 ---
-title: "SDD-0015: Service Catalog Workspace Layout and Topology Specification"
+title: "SDD-0015: Core Service Catalog Workspace Layout and Topology Specification"
 status: "accepted"
 date: "2026-11-05"
-tags: ["design", "architecture", "layout", "topology", "service-catalog", "workspace", "forms"]
+tags: ["design", "architecture", "layout", "topology", "service-catalog", "core-services", "forms"]
 author: "Frontend Architect"
 reviewers: ["Engineering Lead"]
 ---
 
-# SDD-0015: Service Catalog Workspace Layout and Topology Specification
+# SDD-0015: Core Service Catalog Workspace Layout and Topology Specification
 
 ## 1. Visual Topology & Spatial Architecture
 
-The Service Catalog Workspace (`ServiceCatalogView.vue`) resides within the application shell (`BaseSiteLayout.vue`) mounted inside the stage canvas (`BasePageContainer.vue`). It delivers high-density catalog exploration, 4-tier commercial categorization, and administrative ingestion through two contextual portals:
-1. **Header Orientation Strip:** Slotted `BasePageHeader.vue` with breadcrumbs (`Home / Catalogs / Service Catalog`), active catalog count badge, and a primary action button group ("+ New Core Service", "+ New Add-On").
-2. **Catalog Tier Sectional Ribbon:** Tier navigation anchor pills (Rank 1A Door-Opener, Rank 1B Specialized, Rank 2 Retainer Care Plans, Rank 3 Operational Efficiency, Rank 4 Digital Transformation) with quick-scroll markers.
-3. **Responsive Catalog Grid Canvas:** 3-column desktop / 2-column tablet / 1-column mobile grid of interactive cards (`BaseCard.vue` with `clickable: true`) presenting service code, name, commercial rank badge, pricing tag, target profile, and active audit parameter chips.
+The Core Service Catalog Workspace (`ServiceCatalogView.vue`) resides within the application shell (`BaseSiteLayout.vue`) mounted inside the stage canvas (`BasePageContainer.vue`). It delivers high-density catalog exploration, 4-tier commercial categorization for one-time consulting and digital transformation services (excluding recurring add-on care plans, which are isolated under `/addons`), and administrative ingestion:
+1. **Header Orientation Strip:** Slotted `BasePageHeader.vue` with breadcrumbs (`Home / Catalogs / Service Catalog`), active core catalog count badge, and a primary action trigger ("+ New Core Service").
+2. **Catalog Tier Sectional Ribbon:** Tier navigation anchor pills (All, Rank 1A Door-Opener, Rank 1B Specialized, Rank 3 Operational Efficiency, Rank 4 Digital Transformation) with quick-scroll and filter markers.
+3. **Responsive Catalog Grid Canvas:** 3-column desktop / 2-column tablet / 1-column mobile grid of interactive cards (`BaseCard.vue` with `clickable: true`) presenting service code, name, commercial rank badge, pricing tag ($150, $350, $300, $250 flat/hybrid fees), target profile, and active audit parameter chips.
 4. **Contextual Deep Inspection Drawer (`BaseDrawer.vue`):** Right-edge slideout overlay (`size="md"`, 680px) mounting `ServiceDetailsModal.vue` content: deliverables checklist (`BaseList.vue`), scope, exclusions, and active audit parameters.
-5. **Decoupled Creation Modals (`BaseModal.vue`):** Standard dialog shells wrapping `CreateCoreServiceForm.vue` and `CreateAddOnForm.vue` powered by `BaseRepeater.vue` dynamic array inputs.
+5. **Decoupled Creation Modal (`BaseModal.vue`):** Standard dialog shell wrapping `CreateCoreServiceForm.vue` powered by `BaseRepeater.vue` dynamic array inputs and canonical tier price calculation.
 
 ```
 +===================================================================================================================+
@@ -27,27 +27,27 @@ The Service Catalog Workspace (`ServiceCatalogView.vue`) resides within the appl
 |                                             |                                                                     |
 |  * 3-TIER NAVIGATION:                       |  * PAGE ORIENTATION (BasePageHeader.vue):                           |
 |    - Leads (/leads)                         |    - Breadcrumbs: Home / Catalogs / Service Catalog                 |
-|    - Pursued (/pursued)                     |    - Title: "Service Catalog"                                       |
-|    - Accounts (/clients)                    |    - Subtitle: "Consulting Offerings, Retainer Plans & Ingestion"   |
-|    - Service Catalog (/services) [ACTIVE]   |    - Badges: [8 Offerings Active]                                   |
-|    - Add-ons & Subs (/addons)               |    - Actions: [ + New Core Service ] [ + New Care Plan ]            |
+|    - Pursued (/pursued)                     |    - Title: "Core Service Catalog"                                  |
+|    - Accounts (/clients)                    |    - Subtitle: "Consulting Offerings, Fixed Scopes & Ingestion"     |
+|    - Service Catalog (/services) [ACTIVE]   |    - Badges: [6 Offerings Active]                                   |
+|    - Add-ons & Subs (/addons) [DECOUPLED]   |    - Actions: [ + New Core Service ]                                |
 |                                             |                                                                     |
 |                                             |  * TIER FILTER RIBBON (Pill Bar):                                   |
-|                                             |    [ All (8) ] [ Rank 1A ] [ Rank 1B ] [ Rank 2 ] [ Rank 3/4 ]     |
+|                                             |    [ All (6) ] [ Rank 1A ] [ Rank 1B ] [ Rank 3 ] [ Rank 4 ]        |
 |                                             |                                                                     |
 |                                             |  * CATALOG GRID CANVAS:                                             |
 |                                             |    +--------------------+ +--------------------+ +----------------+ |
 |                                             |    | BaseCard (Clickable| | BaseCard (Clickable| | BaseCard ...     | |
-|                                             |    | [Rank 1A]  [$150]  | | [Rank 1B]  [$350]  | | [Rank 2]  [$199] | |
-|                                             |    | Core Audit Bundle  | | Deep Performance   | | Digital Care Pro | |
-|                                             |    | Target: SMB Retail | | Target: E-commerce | | Retainer: 60m cap| |
-|                                             |    | [Chips: ssl, perf] | | [Chips: pagespeed] | | [Chips: uptime]  | |
+|                                             |    | [Rank 1A]  [$150]  | | [Rank 1B]  [$350]  | | [Rank 3]  [$300] | |
+|                                             |    | Core Audit Bundle  | | Deep Performance   | | Ops Efficiency   | |
+|                                             |    | Target: SMB Retail | | Target: E-commerce | | Target: Multi-loc| |
+|                                             |    | [Chips: ssl, perf] | | [Chips: pagespeed] | | [Chips: audit]   | |
 |                                             |    +--------------------+ +--------------------+ +----------------+ |
 |                                             |    (Grid: 3 cols >= 1280px, 2 cols 768-1279px, 1 col < 768px)       |
 +=============================================+=====================================================================+
 |  OVERLAY MOUNTING ROOTS (Teleport targets rendered directly under <body>)                                          |
 |  - <div id="drawer-portal" />: BaseDrawer.vue (size="md", 680px) -> Deep Service Inspection Dossier               |
-|  - <div id="modal-portal" />: BaseModal.vue -> CreateCoreServiceForm.vue / CreateAddOnForm.vue                     |
+|  - <div id="modal-portal" />: BaseModal.vue -> CreateCoreServiceForm.vue                                            |
 +===================================================================================================================+
 ```
 
@@ -61,7 +61,7 @@ flowchart TD
     Shell --> Stage[BasePageContainer.vue]
     Stage --> Header[BasePageHeader.vue]
     Header --> Breadcrumbs[BaseBreadcrumb.vue]
-    Header --> HeaderActions[Action Group: + New Core Service / + New Care Plan]
+    Header --> HeaderActions[Action Trigger: + New Core Service]
     Stage --> TierRibbon[TierFilterRibbon.vue]
     Stage --> GridContainer[div.catalog-grid]
     GridContainer --> ServiceCards[BaseCard.vue clickable]
@@ -77,9 +77,6 @@ flowchart TD
     ModalPortal --> CoreModal[CreateCoreServiceModal.vue]
     CoreModal --> CoreForm[CreateCoreServiceForm.vue]
     CoreForm --> Repeater1[BaseRepeater.vue: Scope, Deliverables, Exclusions]
-    ModalPortal --> AddOnModal[CreateAddOnModal.vue]
-    AddOnModal --> AddOnForm[CreateAddOnForm.vue]
-    AddOnForm --> Repeater2[BaseRepeater.vue: Scope, Deliverables, Exclusions]
 ```
 
 ---
@@ -88,7 +85,7 @@ flowchart TD
 
 * **Desktop ($\ge$ 1280px):**
   - Grid: `repeat(3, minmax(0, 1fr))`, gap `1.5rem` (`var(--spacing-6)`).
-  - Aside rail: 240px expanded (persisted toggleable to 64px).
+  - Aside rail: 240px expanded (toggleable to 64px).
   - Inspection Drawer: `size="md"` (680px slideout).
 * **Tablet (768px - 1279px):**
   - Grid: `repeat(2, minmax(0, 1fr))`, gap `1rem` (`var(--spacing-4)`).
@@ -98,17 +95,16 @@ flowchart TD
   - Grid: `1fr` single-column stacked cards.
   - Aside rail: Hidden off-canvas drawer (`isMobileOpen`).
   - Inspection Drawer: `size="full"` (100% viewport width).
-  - Modals: Full viewport sheet overlay with sticky footer action bar.
+  - Creation Modal: Full viewport sheet overlay with sticky footer action bar.
 
 ---
 
 ## 4. Design Token Invariants
 
 * **Surfaces & Cards:** `var(--bg-surface)` with `var(--border-color)`, hover elevation `box-shadow: var(--shadow-md)`.
-* **Ranks & Commercial Badging:**
-  - Rank 1A (Door-Opener): `var(--color-primary-subtle)` / `var(--color-primary)`.
-  - Rank 1B (Specialized): `var(--color-info-subtle)` / `var(--color-info)`.
-  - Rank 2 (Recurring Retainer): `var(--color-emerald-subtle)` / `var(--color-emerald)`.
-  - Rank 3 (Operational): `var(--color-warning-subtle)` / `var(--color-warning)`.
-  - Rank 4 (Transformation): `var(--color-purple-subtle)` / `var(--color-purple)`.
+* **Core Ranks & Commercial Badging:**
+  - Rank 1A (Door-Opener, $150): `var(--color-primary-subtle)` / `var(--color-primary)`.
+  - Rank 1B (Specialized, $350): `var(--color-info-subtle)` / `var(--color-info)`.
+  - Rank 3 (Operational Efficiency, $300): `var(--color-warning-subtle)` / `var(--color-warning)`.
+  - Rank 4 (Digital Transformation, $250): `var(--color-purple-subtle)` / `var(--color-purple)`.
 * **Dynamic Repeater Fields:** `BaseRepeater.vue` with row border `var(--border-subtle)` and transition `0.15s ease-in-out`.

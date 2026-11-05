@@ -1,61 +1,62 @@
 ---
-title: "UAT Acceptance Criteria: Service Catalog Workspace and Dynamic Ingestion"
+title: "UAT Acceptance Criteria: Core Service Catalog Workspace and Ingestion"
 status: "accepted"
 date: "2026-11-05"
-tags: ["uat", "gherkin", "acceptance-criteria", "service-catalog", "ingestion", "inspection"]
+tags: ["uat", "gherkin", "acceptance-criteria", "service-catalog", "core-services", "ingestion", "inspection"]
 ---
 
-# UAT Acceptance Criteria: Service Catalog Workspace and Dynamic Ingestion
+# UAT Acceptance Criteria: Core Service Catalog Workspace and Ingestion
 
 ## 1. Architectural Invariants (Core Rules)
 
-* **Invariant 1.1 (Pure Route Stage Navigation):** The Service Catalog workspace must mount as a top-level stage route (`/services`) inside `BasePageContainer.vue` and oriented with `BasePageHeader.vue`. No modal or drawer may open automatically on route load.
-* **Invariant 1.2 (Parameter Registry Strictness):** All audit parameters selectable during service creation must originate strictly from the backend parameter registry (`GET /api/services/audit-parameters`). Free-text manual entry of parameters is strictly prohibited.
-* **Invariant 1.3 (Canonical Rank Pricing Presets):** Core service creation must automatically reflect standard firm pricing when a Rank is selected ($150 for Rank 1A, $350 for Rank 1B, $300 for Rank 3, $250 for Rank 4).
-* **Invariant 1.4 (Array Input Repeater Standard):** Scope, deliverables, and exclusions must be managed via `BaseRepeater.vue` dynamic string arrays, never unstructured newline-delimited textareas.
+* **Invariant 1.1 (Pure Route Stage Navigation):** The Core Service Catalog workspace must mount as a top-level stage route (`/services`) inside `BasePageContainer.vue` and oriented with `BasePageHeader.vue`. No modal or drawer may open automatically on route load.
+* **Invariant 1.2 (Decoupled Offering Taxonomy):** The Service Catalog workspace is exclusively designated for Core Services (Rank 1A Door-Opener, Rank 1B Specialized, Rank 3 Operational Efficiency, Rank 4 Digital Transformation). Recurring Add-on Digital Care Plans and retainer subscriptions reside strictly under the dedicated `/addons` workspace.
+* **Invariant 1.3 (Parameter Registry Strictness):** All audit parameters selectable during service creation must originate strictly from the backend parameter registry (`GET /api/services/audit-parameters`). Free-text manual entry of parameters is strictly prohibited.
+* **Invariant 1.4 (Canonical Rank Pricing Presets):** Core service creation must automatically reflect standard firm pricing when a Rank is selected ($150 for Rank 1A, $350 for Rank 1B, $300 for Rank 3, $250 for Rank 4).
+* **Invariant 1.5 (Array Input Repeater Standard):** Scope, deliverables, and exclusions must be managed via `BaseRepeater.vue` dynamic string arrays, never unstructured newline-delimited textareas.
 
 ---
 
 ## 2. Gherkin Acceptance Scenarios
 
 ```gherkin
-Feature: Service Catalog Workspace Browsing, Deep Inspection, and Dynamic Ingestion
+Feature: Core Service Catalog Workspace Browsing, Deep Inspection, and Dynamic Ingestion
 
   Background:
     Given the operator accesses the SMB Ops application
-    And the backend service catalog contains active offerings
+    And the backend service catalog contains active core consulting offerings
     And the backend audit parameter registry is initialized
 
   # =========================================================================
   # SCENARIO 1: WORKSPACE ROUTE MOUNTING & ORIENTATION
   # =========================================================================
-  Scenario: Mounting the Service Catalog workspace route
+  Scenario: Mounting the Core Service Catalog workspace route
     When the operator navigates to "/services"
     Then the stage should display a BasePageHeader with:
       | Field       | Expected Value                                             |
       | Breadcrumb  | Home / Catalogs / Service Catalog                          |
-      | Title       | Service Catalog                                            |
-      | Subtitle    | Consulting Offerings, Retainer Plans & Ingestion           |
+      | Title       | Core Service Catalog                                       |
+      | Subtitle    | Consulting Offerings, Fixed Scopes & Ingestion             |
       | Action 1    | + New Core Service                                         |
-      | Action 2    | + New Care Plan                                            |
-    And the catalog grid should render all active offerings as clickable BaseCard components
-    And each card should display a Rank badge, a pricing tag, and active audit chips
+    And the catalog grid should render all active core offerings as clickable BaseCard components
+    And each card should display a Rank badge (1A, 1B, 3, or 4), a pricing tag, and active audit chips
+    And no recurring Rank 2 Add-On offerings should be visible in this grid
 
   # =========================================================================
-  # SCENARIO 2: TIER FILTERING
+  # SCENARIO 2: CORE TIER FILTERING
   # =========================================================================
   Scenario: Filtering offerings by commercial rank
-    Given the catalog displays 8 total offerings across all ranks
+    Given the catalog displays 6 total core offerings across Ranks 1A, 1B, 3, and 4
     When the operator clicks on the "Rank 1A" filter pill
     Then the catalog grid should update to display only Rank 1A offerings
     And the "Rank 1A" filter pill should display the active highlight state
     When the operator clicks the "All" filter pill
-    Then all 8 offerings should be displayed again
+    Then all 6 core offerings should be displayed again
 
   # =========================================================================
   # SCENARIO 3: DEEP INSPECTION DRAWER OVERLAY
   # =========================================================================
-  Scenario: Opening the deep inspection flyout drawer for a service offering
+  Scenario: Opening the deep inspection flyout drawer for a core service offering
     Given the catalog displays the "Core Audit Bundle" service card
     When the operator clicks on the "Core Audit Bundle" card
     Then the BaseDrawer (#drawer-portal) should slide open with size "md"
