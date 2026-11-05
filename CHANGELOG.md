@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Core Service Catalog Workspace & Deep Inspection (`src/pages/ServiceCatalogView.vue`):**
+  - Implemented primary Core Service Catalog workspace conforming to ADR-0031 4-Step UI Specification Architecture (SDD-0015, FSM-0009, Action Table 0012, UAT-0003).
+  - Composed pre-tested primitives and layout atoms: `BasePageContainer`, `BasePageHeader`, clickable `BaseCard` grid, `BaseBadge`, `BaseAlert`, `BaseModal`, `CreateCoreServiceForm`, and `ServiceDetailsDrawer` (`BaseDrawer` size="md" + `BaseList`).
+  - Decoupled one-time consulting and transformation offerings (Ranks 1A, 1B, 3, 4) from recurring add-on digital care plans (`/addons`).
+  - Added commercial rank filter ribbon (All, Rank 1A, Rank 1B, Rank 3, Rank 4) with zero-layout-shift reactive filtering.
+  - Authored headless Vitest assertion matrix `tests/unit/ServiceCatalogView.spec.ts` asserting orientation, add-on exclusion, tier filtering, drawer lifecycle, and modal ingestion.
 - **BaseRepeater Dynamic Array Primitive (`src/shared/ui/BaseRepeater.vue`):**
   - Created dynamic array repeater primitive driven by an in-memory string array with text inputs, row insertion via "Add Another" button, and indexed row removal buttons.
   - Implemented constraints for `minItems`, `maxItems`, `disabled`, and customizable empty state slot.

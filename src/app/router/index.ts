@@ -37,12 +37,7 @@ export const router = createRouter({
     {
       path: '/services',
       name: 'services',
-      component: PlaceholderWorkspaceView,
-      props: {
-        title: 'Service Catalog Architecture',
-        subtitle: 'Configure diagnostic criteria, opportunity scoring thresholds, and core packages',
-        sectionName: 'Service Catalog'
-      }
+      component: () => import('@/pages/ServiceCatalogView.vue')
     },
     {
       path: '/addons',
