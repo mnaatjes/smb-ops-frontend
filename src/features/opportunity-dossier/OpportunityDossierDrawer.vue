@@ -794,7 +794,8 @@ const matchingServices = computed<ServiceCatalogItem[]>(() => {
 .workspace-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(2px);
   z-index: 50;
   display: flex;
   justify-content: flex-end;
@@ -805,11 +806,12 @@ const matchingServices = computed<ServiceCatalogItem[]>(() => {
   width: calc(100vw - 260px);
   max-width: calc(100vw - 260px);
   height: 100vh;
-  background-color: var(--color-background, #090d16);
-  border-left: 1px solid var(--color-border, #1e293b);
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  border-left: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
-  box-shadow: -6px 0 32px rgba(0, 0, 0, 0.6);
+  box-shadow: -6px 0 32px rgba(0, 0, 0, 0.25);
   animation: slideInWorkspace 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
 }
@@ -826,11 +828,11 @@ const matchingServices = computed<ServiceCatalogItem[]>(() => {
 /* Header */
 .workspace-header {
   padding: 1rem 1.75rem;
-  border-bottom: 1px solid var(--color-border, #1e293b);
+  border-bottom: 1px solid var(--border-color);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: var(--color-surface, #0f172a);
+  background-color: var(--bg-surface);
   flex-shrink: 0;
 }
 
@@ -839,16 +841,16 @@ const matchingServices = computed<ServiceCatalogItem[]>(() => {
   align-items: center;
   gap: 0.5rem;
   font-size: 0.75rem;
-  color: var(--color-text-muted, #94a3b8);
+  color: var(--text-muted);
 }
 
 .pipeline-tag {
   font-weight: 600;
-  color: var(--color-primary, #3b82f6);
+  color: var(--accent-primary);
 }
 
 .tracking-uid {
-  font-family: monospace;
+  font-family: var(--font-mono, monospace);
 }
 
 .title-status-row {
@@ -862,17 +864,17 @@ const matchingServices = computed<ServiceCatalogItem[]>(() => {
   margin: 0;
   font-size: 1.35rem;
   font-weight: 700;
-  color: var(--color-text, #f1f5f9);
+  color: var(--text-primary);
 }
 
 .score-pill-header {
   padding: 0.2rem 0.6rem;
-  background-color: rgba(59, 130, 246, 0.15);
-  border: 1px solid rgba(59, 130, 246, 0.3);
+  background-color: var(--badge-primary-bg, rgba(59, 130, 246, 0.15));
+  border: 1px solid var(--badge-primary-border, rgba(59, 130, 246, 0.3));
   border-radius: 9999px;
   font-size: 0.75rem;
   font-weight: 700;
-  color: #60a5fa;
+  color: var(--badge-primary-text, #2563eb);
 }
 
 .header-actions {
@@ -884,7 +886,7 @@ const matchingServices = computed<ServiceCatalogItem[]>(() => {
 .close-btn {
   background: none;
   border: none;
-  color: var(--color-text-muted, #94a3b8);
+  color: var(--text-muted);
   font-size: 1.25rem;
   cursor: pointer;
   padding: 0.35rem 0.6rem;
@@ -893,8 +895,8 @@ const matchingServices = computed<ServiceCatalogItem[]>(() => {
 }
 
 .close-btn:hover {
-  background-color: rgba(255, 255, 255, 0.08);
-  color: var(--color-text, #f1f5f9);
+  background-color: var(--bg-surface-hover);
+  color: var(--text-primary);
 }
 
 /* Body: 2 Independent Columns */
@@ -902,7 +904,7 @@ const matchingServices = computed<ServiceCatalogItem[]>(() => {
   flex: 1;
   display: flex;
   overflow: hidden;
-  background-color: var(--color-background, #090d16);
+  background-color: var(--bg-app);
 }
 
 .workspace-col {
@@ -916,19 +918,19 @@ const matchingServices = computed<ServiceCatalogItem[]>(() => {
 
 .col-left {
   width: 44%;
-  border-right: 1px solid var(--color-border, #1e293b);
-  background-color: rgba(15, 23, 42, 0.4);
+  border-right: 1px solid var(--border-color);
+  background-color: var(--bg-surface-subtle);
 }
 
 .col-right {
   width: 56%;
-  background-color: var(--color-background, #090d16);
+  background-color: var(--bg-app);
 }
 
 /* Generic Panel Cards */
 .panel-card {
-  background-color: var(--color-surface, #0f172a);
-  border: 1px solid var(--color-border, #1e293b);
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 1.25rem;
   display: flex;
@@ -948,7 +950,7 @@ const matchingServices = computed<ServiceCatalogItem[]>(() => {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--color-text, #f1f5f9);
+  color: var(--text-primary);
 }
 
 .title-with-badge {
@@ -960,16 +962,16 @@ const matchingServices = computed<ServiceCatalogItem[]>(() => {
 .panel-count {
   font-size: 0.72rem;
   padding: 0.15rem 0.5rem;
-  background-color: var(--color-surface-muted, #1e293b);
+  background-color: var(--bg-surface-subtle);
   border-radius: 9999px;
-  color: var(--color-text-muted, #94a3b8);
+  color: var(--text-secondary);
   font-weight: 600;
 }
 
 .panel-action-link {
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--color-primary, #3b82f6);
+  color: var(--accent-primary);
   text-decoration: none;
 }
 
@@ -980,8 +982,8 @@ const matchingServices = computed<ServiceCatalogItem[]>(() => {
 .panel-badge-score {
   font-size: 0.78rem;
   font-weight: 700;
-  color: #38bdf8;
-  background: rgba(56, 189, 248, 0.1);
+  color: var(--accent-primary);
+  background: var(--badge-primary-bg);
   padding: 0.2rem 0.5rem;
   border-radius: 4px;
 }
@@ -1012,17 +1014,17 @@ const matchingServices = computed<ServiceCatalogItem[]>(() => {
   font-size: 0.7rem;
   font-weight: 600;
   text-transform: uppercase;
-  color: var(--color-text-muted, #94a3b8);
+  color: var(--text-muted);
 }
 
 .vital-text {
   font-size: 0.82rem;
-  color: var(--color-text, #f1f5f9);
+  color: var(--text-primary);
 }
 
 .website-link {
   font-size: 0.82rem;
-  color: var(--color-primary, #3b82f6);
+  color: var(--accent-primary);
   text-decoration: none;
   word-break: break-all;
 }
@@ -1033,7 +1035,7 @@ const matchingServices = computed<ServiceCatalogItem[]>(() => {
 
 .vital-empty {
   font-size: 0.82rem;
-  color: var(--color-text-muted, #94a3b8);
+  color: var(--text-muted);
   font-style: italic;
 }
 
@@ -1042,8 +1044,8 @@ const matchingServices = computed<ServiceCatalogItem[]>(() => {
   height: 200px;
   border-radius: 6px;
   overflow: hidden;
-  border: 1px solid var(--color-border, #1e293b);
-  background-color: #0b1120;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-surface-subtle);
 }
 
 .google-map-iframe {
@@ -1067,26 +1069,26 @@ const matchingServices = computed<ServiceCatalogItem[]>(() => {
   justify-content: space-between;
   align-items: center;
   padding: 0.55rem 0.75rem;
-  background-color: var(--color-surface-muted, #1e293b);
-  border: 1px solid var(--color-border, #334155);
+  background-color: var(--bg-surface-subtle);
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   font-size: 0.75rem;
-  opacity: 0.45;
+  opacity: 0.55;
 }
 
 .factors-list li.active {
   opacity: 1;
-  border-color: rgba(239, 68, 68, 0.4);
-  background-color: rgba(239, 68, 68, 0.08);
+  border-color: var(--badge-danger-border);
+  background-color: var(--badge-danger-bg);
 }
 
 .factor-name {
-  color: var(--color-text, #f1f5f9);
+  color: var(--text-primary);
   font-weight: 500;
 }
 
 .factor-pts {
-  color: #ef4444;
+  color: var(--badge-danger-text);
   font-weight: 600;
   font-size: 0.72rem;
 }
@@ -1099,8 +1101,8 @@ const matchingServices = computed<ServiceCatalogItem[]>(() => {
 }
 
 .script-card {
-  background-color: var(--color-surface-muted, #1e293b);
-  border: 1px solid var(--color-border, #334155);
+  background-color: var(--bg-surface-subtle);
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   padding: 1rem;
   display: flex;
@@ -1117,29 +1119,30 @@ const matchingServices = computed<ServiceCatalogItem[]>(() => {
 .script-service-tag {
   font-size: 0.78rem;
   font-weight: 700;
-  color: #38bdf8;
+  color: var(--accent-primary);
 }
 
 .copy-script-btn {
   font-size: 0.7rem;
   font-weight: 600;
   padding: 0.25rem 0.6rem;
-  background-color: rgba(59, 130, 246, 0.15);
-  border: 1px solid rgba(59, 130, 246, 0.3);
+  background-color: var(--badge-primary-bg);
+  border: 1px solid var(--badge-primary-border);
   border-radius: 4px;
-  color: #60a5fa;
+  color: var(--badge-primary-text);
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .copy-script-btn:hover {
-  background-color: rgba(59, 130, 246, 0.3);
+  background-color: var(--accent-hover);
+  color: #ffffff;
 }
 
 .script-hook {
   margin: 0;
   font-size: 0.78rem;
-  color: var(--color-text, #f1f5f9);
+  color: var(--text-primary);
   line-height: 1.4;
 }
 
@@ -1153,17 +1156,17 @@ const matchingServices = computed<ServiceCatalogItem[]>(() => {
   font-size: 0.7rem;
   font-weight: 600;
   text-transform: uppercase;
-  color: var(--color-text-muted, #94a3b8);
+  color: var(--text-muted);
 }
 
 .pitch-quote {
   margin: 0;
   padding: 0.6rem 0.75rem;
-  background-color: rgba(0, 0, 0, 0.3);
-  border-left: 3px solid var(--color-primary, #3b82f6);
+  background-color: var(--bg-surface-hover);
+  border-left: 3px solid var(--accent-primary);
   border-radius: 0 4px 4px 0;
   font-size: 0.78rem;
-  color: #e2e8f0;
+  color: var(--text-primary);
   font-style: italic;
   line-height: 1.45;
 }
@@ -1171,10 +1174,10 @@ const matchingServices = computed<ServiceCatalogItem[]>(() => {
 .email-quote {
   margin: 0;
   padding: 0.6rem 0.75rem;
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: var(--bg-surface-hover);
   border-radius: 4px;
   font-size: 0.72rem;
-  color: #cbd5e1;
+  color: var(--text-secondary);
   white-space: pre-wrap;
   font-family: inherit;
   line-height: 1.4;
@@ -1182,11 +1185,11 @@ const matchingServices = computed<ServiceCatalogItem[]>(() => {
 
 .objection-text {
   font-size: 0.75rem;
-  color: #fbbf24;
-  background-color: rgba(251, 191, 36, 0.08);
+  color: var(--badge-warning-text);
+  background-color: var(--badge-warning-bg);
   padding: 0.5rem 0.65rem;
   border-radius: 4px;
-  border-left: 3px solid #fbbf24;
+  border-left: 3px solid var(--badge-warning-border);
   line-height: 1.4;
 }
 
@@ -1199,8 +1202,8 @@ const matchingServices = computed<ServiceCatalogItem[]>(() => {
 
 .service-fit-card {
   padding: 0.75rem;
-  background-color: var(--color-surface-muted, #1e293b);
-  border: 1px solid var(--color-border, #334155);
+  background-color: var(--bg-surface-subtle);
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   display: flex;
   flex-direction: column;
@@ -1221,34 +1224,34 @@ const matchingServices = computed<ServiceCatalogItem[]>(() => {
 
 .service-code-text {
   font-size: 0.72rem;
-  font-family: monospace;
-  color: var(--color-text-muted, #94a3b8);
+  font-family: var(--font-mono, monospace);
+  color: var(--text-muted);
 }
 
 .service-price-text {
   font-size: 0.75rem;
   font-weight: 700;
-  color: #10b981;
+  color: var(--badge-success-text);
 }
 
 .service-fit-name {
   font-size: 0.8rem;
   font-weight: 600;
-  color: var(--color-text, #f1f5f9);
+  color: var(--text-primary);
 }
 
 .service-fit-desc {
   margin: 0;
   font-size: 0.72rem;
-  color: var(--color-text-muted, #94a3b8);
+  color: var(--text-secondary);
   line-height: 1.35;
 }
 
 /* Stage Stepper Full-Width Header Strip */
 .workspace-stepper-strip {
   width: 100%;
-  background-color: var(--color-surface, #0f172a);
-  border-bottom: 1px solid var(--color-border, #1e293b);
+  background-color: var(--bg-surface);
+  border-bottom: 1px solid var(--border-color);
   padding: 0.75rem 2rem;
 }
 
@@ -1269,7 +1272,7 @@ const matchingServices = computed<ServiceCatalogItem[]>(() => {
 .stepper-meta-title {
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--color-text-muted, #94a3b8);
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -1277,8 +1280,8 @@ const matchingServices = computed<ServiceCatalogItem[]>(() => {
 .active-stage-label {
   font-size: 0.75rem;
   font-weight: 700;
-  color: var(--color-primary, #3b82f6);
-  background-color: rgba(59, 130, 246, 0.1);
+  color: var(--accent-primary);
+  background-color: var(--badge-primary-bg);
   padding: 0.2rem 0.5rem;
   border-radius: 4px;
 }
@@ -1296,10 +1299,10 @@ const matchingServices = computed<ServiceCatalogItem[]>(() => {
   align-items: center;
   gap: 0.4rem;
   padding: 0.5rem 0.6rem;
-  background-color: var(--color-surface-muted, #1e293b);
-  border: 1px solid var(--color-border, #334155);
+  background-color: var(--bg-surface-subtle);
+  border: 1px solid var(--border-color);
   border-radius: 6px;
-  color: var(--color-text-muted, #94a3b8);
+  color: var(--text-secondary);
   font-size: 0.72rem;
   font-weight: 600;
   cursor: pointer;
@@ -1308,20 +1311,20 @@ const matchingServices = computed<ServiceCatalogItem[]>(() => {
 }
 
 .stage-pill-step:hover {
-  background-color: rgba(59, 130, 246, 0.1);
-  color: var(--color-text, #f1f5f9);
+  background-color: var(--bg-surface-hover);
+  color: var(--text-primary);
 }
 
 .stage-pill-step.active {
-  background-color: var(--color-primary, #3b82f6);
-  border-color: var(--color-primary, #3b82f6);
+  background-color: var(--accent-primary);
+  border-color: var(--accent-primary);
   color: #ffffff;
 }
 
 .stage-pill-step.passed {
-  background-color: rgba(16, 185, 129, 0.15);
-  border-color: rgba(16, 185, 129, 0.4);
-  color: #34d399;
+  background-color: var(--badge-success-bg);
+  border-color: var(--badge-success-border);
+  color: var(--badge-success-text);
 }
 
 .step-num {
@@ -1331,7 +1334,7 @@ const matchingServices = computed<ServiceCatalogItem[]>(() => {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.25);
+  background: rgba(0, 0, 0, 0.15);
   font-size: 0.68rem;
 }
 
@@ -1343,24 +1346,24 @@ const matchingServices = computed<ServiceCatalogItem[]>(() => {
 }
 
 .contact-card {
-  background-color: var(--color-surface-muted, #1e293b);
-  border: 1px solid var(--color-border, #334155);
+  background-color: var(--bg-surface-subtle);
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   padding: 0.75rem;
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
   cursor: pointer;
-  transition: border-color 0.15s ease;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
 }
 
 .contact-card:hover {
-  border-color: var(--color-primary, #3b82f6);
+  border-color: var(--accent-primary);
 }
 
 .contact-card.is-active-target {
-  border-color: #60a5fa;
-  background-color: rgba(59, 130, 246, 0.08);
+  border-color: var(--accent-primary);
+  background-color: var(--badge-primary-bg);
 }
 
 .contact-card.is-primary-card {
@@ -1380,12 +1383,12 @@ const matchingServices = computed<ServiceCatalogItem[]>(() => {
 
 .contact-name {
   font-size: 0.82rem;
-  color: var(--color-text, #f1f5f9);
+  color: var(--text-primary);
 }
 
 .contact-role {
   font-size: 0.72rem;
-  color: var(--color-text-muted, #94a3b8);
+  color: var(--text-secondary);
 }
 
 .contact-badges-row {
@@ -1398,15 +1401,15 @@ const matchingServices = computed<ServiceCatalogItem[]>(() => {
   font-size: 0.62rem;
   font-weight: 700;
   padding: 0.1rem 0.35rem;
-  background-color: rgba(16, 185, 129, 0.2);
-  color: #34d399;
+  background-color: var(--badge-success-bg);
+  color: var(--badge-success-text);
   border-radius: 4px;
 }
 
 .delete-contact-btn {
   background: none;
   border: none;
-  color: var(--color-text-muted, #94a3b8);
+  color: var(--text-muted);
   font-size: 0.85rem;
   cursor: pointer;
   padding: 0.1rem 0.25rem;
@@ -1424,13 +1427,13 @@ const matchingServices = computed<ServiceCatalogItem[]>(() => {
 
 .channel-pill {
   font-size: 0.7rem;
-  color: var(--color-text-muted, #94a3b8);
+  color: var(--text-secondary);
 }
 
 .contact-notes-text {
   margin: 0;
   font-size: 0.7rem;
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-style: italic;
 }
 
@@ -1438,7 +1441,7 @@ const matchingServices = computed<ServiceCatalogItem[]>(() => {
   margin-top: 0.25rem;
   font-size: 0.65rem;
   font-weight: 600;
-  color: #60a5fa;
+  color: var(--accent-primary);
 }
 
 /* Activity Form */
@@ -1467,16 +1470,16 @@ const matchingServices = computed<ServiceCatalogItem[]>(() => {
   font-size: 0.72rem;
   font-weight: 600;
   text-transform: uppercase;
-  color: var(--color-text-muted, #94a3b8);
+  color: var(--text-muted);
 }
 
 .custom-select,
 .custom-datetime-input,
 .custom-textarea {
-  background-color: var(--color-surface-muted, #1e293b);
-  border: 1px solid var(--color-border, #334155);
+  background-color: var(--bg-surface-subtle);
+  border: 1px solid var(--border-color);
   border-radius: 6px;
-  color: var(--color-text, #f1f5f9);
+  color: var(--text-primary);
   padding: 0.5rem 0.75rem;
   font-size: 0.78rem;
   outline: none;
@@ -1486,12 +1489,12 @@ const matchingServices = computed<ServiceCatalogItem[]>(() => {
 .custom-select:focus,
 .custom-datetime-input:focus,
 .custom-textarea:focus {
-  border-color: var(--color-primary, #3b82f6);
+  border-color: var(--accent-primary);
 }
 
 .field-hint {
   font-size: 0.68rem;
-  color: var(--color-text-muted, #94a3b8);
+  color: var(--text-muted);
 }
 
 .activity-submit-row {
@@ -1508,8 +1511,8 @@ const matchingServices = computed<ServiceCatalogItem[]>(() => {
 
 .timeline-item {
   padding: 0.75rem 0.9rem;
-  background-color: var(--color-surface-muted, #1e293b);
-  border: 1px solid var(--color-border, #334155);
+  background-color: var(--bg-surface-subtle);
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   display: flex;
   flex-direction: column;
@@ -1518,7 +1521,7 @@ const matchingServices = computed<ServiceCatalogItem[]>(() => {
 
 .timeline-item.appointment-item {
   border-left: 3px solid #8b5cf6;
-  background-color: rgba(139, 92, 246, 0.06);
+  background-color: var(--badge-indigo-bg);
 }
 
 .timeline-meta {
@@ -1530,34 +1533,34 @@ const matchingServices = computed<ServiceCatalogItem[]>(() => {
 
 .timeline-channel-tag {
   font-weight: 700;
-  color: var(--color-primary, #3b82f6);
+  color: var(--accent-primary);
 }
 
 .timeline-contact-tag {
-  color: var(--color-text, #f1f5f9);
+  color: var(--text-primary);
 }
 
 .timeline-date {
   margin-left: auto;
-  color: var(--color-text-muted, #94a3b8);
+  color: var(--text-muted);
 }
 
 .appointment-badge {
   font-size: 0.72rem;
   font-weight: 700;
-  color: #a78bfa;
+  color: #7c3aed;
 }
 
 .timeline-summary {
   margin: 0;
   font-size: 0.78rem;
-  color: #cbd5e1;
+  color: var(--text-secondary);
   line-height: 1.4;
 }
 
 .empty-state {
   font-size: 0.75rem;
-  color: var(--color-text-muted, #94a3b8);
+  color: var(--text-muted);
   font-style: italic;
   padding: 0.5rem 0;
 }
@@ -1579,14 +1582,15 @@ const matchingServices = computed<ServiceCatalogItem[]>(() => {
   align-items: center;
   gap: 0.5rem;
   font-size: 0.8rem;
-  color: var(--color-text, #f1f5f9);
+  color: var(--text-primary);
   cursor: pointer;
 }
 
 .form-error {
   font-size: 0.75rem;
-  color: #ef4444;
-  background: rgba(239, 68, 68, 0.1);
+  color: var(--banner-error-text);
+  background: var(--banner-error-bg);
+  border: 1px solid var(--banner-error-border);
   padding: 0.5rem;
   border-radius: 4px;
 }

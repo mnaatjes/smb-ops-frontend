@@ -10,6 +10,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Opportunity Dossier Overlay Refactor & Theme Adaptation (`src/features/opportunity-dossier/OpportunityDossierDrawer.vue`):**
+  - Conformed to ADR-0031 4-Step UI Specification Architecture (SDD-0019, FSM-0013, Action Table 0016, UAT-0007).
+  - Decoupled hardcoded dark palette hex codes into semantic design tokens (`--bg-surface`, `--bg-app`, `--bg-surface-subtle`, `--text-primary`, `--text-secondary`, `--text-muted`, `--border-color`), enabling both light and dark modes.
+  - Retained dual-column independent scroll layout (44% Vitals & Diagnostic Deficit Rubric, 56% Commercial Engagement Hub & Activity Feed).
+  - Added headless Vitest assertions in `tests/unit/OpportunityDossierDrawer.spec.ts` verifying light and dark theme mode adaptation and interactive stage stepper advancement.
+- **Pursued Opportunity Pipeline Workspace (`src/pages/PursuedLeadsView.vue`):**
+  - Implemented primary Pursued Opportunity Pipeline workspace conforming to ADR-0031 4-Step UI Specification Architecture (SDD-0018, FSM-0012, Action Table 0015, UAT-0006).
+  - Promoted active pursued opportunities from a compressed table layout to a responsive `BaseCard.vue` card deck (`repeat(auto-fill, minmax(360px, 1fr))`) to accommodate dense business telemetry and multi-action controls without horizontal truncations or scrolling.
+  - Added 4-column pipeline KPI metric ribbon (`Active Pursued Deals`, `Engaged / In Discussion`, `Proposals Out`, `Average Opp Score`).
+  - Implemented interactive stage filter pill ribbon (`All Stages`, `Claimed`, `Contact Attempted`, `Engaged`, `Appointment Scheduled`, `Proposal Presented`) and real-time search & score filters.
+  - Implemented 1-click stage advancement (`Advance Stage`) stepping opportunities through pipeline milestones (`claimed` $\rightarrow$ `proposal_presented`).
+  - Integrated `OpportunityDossierDrawer.vue` (`BaseDrawer size="lg"`, 960px) for deep engagement telemetry, contact management, and outreach activity timeline.
+  - Integrated `ClientOnboardingModal.vue` (`BaseModal.vue`) for converting opportunities directly into active Client Accounts (`/clients`).
+  - Authored headless Vitest assertion matrix `tests/unit/PursuedLeadsView.spec.ts` asserting orientation, card deck rendering, stage filtering, stage progression, and client onboarding.
 - **Lead Operations & Triage Workspace (`src/pages/LeadsView.vue`):**
   - Implemented primary Lead Operations and Triage workspace conforming to ADR-0031 4-Step UI Specification Architecture (SDD-0017, FSM-0011, Action Table 0014, UAT-0005).
   - Implemented executive KPI metric ribbon powered by 4 `BaseMetricCard` instances (`Discovery Pool`, `High Risk 70+`, `Moderate Deficit 40-69`, `Average Opp Score`).

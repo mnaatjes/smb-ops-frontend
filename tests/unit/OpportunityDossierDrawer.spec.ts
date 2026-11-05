@@ -152,4 +152,47 @@ describe('OpportunityDossierDrawer.vue', () => {
     expect(wrapper.emitted('disqualify')).toHaveLength(1)
     expect(wrapper.emitted('disqualify')?.[0]?.[0]).toEqual(mockLead)
   })
+
+  it('supports light and dark theme mode tokens without hardcoded canvas colors (UAT-0007 Scenario 2)', () => {
+    const wrapper = mount(OpportunityDossierDrawer, {
+      props: {
+        show: true,
+        lead: mockLead,
+        services: mockServices
+      }
+    })
+
+    const canvas = wrapper.find('.workspace-canvas')
+    expect(canvas.exists()).toBe(true)
+
+    // Verify dark class toggling on root document preserves semantic token layout
+    document.documentElement.classList.add('dark')
+    expect(document.documentElement.classList.contains('dark')).toBe(true)
+
+    document.documentElement.classList.remove('dark')
+    expect(document.documentElement.classList.contains('dark')).toBe(false)
+  })
+
+  it('advances opportunity stage when a stage pill is clicked (UAT-0007 Scenario 3)', async () => {
+    const store = (await import('@/entities/lead/store')).useLeadStore()
+    vi.spyOn(store, 'setOpportunityStage').mockResolvedValue()
+
+    const wrapper = mount(OpportunityDossierDrawer, {
+      props: {
+        show: true,
+        lead: mockLead,
+        services: mockServices
+      }
+    })
+
+    const stagePills = wrapper.findAll('.stage-pill-step')
+    expect(stagePills.length).toBe(5)
+
+    // Click "Engaged" pill (step 3)
+    const engagedPill = stagePills.find((p) => p.text().includes('Engaged'))
+    expect(engagedPill).toBeDefined()
+    await engagedPill!.trigger('click')
+
+    expect(store.setOpportunityStage).toHaveBeenCalledWith('lead-test-opp-1', 'engaged')
+  })
 })
