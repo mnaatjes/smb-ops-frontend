@@ -64,9 +64,13 @@ function getStorageKey(clientId: string): string {
 function loadContractActionStates(): void {
   if (!props.client) return
   try {
-    const raw = localStorage.getItem(getStorageKey(props.client.id))
-    if (raw) {
-      contractActionStates.value = JSON.parse(raw)
+    if (typeof localStorage !== 'undefined' && localStorage.getItem) {
+      const raw = localStorage.getItem(getStorageKey(props.client.id))
+      if (raw) {
+        contractActionStates.value = JSON.parse(raw)
+      } else {
+        contractActionStates.value = {}
+      }
     } else {
       contractActionStates.value = {}
     }
@@ -78,7 +82,9 @@ function loadContractActionStates(): void {
 function saveContractActionStates(): void {
   if (!props.client) return
   try {
-    localStorage.setItem(getStorageKey(props.client.id), JSON.stringify(contractActionStates.value))
+    if (typeof localStorage !== 'undefined' && localStorage.setItem) {
+      localStorage.setItem(getStorageKey(props.client.id), JSON.stringify(contractActionStates.value))
+    }
   } catch (err: unknown) {
     console.error('Failed to persist contract actions to localStorage:', err)
   }
@@ -206,18 +212,22 @@ async function handleReveal(secretId: string): Promise<void> {
     const plaintext = await leadStore.revealSecret(props.client.id, secretId)
     const entry: { plaintext: string; remainingSeconds: number; timer?: ReturnType<typeof setInterval> } = {
       plaintext,
-      remainingSeconds: 30
+      remainingSeconds: 15
     }
 
     entry.timer = setInterval(() => {
-      if (entry.remainingSeconds > 1) {
-        entry.remainingSeconds -= 1
+      const current = activeReveals.value[secretId]
+      if (current && current.remainingSeconds > 1) {
+        current.remainingSeconds -= 1
       } else {
         hideSecret(secretId)
       }
     }, 1000)
 
-    activeReveals.value[secretId] = entry
+    activeReveals.value = {
+      ...activeReveals.value,
+      [secretId]: entry
+    }
   } catch (err: unknown) {
     console.error('Failed to reveal secret:', err)
   } finally {
@@ -726,11 +736,12 @@ function handleTriggerLogWork(): void {
   width: calc(100vw - 260px);
   max-width: calc(100vw - 260px);
   height: 100vh;
-  background-color: var(--color-background, #090d16);
-  border-left: 1px solid var(--color-border, #1e293b);
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  border-left: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
-  box-shadow: -6px 0 32px rgba(0, 0, 0, 0.6);
+  box-shadow: -6px 0 32px rgba(0, 0, 0, 0.25);
   animation: slideInWorkspace 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
 }
@@ -747,11 +758,11 @@ function handleTriggerLogWork(): void {
 /* Header */
 .workspace-header {
   padding: 1rem 1.75rem;
-  border-bottom: 1px solid var(--color-border, #1e293b);
+  border-bottom: 1px solid var(--border-color);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: var(--color-surface, #0f172a);
+  background-color: var(--bg-surface);
   flex-shrink: 0;
 }
 
@@ -760,16 +771,16 @@ function handleTriggerLogWork(): void {
   align-items: center;
   gap: 0.5rem;
   font-size: 0.75rem;
-  color: var(--color-text-muted, #94a3b8);
+  color: var(--text-muted);
 }
 
 .workspace-tag {
   font-weight: 600;
-  color: var(--color-primary, #3b82f6);
+  color: var(--accent-primary);
 }
 
 .crumb-separator {
-  color: var(--color-text-muted, #64748b);
+  color: var(--text-muted);
 }
 
 .tracking-uid {
@@ -787,7 +798,7 @@ function handleTriggerLogWork(): void {
   margin: 0;
   font-size: 1.35rem;
   font-weight: 700;
-  color: var(--color-text, #f1f5f9);
+  color: var(--text-primary);
 }
 
 .header-actions {
@@ -799,7 +810,7 @@ function handleTriggerLogWork(): void {
 .close-btn {
   background: none;
   border: none;
-  color: var(--color-text-muted, #94a3b8);
+  color: var(--text-muted);
   font-size: 1.25rem;
   cursor: pointer;
   padding: 0.35rem 0.6rem;
@@ -808,8 +819,8 @@ function handleTriggerLogWork(): void {
 }
 
 .close-btn:hover {
-  background-color: rgba(255, 255, 255, 0.08);
-  color: var(--color-text, #f1f5f9);
+  background-color: var(--bg-surface-subtle);
+  color: var(--text-primary);
 }
 
 /* Body: 2 Independent Columns */
@@ -817,7 +828,7 @@ function handleTriggerLogWork(): void {
   flex: 1;
   display: flex;
   overflow: hidden;
-  background-color: var(--color-background, #090d16);
+  background-color: var(--bg-app);
 }
 
 .workspace-col {
@@ -831,19 +842,19 @@ function handleTriggerLogWork(): void {
 
 .col-left {
   width: 44%;
-  border-right: 1px solid var(--color-border, #1e293b);
-  background-color: rgba(15, 23, 42, 0.4);
+  border-right: 1px solid var(--border-color);
+  background-color: var(--bg-app);
 }
 
 .col-right {
   width: 56%;
-  background-color: var(--color-background, #090d16);
+  background-color: var(--bg-app);
 }
 
 /* Generic Panel Cards */
 .panel-card {
-  background-color: var(--color-surface, #0f172a);
-  border: 1px solid var(--color-border, #1e293b);
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 1.25rem;
   display: flex;
@@ -863,7 +874,7 @@ function handleTriggerLogWork(): void {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--color-text, #f1f5f9);
+  color: var(--text-primary);
 }
 
 .title-with-badge {
@@ -875,9 +886,9 @@ function handleTriggerLogWork(): void {
 .panel-count {
   font-size: 0.72rem;
   padding: 0.15rem 0.5rem;
-  background-color: var(--color-surface-muted, #1e293b);
+  background-color: var(--bg-surface-subtle);
   border-radius: 9999px;
-  color: var(--color-text-muted, #94a3b8);
+  color: var(--text-secondary);
   font-weight: 600;
 }
 
@@ -898,23 +909,23 @@ function handleTriggerLogWork(): void {
   font-size: 0.7rem;
   font-weight: 600;
   text-transform: uppercase;
-  color: var(--color-text-muted, #94a3b8);
+  color: var(--text-muted);
 }
 
 .vital-text {
   font-size: 0.82rem;
-  color: var(--color-text, #f1f5f9);
+  color: var(--text-primary);
 }
 
 .vital-empty {
   font-size: 0.82rem;
-  color: var(--color-text-muted, #94a3b8);
+  color: var(--text-muted);
   font-style: italic;
 }
 
 .website-link {
   font-size: 0.82rem;
-  color: var(--color-primary, #3b82f6);
+  color: var(--accent-primary);
   text-decoration: none;
   word-break: break-all;
 }
@@ -935,7 +946,7 @@ function handleTriggerLogWork(): void {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: var(--color-text, #f1f5f9);
+  color: var(--text-primary);
 }
 
 .health-bullet {
@@ -945,18 +956,18 @@ function handleTriggerLogWork(): void {
 }
 
 .health-bullet.green {
-  background-color: var(--color-success, #10b981);
-  box-shadow: 0 0 6px var(--color-success, #10b981);
+  background-color: var(--badge-success-text, #10b981);
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.4);
 }
 
 .health-bullet.red {
-  background-color: var(--color-danger, #ef4444);
-  box-shadow: 0 0 6px var(--color-danger, #ef4444);
+  background-color: var(--badge-danger-text, #ef4444);
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.4);
 }
 
 .ping-meta {
   font-size: 0.7rem;
-  color: var(--color-text-muted, #94a3b8);
+  color: var(--text-muted);
   margin-top: 0.25rem;
 }
 
@@ -968,8 +979,8 @@ function handleTriggerLogWork(): void {
 }
 
 .contract-card {
-  background-color: var(--color-surface-muted, #1e293b);
-  border: 1px solid var(--color-border, #334155);
+  background-color: var(--bg-surface-subtle);
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   padding: 0.75rem;
   font-size: 0.8rem;
@@ -977,8 +988,7 @@ function handleTriggerLogWork(): void {
 }
 
 .contract-card.expanded {
-  border-color: var(--color-primary, #3b82f6);
-  background-color: rgba(30, 41, 59, 0.9);
+  border-color: var(--accent-primary);
 }
 
 .contract-head {
@@ -998,20 +1008,20 @@ function handleTriggerLogWork(): void {
 
 .accordion-chevron {
   font-size: 0.65rem;
-  color: var(--color-text-muted, #94a3b8);
+  color: var(--text-muted);
   transition: transform 0.2s ease;
 }
 
 .contract-code {
   font-family: monospace;
   font-weight: 600;
-  color: var(--color-text, #f1f5f9);
+  color: var(--text-primary);
 }
 
 .contract-body {
   display: flex;
   gap: 1rem;
-  color: var(--color-text-muted, #94a3b8);
+  color: var(--text-secondary);
   font-size: 0.75rem;
 }
 
@@ -1023,7 +1033,7 @@ function handleTriggerLogWork(): void {
 .contract-actions-drawer {
   margin-top: 0.75rem;
   padding-top: 0.75rem;
-  border-top: 1px solid var(--color-border, #334155);
+  border-top: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
@@ -1039,14 +1049,14 @@ function handleTriggerLogWork(): void {
   margin: 0;
   font-size: 0.75rem;
   font-weight: 700;
-  color: var(--color-primary, #3b82f6);
+  color: var(--accent-primary);
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
 
 .actions-completion-counter {
   font-size: 0.7rem;
-  color: var(--color-text-muted, #94a3b8);
+  color: var(--text-muted);
   font-weight: 600;
 }
 
@@ -1064,8 +1074,8 @@ function handleTriggerLogWork(): void {
   flex-direction: column;
   gap: 0.35rem;
   padding: 0.5rem 0.6rem;
-  background-color: rgba(15, 23, 42, 0.6);
-  border: 1px solid var(--color-border, rgba(51, 65, 85, 0.6));
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   transition: all 0.15s ease;
 }
@@ -1086,7 +1096,7 @@ function handleTriggerLogWork(): void {
   gap: 0.5rem;
   cursor: pointer;
   font-size: 0.75rem;
-  color: var(--color-text, #f1f5f9);
+  color: var(--text-primary);
   line-height: 1.35;
 }
 
@@ -1097,7 +1107,7 @@ function handleTriggerLogWork(): void {
 
 .discrete-action-item.completed .action-text {
   text-decoration: line-through;
-  color: var(--color-text-muted, #94a3b8);
+  color: var(--text-muted);
 }
 
 .action-commit-block {
@@ -1119,20 +1129,19 @@ function handleTriggerLogWork(): void {
   background-color: rgba(59, 130, 246, 0.15);
   border: 1px solid rgba(59, 130, 246, 0.3);
   border-radius: 4px;
-  color: #60a5fa;
+  color: var(--accent-primary);
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .commit-sha-badge:hover {
   background-color: rgba(59, 130, 246, 0.25);
-  border-color: #60a5fa;
 }
 
 .add-commit-btn {
   background: none;
   border: none;
-  color: var(--color-text-muted, #64748b);
+  color: var(--text-muted);
   font-size: 0.7rem;
   cursor: pointer;
   padding: 0;
@@ -1141,7 +1150,7 @@ function handleTriggerLogWork(): void {
 }
 
 .add-commit-btn:hover {
-  color: var(--color-primary, #3b82f6);
+  color: var(--accent-primary);
 }
 
 .commit-edit-row {
@@ -1166,7 +1175,7 @@ function handleTriggerLogWork(): void {
 .history-title {
   margin: 0 0 0.5rem;
   font-size: 0.8rem;
-  color: var(--color-text-muted, #94a3b8);
+  color: var(--text-muted);
   text-transform: uppercase;
   font-weight: 600;
   letter-spacing: 0.03em;
@@ -1181,8 +1190,8 @@ function handleTriggerLogWork(): void {
 }
 
 .log-entry-item {
-  background-color: var(--color-surface-muted, #1e293b);
-  border: 1px solid var(--color-border, #334155);
+  background-color: var(--bg-surface-subtle);
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   padding: 0.6rem 0.85rem;
   font-size: 0.78rem;
@@ -1192,14 +1201,14 @@ function handleTriggerLogWork(): void {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  color: var(--color-text, #f1f5f9);
+  color: var(--text-primary);
 }
 
 .log-title-group {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  flex: 1;
+  flex-1;
   overflow: hidden;
 }
 
@@ -1214,39 +1223,38 @@ function handleTriggerLogWork(): void {
 }
 
 .log-type-tag.retainer_maintenance {
-  background-color: rgba(16, 185, 129, 0.15);
-  color: #10b981;
+  background-color: var(--badge-success-bg, rgba(16, 185, 129, 0.15));
+  color: var(--badge-success-text, #10b981);
   border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
 .log-type-tag.billable_extra {
   background-color: rgba(59, 130, 246, 0.15);
-  color: #60a5fa;
+  color: var(--accent-primary, #3b82f6);
   border: 1px solid rgba(59, 130, 246, 0.3);
 }
 
 .log-type-tag.internal_non_billable {
-  background-color: rgba(148, 163, 184, 0.15);
-  color: #94a3b8;
-  border: 1px solid rgba(148, 163, 184, 0.3);
+  background-color: var(--bg-surface-subtle);
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
 }
 
-
 .log-duration {
-  color: var(--color-primary, #3b82f6);
+  color: var(--accent-primary);
 }
 
 .log-entry-meta {
   display: flex;
   justify-content: space-between;
-  color: var(--color-text-muted, #94a3b8);
+  color: var(--text-muted);
   font-size: 0.7rem;
   margin-top: 0.25rem;
 }
 
 .empty-state, .empty-log {
   font-size: 0.78rem;
-  color: var(--color-text-muted, #94a3b8);
+  color: var(--text-muted);
   font-style: italic;
 }
 
@@ -1258,8 +1266,8 @@ function handleTriggerLogWork(): void {
 }
 
 .vault-credential-card {
-  background-color: var(--color-surface-muted, #1e293b);
-  border: 1px solid var(--color-border, #334155);
+  background-color: var(--bg-surface-subtle);
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   padding: 0.85rem;
 }
@@ -1268,7 +1276,7 @@ function handleTriggerLogWork(): void {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid var(--color-border, #334155);
+  border-bottom: 1px solid var(--border-color);
   padding-bottom: 0.35rem;
   margin-bottom: 0.5rem;
 }
@@ -1283,7 +1291,7 @@ function handleTriggerLogWork(): void {
   font-size: 0.65rem;
   text-transform: uppercase;
   background-color: rgba(59, 130, 246, 0.15);
-  color: var(--color-primary, #3b82f6);
+  color: var(--accent-primary);
   padding: 0.15rem 0.4rem;
   border-radius: 4px;
   font-family: monospace;
@@ -1291,7 +1299,7 @@ function handleTriggerLogWork(): void {
 
 .vault-sec-label {
   font-size: 0.85rem;
-  color: var(--color-text, #f1f5f9);
+  color: var(--text-primary);
 }
 
 .vault-action-btn {
@@ -1322,12 +1330,12 @@ function handleTriggerLogWork(): void {
 
 .vault-field-label {
   width: 75px;
-  color: var(--color-text-muted, #94a3b8);
+  color: var(--text-muted);
   flex-shrink: 0;
 }
 
 .vault-link {
-  color: var(--color-primary, #3b82f6);
+  color: var(--accent-primary);
   text-decoration: underline;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1336,8 +1344,9 @@ function handleTriggerLogWork(): void {
 
 .vault-username {
   font-family: monospace;
-  color: var(--color-text, #f1f5f9);
-  background-color: rgba(0, 0, 0, 0.3);
+  color: var(--text-primary);
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
   padding: 0.1rem 0.35rem;
   border-radius: 3px;
 }
@@ -1346,27 +1355,27 @@ function handleTriggerLogWork(): void {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: var(--bg-surface);
   padding: 0.2rem 0.5rem;
   border-radius: 4px;
-  border: 1px solid var(--color-border, #334155);
+  border: 1px solid var(--border-color);
 }
 
 .masked-dots {
   letter-spacing: 2px;
-  color: var(--color-text-muted, #94a3b8);
+  color: var(--text-muted);
   font-size: 0.85rem;
 }
 
 .revealed-plaintext {
   font-family: monospace;
-  color: #10b981;
+  color: var(--badge-success-text, #10b981);
   font-weight: 600;
   font-size: 0.85rem;
 }
 
 .countdown-badge {
-  background-color: #ef4444;
+  background-color: var(--badge-danger-text, #ef4444);
   color: #ffffff;
   font-size: 0.65rem;
   font-weight: 600;
@@ -1381,17 +1390,19 @@ function handleTriggerLogWork(): void {
   padding: 0.1rem 0.2rem;
   font-size: 0.8rem;
   border-radius: 3px;
+  color: var(--text-secondary);
 }
 
 .reveal-toggle-btn:hover, .copy-btn:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: var(--bg-surface-subtle);
+  color: var(--text-primary);
 }
 
 .vault-meta-row {
   display: flex;
   justify-content: space-between;
   margin-top: 0.25rem;
-  color: var(--color-text-muted, #64748b);
+  color: var(--text-muted);
   font-size: 0.65rem;
 }
 
@@ -1405,13 +1416,13 @@ function handleTriggerLogWork(): void {
 
 .modal-instruction {
   font-size: 0.8rem;
-  color: var(--color-text-muted, #94a3b8);
+  color: var(--text-muted);
   margin: 0;
 }
 
 .add-secret-error {
   background-color: rgba(239, 68, 68, 0.15);
-  color: #ef4444;
+  color: var(--badge-danger-text, #ef4444);
   border: 1px solid #ef4444;
   padding: 0.5rem;
   border-radius: 6px;
@@ -1426,16 +1437,16 @@ function handleTriggerLogWork(): void {
 
 .form-label {
   font-size: 0.8rem;
-  color: var(--color-text-muted, #94a3b8);
+  color: var(--text-muted);
 }
 
 .modal-select {
   width: 100%;
   padding: 0.5rem;
-  background-color: var(--color-background, #090d16);
-  border: 1px solid var(--color-border, #334155);
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
   border-radius: 6px;
-  color: var(--color-text, #f1f5f9);
+  color: var(--text-primary);
   font-size: 0.85rem;
 }
 
