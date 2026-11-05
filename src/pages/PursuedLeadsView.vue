@@ -38,11 +38,11 @@ const minScore = ref<number>(0)
 
 // Table Columns Definition (Standardized BaseTable format, card decks prohibited)
 const tableColumns: TableColumn[] = [
-  { key: 'business_name', label: 'Opportunity & Contact', width: '30%' },
-  { key: 'stage', label: 'Engagement Stage', width: '22%', align: 'center' },
-  { key: 'opportunity_score', label: 'Deficit Score', width: '15%', align: 'center' },
-  { key: 'audit_summary', label: 'Audit Highlights', width: '15%' },
-  { key: 'actions', label: 'Deal Actions', width: '18%', align: 'right' }
+  { key: 'business_name', label: 'Opportunity & Contact', width: '32%' },
+  { key: 'stage', label: 'Engagement Stage', width: '18%', align: 'center' },
+  { key: 'opportunity_score', label: 'Deficit Score', width: '12%', align: 'center' },
+  { key: 'audit_summary', label: 'Stack / Findings', width: '14%' },
+  { key: 'actions', label: 'Deal Actions', width: '24%', align: 'right' }
 ]
 
 // Modals and Drawer state
@@ -247,7 +247,7 @@ async function handleConfirmDisqualify(payload: DisqualifyLeadPayload) {
 </script>
 
 <template>
-  <BasePageContainer>
+  <BasePageContainer :fluid="true">
     <BasePageHeader
       title="Pursued Opportunity Pipeline"
       subtitle="Engage Qualified Prospects & Assemble Proposals"
@@ -638,8 +638,14 @@ async function handleConfirmDisqualify(payload: DisqualifyLeadPayload) {
   display: inline-flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 0.5rem;
-  flex-wrap: wrap;
+  gap: 0.375rem;
+  flex-wrap: nowrap;
+}
+
+.actions-cell :deep(.base-button) {
+  padding: 0.35rem 0.6rem;
+  font-size: 0.775rem;
+  white-space: nowrap;
 }
 
 .disqualify-modal-content {
