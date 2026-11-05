@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Opportunity Dossier Overlay Refactor & Theme Adaptation (`src/features/opportunity-dossier/OpportunityDossierDrawer.vue`):**
+  - Conformed to ADR-0031 4-Step UI Specification Architecture (SDD-0019, FSM-0013, Action Table 0016, UAT-0007).
+  - Decoupled hardcoded dark palette hex codes into semantic design tokens (`--bg-surface`, `--bg-app`, `--bg-surface-subtle`, `--text-primary`, `--text-secondary`, `--text-muted`, `--border-color`), enabling both light and dark modes.
+  - Retained dual-column independent scroll layout (44% Vitals & Diagnostic Deficit Rubric, 56% Commercial Engagement Hub & Activity Feed).
+  - Added headless Vitest assertions in `tests/unit/OpportunityDossierDrawer.spec.ts` verifying light and dark theme mode adaptation and interactive stage stepper advancement.
 - **Pursued Opportunity Pipeline Workspace (`src/pages/PursuedLeadsView.vue`):**
   - Implemented primary Pursued Opportunity Pipeline workspace conforming to ADR-0031 4-Step UI Specification Architecture (SDD-0018, FSM-0012, Action Table 0015, UAT-0006).
   - Designed strictly with `BaseTable.vue` in a tabular layout (card grids and floating card tiles prohibited).
