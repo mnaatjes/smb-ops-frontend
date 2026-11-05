@@ -23,7 +23,8 @@ describe('ServiceCatalogView.vue Headless Assertion Matrix (UAT-0003)', () => {
       deliverables: ['1-page report', 'Secured site'],
       exclusions: ['No redesign'],
       audit_parameters: ['ssl_active', 'status_code'],
-      minimum_opportunity_score: 50
+      minimum_opportunity_score: 50,
+      created_at: '2026-11-05T00:00:00Z'
     },
     {
       id: 'svc-2',
@@ -39,7 +40,8 @@ describe('ServiceCatalogView.vue Headless Assertion Matrix (UAT-0003)', () => {
       deliverables: ['Cloudflare deployment'],
       exclusions: ['Content writing'],
       audit_parameters: ['response_time_ms'],
-      minimum_opportunity_score: 40
+      minimum_opportunity_score: 40,
+      created_at: '2026-11-05T00:00:00Z'
     },
     {
       id: 'svc-3',
@@ -55,7 +57,8 @@ describe('ServiceCatalogView.vue Headless Assertion Matrix (UAT-0003)', () => {
       deliverables: ['Report'],
       exclusions: ['New features'],
       audit_parameters: ['ssl_active'],
-      minimum_opportunity_score: 30
+      minimum_opportunity_score: 30,
+      created_at: '2026-11-05T00:00:00Z'
     }
   ]
 
