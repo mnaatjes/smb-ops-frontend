@@ -6,7 +6,7 @@ import BaseCard from '@/shared/ui/BaseCard.vue'
 import BaseBadge from '@/shared/ui/BaseBadge.vue'
 import BaseButton from '@/shared/ui/BaseButton.vue'
 import BaseAlert from '@/shared/ui/BaseAlert.vue'
-import BaseModal from '@/shared/ui/BaseModal.vue'
+import BaseDrawer from '@/shared/ui/BaseDrawer.vue'
 import CreateCoreServiceForm from '@/shared/ui/CreateCoreServiceForm.vue'
 import ServiceDetailsDrawer from '@/features/service-catalog/ServiceDetailsDrawer.vue'
 import { useLeadStore } from '@/entities/lead/store'
@@ -31,7 +31,7 @@ const tierFilters = [
 const activeTier = ref<string>('ALL')
 const selectedService = ref<ServiceCatalogItem | null>(null)
 const isDrawerOpen = ref<boolean>(false)
-const isCreateModalOpen = ref<boolean>(false)
+const isCreateDrawerOpen = ref<boolean>(false)
 const isSubmitting = ref<boolean>(false)
 const createError = ref<string | null>(null)
 const successBanner = ref<string | null>(null)
@@ -70,13 +70,13 @@ function handleCloseDrawer() {
   selectedService.value = null
 }
 
-function handleOpenCreateModal() {
+function handleOpenCreateDrawer() {
   createError.value = null
-  isCreateModalOpen.value = true
+  isCreateDrawerOpen.value = true
 }
 
-function handleCloseCreateModal() {
-  isCreateModalOpen.value = false
+function handleCloseCreateDrawer() {
+  isCreateDrawerOpen.value = false
   createError.value = null
 }
 
@@ -85,7 +85,7 @@ async function handleCreateCoreService(payload: CreateCoreServicePayload) {
   createError.value = null
   try {
     await store.createServiceOffering(payload)
-    isCreateModalOpen.value = false
+    isCreateDrawerOpen.value = false
     successBanner.value = `Successfully created core service: ${payload.name} (${payload.code})`
   } catch (err: unknown) {
     createError.value = err instanceof Error ? err.message : 'Failed to create core service offering'
@@ -130,7 +130,7 @@ function formatPriceTag(svc: ServiceCatalogItem): string {
         <BaseButton
           label="+ New Core Service"
           variant="primary"
-          @click="handleOpenCreateModal"
+          @click="handleOpenCreateDrawer"
         />
       </template>
     </BasePageHeader>
@@ -228,7 +228,7 @@ function formatPriceTag(svc: ServiceCatalogItem): string {
       <BaseButton
         label="+ New Core Service"
         variant="primary"
-        @click="handleOpenCreateModal"
+        @click="handleOpenCreateDrawer"
       />
     </div>
 
@@ -239,25 +239,29 @@ function formatPriceTag(svc: ServiceCatalogItem): string {
       @close="handleCloseDrawer"
     />
 
-    <!-- Ingestion Modal -->
-    <BaseModal
-      :show="isCreateModalOpen"
+    <!-- Ingestion Deep Drawer -->
+    <BaseDrawer
+      :show="isCreateDrawerOpen"
       title="Register Core Service Offering"
-      @close="handleCloseCreateModal"
+      subtitle="Define canonical rank pricing, scope boundaries, deliverables, and parameter bindings"
+      size="lg"
+      @close="handleCloseCreateDrawer"
     >
-      <BaseAlert
-        v-if="createError"
-        variant="danger"
-        class="form-alert"
-      >
-        {{ createError }}
-      </BaseAlert>
+      <div class="create-drawer-body">
+        <BaseAlert
+          v-if="createError"
+          variant="danger"
+          class="form-alert"
+        >
+          {{ createError }}
+        </BaseAlert>
 
-      <CreateCoreServiceForm
-        :disabled="isSubmitting"
-        @submit="handleCreateCoreService"
-      />
-    </BaseModal>
+        <CreateCoreServiceForm
+          :disabled="isSubmitting"
+          @submit="handleCreateCoreService"
+        />
+      </div>
+    </BaseDrawer>
   </BasePageContainer>
 </template>
 

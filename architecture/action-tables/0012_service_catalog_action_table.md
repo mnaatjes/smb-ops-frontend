@@ -19,8 +19,8 @@ This Action Table defines the deterministic interaction contract for all user tr
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Core Service Card (`BaseCard`)** | `@click` | `emit('select-service', item: ServiceCatalogItem)` | Sets `selectedServiceId = item.id`; opens inspection drawer | Card active elevation; drawer opens immediately (`size="md"`) | None (read-only action). |
 | **Tier Filter Pill** | `@click` | Handler in page | Mutates `activeFilter = tier` | Re-filters active card grid instantaneously with zero layout shift | If already active, toggles back to `'ALL'`. |
-| **"+ New Core Service" Button** | `@click` | Handler in page | Sets `isCoreModalOpen = true` | `BaseModal` mounts with `CreateCoreServiceForm` | Guarded against unauthenticated operators. |
-| **Drawer Close Trigger (`X`)** | `@click` | `emit('close')` | Sets `selectedServiceId = null` | Drawer slides off right viewport boundary | Unlocks stage canvas scroll. |
+| **"+ New Core Service" Button** | `@click` | Handler in page | Sets `isCreateDrawerOpen = true` | `BaseDrawer` (`size="lg"`, 960px) mounts with `CreateCoreServiceForm` | Guarded against unauthenticated operators. |
+| **Drawer Close Trigger (`X`)** | `@click` | `emit('close')` | Sets `selectedServiceId = null` or `isCreateDrawerOpen = false` | Drawer slides off right viewport boundary | Unlocks stage canvas scroll. |
 | **`BaseRepeater` "Add Another"** | `@click` | `emit('update:modelValue')` | Appends empty string to array | New text input appears with autofocus | Disabled if `array.length >= maxItems`. |
 | **`BaseRepeater` Remove Button** | `@click` | `emit('update:modelValue')` | Splices item at target index | Row fades out immediately | Disabled if `array.length <= minItems`. |
 | **Core Rank Select (`BaseSelect`)** | `@change` | `v-model="form.rank"` | Mutates form rank and updates price preview | Banner updates to canonical tier price ($150, $350, $300, $250) | Read-only price display. |

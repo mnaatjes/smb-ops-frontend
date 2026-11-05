@@ -18,8 +18,8 @@ This document specifies the Finite State Machine (FSM) governing the Core Servic
 +---------------------------------------------------------------------------------------+
 |                         CORE SERVICE CATALOG WORKSPACE FSM DOMAINS                    |
 |  1. Catalog Hydration Domain:  UNINITIALIZED -> LOADING -> POPULATED / EMPTY / ERROR  |
-|  2. Inspection Drawer Domain:  DRAWER_CLOSED <-----------> DRAWER_OPEN(serviceId)     |
-|  3. Ingestion Modal Domain:    MODAL_CLOSED  <-----------> CORE_MODAL_ACTIVE          |
+|  2. Inspection Drawer Domain:  INSPECT_CLOSED <----------> INSPECT_OPEN(serviceId)    |
+|  3. Ingestion Drawer Domain:   CREATE_CLOSED  <----------> CREATE_DRAWER_ACTIVE(lg)   |
 |  4. Parameter Registry Domain: REGISTRY_STALE <----------> REGISTRY_CACHED            |
 +---------------------------------------------------------------------------------------+
 ```
@@ -54,15 +54,15 @@ Governs inspection overlay for detailed service profiles, deliverables, and para
 
 ---
 
-## 4. Administrative Ingestion Modal State Machine
+## 4. Administrative Ingestion Drawer State Machine
 
-Governs core service creation modal lifecycle, parameter registry binding, and form submission.
+Governs core service creation drawer lifecycle (`BaseDrawer size="lg"`), parameter registry binding, and form submission.
 
 | Current State | Event / Trigger | Target State | UI Rendering Output | Side Effects / Guard |
 | :--- | :--- | :--- | :--- | :--- |
-| `MODAL_CLOSED` | Click "+ New Core Service" | `CORE_MODAL_ACTIVE` | `BaseModal` mounts `CreateCoreServiceForm.vue`; auto-focuses first input | Initialize empty payload with default Rank 1A ($150) pricing |
-| `CORE_MODAL_ACTIVE` | Rank Selection Changed | `CORE_MODAL_ACTIVE` | Price preview banner recalculates instantly ($150, $350, $300, $250) | Mutate `payload.rank`, `payload.price_min`, `payload.price_max` |
-| `CORE_MODAL_ACTIVE` | Form `@submit` emitted | `INGESTION_SUBMITTING` | Submit button disabled with spinner; inputs set to read-only | Call `leadStore.createServiceOffering(payload)` |
-| `INGESTION_SUBMITTING` | API Success (201 Created) | `MODAL_CLOSED` | Modal unmounts; success notification banner displayed in header | Trigger optimistic catalog append; reset form state |
-| `INGESTION_SUBMITTING` | API Error (400 / 422 / 500) | `FORM_ERROR` | Error banner rendered at top of modal; re-enable inputs | Retain operator input values; prevent data loss |
-| `CORE_MODAL_ACTIVE` | Click Cancel / Modal Backdrop | `MODAL_CLOSED` | Modal unmounts without mutation | Confirm if form is dirty before closing |
+| `CREATE_CLOSED` | Click "+ New Core Service" | `CREATE_DRAWER_ACTIVE` | `BaseDrawer` (`size="lg"`, 960px) mounts `CreateCoreServiceForm.vue`; auto-focuses first input | Initialize empty payload with default Rank 1A ($150) pricing |
+| `CREATE_DRAWER_ACTIVE` | Rank Selection Changed | `CREATE_DRAWER_ACTIVE` | Price preview banner recalculates instantly ($150, $350, $300, $250) | Mutate `payload.rank`, `payload.price_min`, `payload.price_max` |
+| `CREATE_DRAWER_ACTIVE` | Form `@submit` emitted | `INGESTION_SUBMITTING` | Submit button disabled with spinner; inputs set to read-only | Call `leadStore.createServiceOffering(payload)` |
+| `INGESTION_SUBMITTING` | API Success (201 Created) | `CREATE_CLOSED` | Drawer slides closed; success notification banner displayed in header | Trigger optimistic catalog append; reset form state |
+| `INGESTION_SUBMITTING` | API Error (400 / 422 / 500) | `FORM_ERROR` | Error banner rendered at top of drawer; re-enable inputs | Retain operator input values; prevent data loss |
+| `CREATE_DRAWER_ACTIVE` | Click Cancel / Backdrop / Esc | `CREATE_CLOSED` | Drawer slides closed without mutation | Confirm if form is dirty before closing |

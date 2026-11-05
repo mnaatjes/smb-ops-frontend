@@ -120,7 +120,7 @@ describe('ServiceCatalogView.vue Headless Assertion Matrix (UAT-0003)', () => {
     expect(drawer.props('show')).toBe(false)
   })
 
-  it('opens ingestion modal on + New Core Service click and dispatches create (Scenario 4)', async () => {
+  it('opens ingestion deep drawer on + New Core Service click and dispatches create (Scenario 4)', async () => {
     const wrapper = mount(ServiceCatalogView)
     const createSpy = vi.spyOn(store, 'createServiceOffering').mockResolvedValue()
 
@@ -128,9 +128,10 @@ describe('ServiceCatalogView.vue Headless Assertion Matrix (UAT-0003)', () => {
     expect(openBtn).toBeDefined()
     await openBtn!.trigger('click')
 
-    const modal = wrapper.findComponent({ name: 'BaseModal' })
-    expect(modal.exists()).toBe(true)
-    expect(modal.props('show')).toBe(true)
+    const drawers = wrapper.findAllComponents({ name: 'BaseDrawer' })
+    const createDrawer = drawers.find((d) => d.props('size') === 'lg')
+    expect(createDrawer).toBeDefined()
+    expect(createDrawer!.props('show')).toBe(true)
 
     const form = wrapper.findComponent({ name: 'CreateCoreServiceForm' })
     expect(form.exists()).toBe(true)
@@ -159,6 +160,6 @@ describe('ServiceCatalogView.vue Headless Assertion Matrix (UAT-0003)', () => {
         name: 'Express Security Audit'
       })
     )
-    expect(modal.props('show')).toBe(false)
+    expect(createDrawer!.props('show')).toBe(false)
   })
 })

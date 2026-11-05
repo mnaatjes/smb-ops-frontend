@@ -15,8 +15,8 @@ The Core Service Catalog Workspace (`ServiceCatalogView.vue`) resides within the
 1. **Header Orientation Strip:** Slotted `BasePageHeader.vue` with breadcrumbs (`Home / Catalogs / Service Catalog`), active core catalog count badge, and a primary action trigger ("+ New Core Service").
 2. **Catalog Tier Sectional Ribbon:** Tier navigation anchor pills (All, Rank 1A Door-Opener, Rank 1B Specialized, Rank 3 Operational Efficiency, Rank 4 Digital Transformation) with quick-scroll and filter markers.
 3. **Responsive Catalog Grid Canvas:** 3-column desktop / 2-column tablet / 1-column mobile grid of interactive cards (`BaseCard.vue` with `clickable: true`) presenting service code, name, commercial rank badge, pricing tag ($150, $350, $300, $250 flat/hybrid fees), target profile, and active audit parameter chips.
-4. **Contextual Deep Inspection Drawer (`BaseDrawer.vue`):** Right-edge slideout overlay (`size="md"`, 680px) mounting `ServiceDetailsModal.vue` content: deliverables checklist (`BaseList.vue`), scope, exclusions, and active audit parameters.
-5. **Decoupled Creation Modal (`BaseModal.vue`):** Standard dialog shell wrapping `CreateCoreServiceForm.vue` powered by `BaseRepeater.vue` dynamic array inputs and canonical tier price calculation.
+4. **Contextual Deep Inspection Drawer (`BaseDrawer.vue`):** Right-edge slideout overlay (`size="md"`, 680px) mounting `ServiceDetailsModal.vue` / `ServiceDetailsDrawer.vue` content: deliverables checklist (`BaseList.vue`), scope, exclusions, and active audit parameters.
+5. **Decoupled Creation Workspace Drawer (`BaseDrawer.vue`):** Right-edge deep slideout overlay (`size="lg"`, 960px) wrapping `CreateCoreServiceForm.vue` powered by `BaseRepeater.vue` dynamic array inputs and canonical tier price calculation, providing ample horizontal canvas for 2-column input layouts and repeater rows.
 
 ```
 +===================================================================================================================+
@@ -46,8 +46,9 @@ The Core Service Catalog Workspace (`ServiceCatalogView.vue`) resides within the
 |                                             |    (Grid: 3 cols >= 1280px, 2 cols 768-1279px, 1 col < 768px)       |
 +=============================================+=====================================================================+
 |  OVERLAY MOUNTING ROOTS (Teleport targets rendered directly under <body>)                                          |
-|  - <div id="drawer-portal" />: BaseDrawer.vue (size="md", 680px) -> Deep Service Inspection Dossier               |
-|  - <div id="modal-portal" />: BaseModal.vue -> CreateCoreServiceForm.vue                                            |
+|  - <div id="drawer-portal" />: BaseDrawer.vue                                                                      |
+|    * Deep Service Inspection Dossier (size="md", 680px)                                                            |
+|    * Register Core Service Workspace (size="lg", 960px) -> CreateCoreServiceForm.vue                               |
 +===================================================================================================================+
 ```
 
@@ -68,14 +69,13 @@ flowchart TD
     ServiceCards --> CardHeader[Header: Code + RankBadge + PriceTag]
     ServiceCards --> CardBody[Title + Target Profile Description]
     ServiceCards --> CardFooter[Audit Parameter Chips: IssueChips / Badge]
-    Shell --> DrawerPortal["#drawer-portal (BaseDrawer.vue size='md')"]
-    DrawerPortal --> ServiceDetails[ServiceDetailsDrawer.vue]
+    Shell --> DrawerPortal["#drawer-portal (BaseDrawer.vue)"]
+    DrawerPortal --> ServiceDetails["ServiceDetailsDrawer.vue (size='md')"]
     ServiceDetails --> DeliverablesList[BaseList.vue variant='checkmark']
     ServiceDetails --> ScopeList[BaseList.vue variant='bullet']
     ServiceDetails --> ExclusionsList[BaseList.vue variant='bullet']
-    Shell --> ModalPortal["#modal-portal (BaseModal.vue)"]
-    ModalPortal --> CoreModal[CreateCoreServiceModal.vue]
-    CoreModal --> CoreForm[CreateCoreServiceForm.vue]
+    DrawerPortal --> CoreDrawer["CreateCoreServiceDrawer (BaseDrawer size='lg')"]
+    CoreDrawer --> CoreForm[CreateCoreServiceForm.vue]
     CoreForm --> Repeater1[BaseRepeater.vue: Scope, Deliverables, Exclusions]
 ```
 

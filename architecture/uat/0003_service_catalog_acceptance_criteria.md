@@ -67,12 +67,12 @@ Feature: Core Service Catalog Workspace Browsing, Deep Inspection, and Dynamic I
     Then the BaseDrawer should close immediately
 
   # =========================================================================
-  # SCENARIO 4: DYNAMIC CORE SERVICE INGESTION VIA MODAL
+  # SCENARIO 4: DYNAMIC CORE SERVICE INGESTION VIA DEEP WORKSPACE DRAWER
   # =========================================================================
   Scenario: Ingesting a new core consulting service
     Given the operator is on "/services"
     When the operator clicks "+ New Core Service"
-    Then the BaseModal (#modal-portal) should open with CreateCoreServiceForm
+    Then the BaseDrawer (#drawer-portal) should open with size "lg" containing CreateCoreServiceForm
     When the operator selects Rank "Rank 1A"
     Then the read-only price preview should display "$150.00 Flat Fee"
     When the operator fills in the form fields:
@@ -83,7 +83,7 @@ Feature: Core Service Catalog Workspace Browsing, Deep Inspection, and Dynamic I
     And the operator adds 2 items using the BaseRepeater for deliverables
     And the operator checks "ssl_validity" and "security_headers" from the registry
     And the operator clicks "Create Service Offering"
-    Then the modal should submit and close
+    Then the drawer should submit and slide closed
     And the catalog grid should optimistically display "Express Security Audit"
     And the total count badge should increment by 1
 ```
