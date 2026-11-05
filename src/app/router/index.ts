@@ -17,12 +17,7 @@ export const router = createRouter({
     {
       path: '/pursued',
       name: 'pursued',
-      component: PlaceholderWorkspaceView,
-      props: {
-        title: 'Pursued Opportunity Pipeline',
-        subtitle: 'Engage qualified prospects, dispatch contact playbooks, and assemble proposals',
-        sectionName: 'Pursued Pipeline'
-      }
+      component: () => import('@/pages/PursuedLeadsView.vue')
     },
     {
       path: '/clients',
