@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Client Dossier Overlay Workspace & Theme Token Adaptation (`src/features/client-dossier/ClientDossierDrawer.vue`):**
+  - Conformed to ADR-0031 4-Step UI Specification Architecture (SDD-0021, FSM-0015, Action Table 0018, UAT-0009).
+  - Decoupled hardcoded dark palette hex codes into semantic design tokens (`--bg-surface`, `--bg-app`, `--bg-surface-subtle`, `--text-primary`, `--text-secondary`, `--text-muted`, `--border-color`, `--accent-primary`), enabling full Light and Dark mode theme support.
+  - Retained dual-column independent scroll layout (44% Account Profile, SLA Health Probes, and Active Service Contracts; 56% Monthly Retainer Timecard & MaintenanceGauge, and Encrypted Credentials Vault).
+  - Enhanced automated secret countdown timer reverting plaintext credentials to masked dots after exactly 15 seconds.
+  - Added headless Vitest assertions in `tests/unit/ClientDossierDrawer.spec.ts` asserting orientation, theme switching, deliverables accordion, 15-second secret countdown, and modal delegations.
 - **Client Accounts & Retainers Workspace (`src/pages/ClientAccountsView.vue`):**
   - Implemented primary Client Accounts & Retainers operational ledger conforming to ADR-0031 4-Step UI Specification Architecture (SDD-0020, FSM-0014, Action Table 0017, UAT-0008).
   - Designed with responsive `BaseCard.vue` card deck (`repeat(auto-fill, minmax(360px, 1fr))`) presenting account identity, state badge, primary contact, external URL, and active service contracts.
