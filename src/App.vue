@@ -26,25 +26,27 @@ const isIsolated = computed(() => route.meta.layout === 'isolated')
   padding: 0;
 }
 
+html,
 body {
   background-color: var(--bg-app);
   color: var(--text-primary);
   min-height: 100vh;
-  overflow: hidden;
   font-family: var(--font-sans);
   transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
 }
 
+/* Base App Root */
 #app-root {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
 }
 
+/* Isolated Dev Workspace */
 #app-root.isolated-workspace {
+  height: 100vh;
   overflow-y: auto;
   overflow-x: hidden;
-  height: auto;
-  min-height: 100vh;
+  -webkit-overflow-scrolling: touch;
 }
 </style>
