@@ -22,12 +22,7 @@ export const router = createRouter({
     {
       path: '/clients',
       name: 'clients',
-      component: PlaceholderWorkspaceView,
-      props: {
-        title: 'Client Accounts & Retainers',
-        subtitle: 'Active account ledgers, maintenance SLAs, and credential vaults',
-        sectionName: 'Client Accounts'
-      }
+      component: () => import('@/pages/ClientAccountsView.vue')
     },
     {
       path: '/services',
