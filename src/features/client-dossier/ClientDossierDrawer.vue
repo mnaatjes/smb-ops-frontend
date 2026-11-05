@@ -1208,7 +1208,7 @@ function handleTriggerLogWork(): void {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  flex-1;
+  flex: 1;
   overflow: hidden;
 }
 
