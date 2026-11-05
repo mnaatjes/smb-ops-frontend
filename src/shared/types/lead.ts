@@ -145,6 +145,7 @@ export interface ServiceCatalogItem {
   pricing_model?: string
   price_min?: number
   price_max?: number
+  monthly_retainer_cap_minutes?: number
   target_profile?: string
   scope?: string[]
   deliverables?: string[]
